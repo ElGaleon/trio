@@ -76,6 +76,7 @@ class TrioApp extends ConsumerWidget {
     final foreground = isDark
         ? const Color(0xFFFAFAFA)
         : const Color(0xFF18181B);
+    const accent = AppConstants.seedColor;
 
     return ThemeData(
       colorScheme: ColorScheme.fromSeed(
@@ -94,7 +95,7 @@ class TrioApp extends ConsumerWidget {
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         elevation: 0,
         backgroundColor: surface,
-        selectedItemColor: const Color(0xFF0F766E),
+        selectedItemColor: accent,
         unselectedItemColor: const Color(0xFF71717A),
       ),
       cardTheme: CardThemeData(
@@ -107,13 +108,13 @@ class TrioApp extends ConsumerWidget {
         color: surface,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: Color(0xFF0F766E),
+        backgroundColor: accent,
         foregroundColor: Colors.white,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: const Color(0xFF0F766E),
+          backgroundColor: accent,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -133,7 +134,7 @@ class TrioApp extends ConsumerWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF0F766E), width: 1.5),
+          borderSide: const BorderSide(color: accent, width: 1.5),
         ),
       ),
     );

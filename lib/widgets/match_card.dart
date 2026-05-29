@@ -46,7 +46,6 @@ class MatchCard extends StatelessWidget {
               const SizedBox(height: 10),
               Row(
                 children: [
-
                   Expanded(
                     child: _TeamScoreBadge(
                       name: match.teamAName,
@@ -128,7 +127,7 @@ class _TeamScoreBadge extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final children = [
-      /*_TeamLogo(name: name, highlighted: highlighted),*/
+      _TeamLogo(name: name, highlighted: highlighted),
       const SizedBox(width: 10),
       Expanded(
         child: Column(

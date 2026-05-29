@@ -36,7 +36,6 @@ class MatchesScreen extends ConsumerWidget {
               ),
             )
           : ListView.separated(
-              padding: const EdgeInsets.all(16),
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return _MatchToolbar(

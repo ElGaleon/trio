@@ -18,5 +18,5 @@ class AppConstants {
   static const minTeamSize = 3;
   static const maxTeamSize = 7;
   static const defaultTeamSize = 3;
-  static const seedColor = Color(0xFF0F766E);
+  static const seedColor = Color(0xFF7C3AED);
 }
