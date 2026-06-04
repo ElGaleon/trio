@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 
 import '../models/player.dart';
+import '../theme/app_colors.dart';
 import 'card_actions_menu.dart';
+import 'sport_style.dart';
 
 class PlayerCard extends StatelessWidget {
   const PlayerCard({
@@ -22,7 +23,6 @@ class PlayerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.96, end: 1),
@@ -33,14 +33,19 @@ class PlayerCard extends StatelessWidget {
       },
       child: GestureDetector(
         onTap: onTap,
-        child: FCard.raw(
+        child: Container(
+          decoration: sportGlassDecoration(),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
                 Hero(
                   tag: 'player-${player.id}',
-                  child: FAvatar.raw(size: 48.0, child: Text(player.initials)),
+                  child: SportPlayerAvatar(
+                    initials: player.initials,
+                    imagePath: player.profileImagePath,
+                    size: 48,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -49,13 +54,22 @@ class PlayerCard extends StatelessWidget {
                     children: [
                       Text(
                         player.name,
-                        style: textTheme.titleMedium?.copyWith(fontSize: 16),
+                        style: textTheme.titleMedium?.copyWith(
+                          color: AppColors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${player.role.label} · ${player.linePreference.label}',
+                        [
+                          player.role.label,
+                          player.linePreference.label,
+                          if (player.isExternal) 'Esterno',
+                        ].join(' · '),
                         style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                          color: sportMutedText,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],

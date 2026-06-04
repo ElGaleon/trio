@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'theme/app_colors.dart';
 
 class AppConstants {
   const AppConstants._();
@@ -18,5 +18,5 @@ class AppConstants {
   static const minTeamSize = 3;
   static const maxTeamSize = 7;
   static const defaultTeamSize = 3;
-  static const seedColor = Color(0xFF7C3AED);
+  static const seedColor = AppColors.violet;
 }

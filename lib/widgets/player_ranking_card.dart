@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:trio/app_constants.dart';
 
 import '../models/player.dart';
+import '../theme/app_colors.dart';
 import 'card_actions_menu.dart';
 
 class PlayerRankingCard extends StatelessWidget {
@@ -24,6 +25,7 @@ class PlayerRankingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trophyColor = _trophyColor(rank);
+    final colorScheme = Theme.of(context).colorScheme;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.96, end: 1),
       duration: const Duration(milliseconds: 260),
@@ -67,7 +69,7 @@ class PlayerRankingCard extends StatelessWidget {
                         Text(
                           '${player.matchesPlayed}G · ${player.wins}V · ${player.losses}S · ${(player.winRate * 100).round()}%',
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: const Color(0xFF71717A)),
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -100,9 +102,9 @@ class PlayerRankingCard extends StatelessWidget {
 
 Color? _trophyColor(int? rank) {
   return switch (rank) {
-    1 => const Color(0xFFEAB308),
-    2 => const Color(0xFF94A3B8),
-    3 => const Color(0xFFB45309),
+    1 => AppColors.violet,
+    2 => AppColors.violetMid,
+    3 => AppColors.violetLight,
     _ => null,
   };
 }

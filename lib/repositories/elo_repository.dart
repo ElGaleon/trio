@@ -74,21 +74,27 @@ class EloRepository {
     required String name,
     required PlayerLinePreference linePreference,
     required PlayerRole role,
+    String? profileImagePath,
+    required bool isExternal,
   }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
     player
       ..name = trimmed
       ..linePreference = linePreference
-      ..role = role;
+      ..role = role
+      ..profileImagePath = _normalizedImagePath(profileImagePath)
+      ..isExternal = isExternal;
     await playersBox.put(player.id, player);
   }
 
   Future<void> addPlayerWithLine(
     String name,
     PlayerLinePreference linePreference,
-    PlayerRole role,
-  ) async {
+    PlayerRole role, [
+    String? profileImagePath,
+    bool isExternal = false,
+  ]) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
     final id = DateTime.now().microsecondsSinceEpoch.toString();
@@ -100,6 +106,8 @@ class EloRepository {
         rating: settings.initialRating,
         linePreference: linePreference,
         role: role,
+        profileImagePath: _normalizedImagePath(profileImagePath),
+        isExternal: isExternal,
       ),
     );
   }
@@ -138,6 +146,8 @@ class EloRepository {
           rating: settings.initialRating,
           linePreference: player.linePreference,
           role: player.role,
+          profileImagePath: player.profileImagePath,
+          isExternal: player.isExternal,
         ),
     };
     final orderedMatches = matchesBox.values.toList()
@@ -198,5 +208,11 @@ class EloRepository {
     for (final player in players.values) {
       await playersBox.put(player.id, player);
     }
+  }
+
+  String? _normalizedImagePath(String? value) {
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed;
   }
 }

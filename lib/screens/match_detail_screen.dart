@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:trio/providers/match_provider.dart';
+import 'package:trio/widgets/app_empty_state.dart';
 
 import '../models/player.dart';
 import '../models/scrimmage_match.dart';
 import '../providers/elo_providers.dart';
+import '../theme/app_colors.dart';
+import '../widgets/sport_style.dart';
 
 class MatchDetailScreen extends ConsumerWidget {
   const MatchDetailScreen({super.key, required this.matchId});
@@ -20,11 +23,19 @@ class MatchDetailScreen extends ConsumerWidget {
     final players = ref.watch(rankedPlayersProvider);
     final currentMatch = ref.watch(matchDetailsProvider(matchId));
     if (currentMatch == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Dettaglio partita')),
-        body: const Center(child: Text('Partita non trovata.')),
+      return const Scaffold(
+        body: SportScreenShell(
+          title: 'Match',
+          subtitle: 'Details not found',
+          child: SportEmptyState(
+            icon: Icons.event_busy_outlined,
+            title: 'Partita non trovata',
+            message: 'La partita selezionata non e piu disponibile.',
+          ),
+        ),
       );
     }
+
     final playersById = {for (final player in players) player.id: player};
     final teamA = currentMatch.teamAIds
         .map((id) => playersById[id])
@@ -36,62 +47,58 @@ class MatchDetailScreen extends ConsumerWidget {
         .toList();
     final preMatchRatingA = _teamInitialRating(currentMatch, teamA);
     final preMatchRatingB = _teamInitialRating(currentMatch, teamB);
-    final preMatchDelta = preMatchRatingA - preMatchRatingB;
     final winProbabilityA = _expectedScore(preMatchRatingA, preMatchRatingB);
     final winProbabilityB = 1 - winProbabilityA;
-    final teamAName = currentMatch.teamAName;
-    final teamBName = currentMatch.teamBName;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Dettaglio partita')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _ScoreHeader(match: currentMatch),
-          const SizedBox(height: 16),
-          _TeamBlock(
-            title: teamAName,
-            players: teamA,
-            won: !currentMatch.isDraw && currentMatch.teamAWon,
-          ),
-          const SizedBox(height: 12),
-          _TeamBlock(
-            title: teamBName,
-            players: teamB,
-            won: !currentMatch.isDraw && !currentMatch.teamAWon,
-          ),
-          const SizedBox(height: 16),
-          _PreMatchBlock(
-            ratingA: preMatchRatingA,
-            ratingB: preMatchRatingB,
-            delta: preMatchDelta,
-            probabilityA: winProbabilityA,
-            probabilityB: winProbabilityB,
-            teamAName: teamAName,
-            teamBName: teamBName,
-          ),
-          const SizedBox(height: 16),
-          const _SectionTitle(
-            icon: FIcons.trendingUpDown,
-            title: 'Variazioni ELO',
-          ),
-          const SizedBox(height: 10),
-          FTileGroup(
-            children: [
-              ...[...teamA, ...teamB].map((player) {
-                final initial = currentMatch.initialRatings[player.id];
-                final finalRating = currentMatch.finalRatings[player.id];
-                final delta = currentMatch.ratingDelta(player.id);
-                return _RatingChangeTile(
-                  player: player,
-                  initial: initial,
-                  finalRating: finalRating,
-                  delta: delta,
-                );
-              }),
-            ],
-          ),
-        ],
+      body: SportScreenShell(
+        title: 'Match',
+        subtitle: _dateLabel(currentMatch.createdAt),
+        child: Column(
+          children: [
+            const SportBackButton(),
+            const SizedBox(height: 14),
+            _ScoreHero(match: currentMatch),
+            const SizedBox(height: 16),
+            _TeamBlock(
+              title: currentMatch.teamAName,
+              players: teamA,
+              won: !currentMatch.isDraw && currentMatch.teamAWon,
+            ),
+            const SizedBox(height: 12),
+            _TeamBlock(
+              title: currentMatch.teamBName,
+              players: teamB,
+              won: !currentMatch.isDraw && !currentMatch.teamAWon,
+            ),
+            const SizedBox(height: 18),
+            _SectionTitle(icon: FIcons.scale, title: 'Pre-match'),
+            const SizedBox(height: 10),
+            _PreMatchBlock(
+              ratingA: preMatchRatingA,
+              ratingB: preMatchRatingB,
+              delta: preMatchRatingA - preMatchRatingB,
+              probabilityA: winProbabilityA,
+              probabilityB: winProbabilityB,
+              teamAName: currentMatch.teamAName,
+              teamBName: currentMatch.teamBName,
+            ),
+            const SizedBox(height: 18),
+            const _SectionTitle(
+              icon: FIcons.trendingUpDown,
+              title: 'Variazioni ELO',
+            ),
+            const SizedBox(height: 10),
+            ...[...teamA, ...teamB].map((player) {
+              return _RatingChangeRow(
+                player: player,
+                initial: currentMatch.initialRatings[player.id],
+                finalRating: currentMatch.finalRatings[player.id],
+                delta: currentMatch.ratingDelta(player.id),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
@@ -109,96 +116,110 @@ double _expectedScore(double ratingA, double ratingB) {
   return 1 / (1 + pow(10, (ratingB - ratingA) / 400));
 }
 
-class _ScoreHeader extends StatelessWidget {
-  const _ScoreHeader({required this.match});
+class _ScoreHero extends StatelessWidget {
+  const _ScoreHero({required this.match});
 
   final ScrimmageMatch match;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final result = match.isDraw
         ? 'Pareggio'
         : (match.teamAWon ? match.teamAName : match.teamBName);
-    return FCard.raw(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          spacing: 18,
-          children: [
-            Row(
-              children: [
-                const Icon(FIcons.calendarDays, size: 18),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _dateLabel(match.createdAt),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                FBadge(
-                  variant: .secondary,
-                  child: Text('${match.teamSize}vs${match.teamSize}'),
-                ),
-                if (match.offenseVsDefense) ...[
-                  const SizedBox(width: 8),
-                  FBadge(variant: .outline, child: const Text('O vs D')),
-                ],
-              ],
-            ),
-            Row(
-              children: [
-                _ScoreSide(
-                  label: match.teamAName,
-                  score: match.scoreA,
-                  won: !match.isDraw && match.teamAWon,
-                ),
-                Expanded(
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0, end: 1),
-                    duration: const Duration(milliseconds: 520),
-                    curve: Curves.easeOutBack,
-                    builder: (context, value, child) {
-                      return Transform.scale(scale: value, child: child);
-                    },
-                    child: Icon(
-                      FIcons.trophy,
-                      color: colorScheme.primary,
-                      size: 28,
-                    ),
-                  ),
-                ),
-                _ScoreSide(
-                  label: match.teamBName,
-                  score: match.scoreB,
-                  won: !match.isDraw && !match.teamAWon,
-                ),
-              ],
-            ),
-            FDivider(),
-            Row(
-              children: [
-                Icon(FIcons.badgeCheck, color: colorScheme.primary, size: 18),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    match.isDraw ? 'Risultato' : 'Vincitrice',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                FBadge(
-                  variant: match.isDraw ? .outline : .secondary,
-                  child: Text(result),
-                ),
-              ],
-            ),
+    return Container(
+      decoration: sportGlassDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.white.withValues(alpha: 0.16),
+            AppColors.white.withValues(alpha: 0.045),
           ],
         ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: 8,
+            top: -22,
+            child: Text(
+              '${match.scoreA}-${match.scoreB}',
+              style: textTheme.displayLarge?.copyWith(
+                color: AppColors.white.withValues(alpha: 0.045),
+                fontSize: 92,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      match.offenseVsDefense ? FIcons.shield : FIcons.users,
+                      color: AppColors.violet,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        match.offenseVsDefense
+                            ? 'Attacco vs difesa'
+                            : 'Squadre libere',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: sportMutedText,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    _InfoPill(label: '${match.teamSize}vs${match.teamSize}'),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    _ScoreSide(
+                      label: match.teamAName,
+                      score: match.scoreA,
+                      won: !match.isDraw && match.teamAWon,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Icon(
+                        match.isDraw ? FIcons.minus : FIcons.trophy,
+                        color: AppColors.violet,
+                        size: 28,
+                      ),
+                    ),
+                    _ScoreSide(
+                      label: match.teamBName,
+                      score: match.scoreB,
+                      won: !match.isDraw && !match.teamAWon,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      match.isDraw ? 'Risultato' : 'Vincitrice',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: sportMutedText,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const Spacer(),
+                    _InfoPill(label: result, emphasized: !match.isDraw),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -217,64 +238,44 @@ class _ScoreSide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Expanded(
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
         decoration: BoxDecoration(
           color: won
-              ? colorScheme.primary.withValues(alpha: 0.10)
-              : colorScheme.surfaceContainerHighest,
+              ? AppColors.violet.withValues(alpha: 0.18)
+              : AppColors.white.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: won ? colorScheme.primary : colorScheme.outlineVariant,
+            color: won
+                ? AppColors.violet
+                : AppColors.white.withValues(alpha: 0.12),
           ),
         ),
         child: Column(
-          spacing: 6,
           children: [
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: won ? colorScheme.primary : colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w800,
+              style: textTheme.labelMedium?.copyWith(
+                color: won ? AppColors.white : sportMutedText,
+                fontWeight: FontWeight.w900,
               ),
             ),
+            const SizedBox(height: 6),
             Text(
               score.toString(),
-              style: Theme.of(
-                context,
-              ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w900),
+              style: textTheme.displaySmall?.copyWith(
+                color: AppColors.white,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.icon, required this.title});
-
-  final IconData icon;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: colorScheme.primary),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-        ),
-      ],
     );
   }
 }
@@ -292,51 +293,73 @@ class _TeamBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return FCard(
-      title: Row(
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      decoration: sportGlassDecoration(),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
+      child: Column(
         children: [
-          Icon(FIcons.users, size: 18, color: colorScheme.primary),
-          const SizedBox(width: 8),
-          Expanded(child: Text(title)),
-          if (won) FBadge(variant: .secondary, child: const Text('Win')),
-        ],
-      ),
-      child: FTileGroup(
-        divider: .indented,
-        children: [
-          ...players.map(
-            (player) => FTile(
-              prefix: _PlayerAvatar(player: player),
-              title: Text(player.name),
-              subtitle: Text(
-                '${player.role.label} · ${player.linePreference.label}',
+          Row(
+            children: [
+              Icon(FIcons.users, size: 18, color: AppColors.violet),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: textTheme.titleMedium?.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
-              details: Text(player.rating.round().toString()),
+              if (won) const _InfoPill(label: 'Win', emphasized: true),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ...players.map(
+            (player) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  SportPlayerAvatar(
+                    initials: player.initials,
+                    imagePath: player.profileImagePath,
+                    size: 36,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          player.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.titleSmall?.copyWith(
+                            color: AppColors.white,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        Text(
+                          [
+                            player.role.label,
+                            player.linePreference.label,
+                            if (player.isExternal) 'Esterno',
+                          ].join(' · '),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: sportMutedText,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _InfoPill(label: player.rating.round().toString()),
+                ],
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _PlayerAvatar extends StatelessWidget {
-  const _PlayerAvatar({required this.player});
-
-  final Player player;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return FAvatar.raw(
-      size: 34,
-      child: Text(
-        player.name.characters.first.toUpperCase(),
-        style: TextStyle(
-          color: colorScheme.primary,
-          fontWeight: FontWeight.w900,
-        ),
       ),
     );
   }
@@ -364,135 +387,65 @@ class _PreMatchBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sign = delta >= 0 ? '+' : '';
-    final colorScheme = Theme.of(context).colorScheme;
-    return FCard(
-      title: Row(
-        children: [
-          Icon(FIcons.scale, size: 18, color: colorScheme.primary),
-          const SizedBox(width: 8),
-          const Text('Pre-match'),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _MetricCard(
-                  icon: FIcons.users,
-                  label: 'Rating $teamAName',
-                  value: ratingA.round().toString(),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _MetricCard(
-                  icon: FIcons.shield,
-                  label: 'Rating $teamBName',
-                  value: ratingB.round().toString(),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          _MetricTile(
-            icon: FIcons.arrowLeftRight,
-            label: 'Delta pre-match',
-            value: '$sign${delta.round()}',
-          ),
-          const SizedBox(height: 8),
-          _MetricTile(
-            icon: FIcons.percent,
-            label: 'Probabilita $teamAName',
-            value: '${(probabilityA * 100).round()}%',
-          ),
-          const SizedBox(height: 8),
-          _MetricTile(
-            icon: FIcons.percent,
-            label: 'Probabilita $teamBName',
-            value: '${(probabilityB * 100).round()}%',
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Row(
+          children: [
+            _MetricCard(label: teamAName, value: ratingA.round().toString()),
+            const SizedBox(width: 10),
+            _MetricCard(label: teamBName, value: ratingB.round().toString()),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _MetricRow(label: 'Delta pre-match', value: '$sign${delta.round()}'),
+        _MetricRow(
+          label: 'Probabilita $teamAName',
+          value: '${(probabilityA * 100).round()}%',
+        ),
+        _MetricRow(
+          label: 'Probabilita $teamBName',
+          value: '${(probabilityB * 100).round()}%',
+        ),
+      ],
     );
   }
 }
 
 class _MetricCard extends StatelessWidget {
-  const _MetricCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
+  const _MetricCard({required this.label, required this.value});
 
-  final IconData icon;
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 18, color: colorScheme.primary),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MetricTile extends StatelessWidget {
-  const _MetricTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return FCard.raw(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
+    final textTheme = Theme.of(context).textTheme;
+    return Expanded(
+      child: Container(
+        decoration: sportGlassDecoration(radius: 22),
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 18, color: colorScheme.primary),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                label,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+            Icon(FIcons.shield, size: 18, color: AppColors.violet),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.bodySmall?.copyWith(
+                color: sportMutedText,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            Text(value, style: const TextStyle(fontWeight: FontWeight.w900)),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: textTheme.titleLarge?.copyWith(
+                color: AppColors.white,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ],
         ),
       ),
@@ -500,8 +453,45 @@ class _MetricTile extends StatelessWidget {
   }
 }
 
-class _RatingChangeTile extends StatelessWidget with FTileMixin {
-  const _RatingChangeTile({
+class _MetricRow extends StatelessWidget {
+  const _MetricRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: sportGlassDecoration(radius: 20),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: textTheme.bodySmall?.copyWith(
+                color: sportMutedText,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.white,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RatingChangeRow extends StatelessWidget {
+  const _RatingChangeRow({
     required this.player,
     required this.initial,
     required this.finalRating,
@@ -515,34 +505,125 @@ class _RatingChangeTile extends StatelessWidget with FTileMixin {
 
   @override
   Widget build(BuildContext context) {
-    final color = _deltaColor(context, delta);
+    final textTheme = Theme.of(context).textTheme;
+    final color = _deltaColor(delta);
     final sign = delta > 0 ? '+' : '';
-    return FTile(
-      prefix: Icon(
-        delta == 0
-            ? FIcons.minus
-            : delta > 0
-            ? FIcons.trendingUp
-            : FIcons.trendingDown,
-        color: color,
-      ),
-      title: Text(player.name),
-      subtitle: Text(
-        '${initial?.round() ?? '-'} -> ${finalRating?.round() ?? '-'}',
-      ),
-      details: Text(
-        '$sign${delta.round()}',
-        style: TextStyle(color: color, fontWeight: FontWeight.w900),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: sportGlassDecoration(radius: 24),
+      child: Row(
+        children: [
+          SportPlayerAvatar(
+            initials: player.initials,
+            imagePath: player.profileImagePath,
+            size: 40,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  player.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleSmall?.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  '${initial?.round() ?? '-'} -> ${finalRating?.round() ?? '-'}',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: sportMutedText,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: color.withValues(alpha: 0.45)),
+            ),
+            child: Text(
+              '$sign${delta.round()}',
+              style: textTheme.bodySmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-Color _deltaColor(BuildContext context, double delta) {
-  final colorScheme = Theme.of(context).colorScheme;
-  if (delta > 0) return colorScheme.primary;
-  if (delta < 0) return colorScheme.error;
-  return colorScheme.onSurfaceVariant;
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.icon, required this.title});
+
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.violet),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: AppColors.white,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoPill extends StatelessWidget {
+  const _InfoPill({required this.label, this.emphasized = false});
+
+  final String label;
+  final bool emphasized;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: emphasized
+            ? AppColors.violet.withValues(alpha: 0.22)
+            : AppColors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: emphasized
+              ? AppColors.violet
+              : AppColors.white.withValues(alpha: 0.12),
+        ),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: AppColors.white,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+Color _deltaColor(double delta) {
+  if (delta > 0) return AppColors.violet;
+  if (delta < 0) return AppColors.danger;
+  return sportMutedText;
 }
 
 String _dateLabel(DateTime date) {

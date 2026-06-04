@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:go_router/go_router.dart';
 
 import '../app_constants.dart';
+import '../app_router.dart';
 import '../models/player.dart';
 import '../models/scrimmage_match.dart';
 import '../providers/elo_providers.dart';
+import '../providers/match_provider.dart';
 import '../repositories/elo_repository.dart';
+import '../theme/app_colors.dart';
 import '../widgets/animated_score_stepper.dart';
+import '../widgets/sport_style.dart';
 
 class MatchFormScreen extends ConsumerStatefulWidget {
-  const MatchFormScreen({super.key, this.match});
+  const MatchFormScreen({super.key, this.match, this.matchId});
 
   final ScrimmageMatch? match;
+  final String? matchId;
 
   @override
   ConsumerState<MatchFormScreen> createState() => _MatchFormScreenState();
@@ -27,24 +33,26 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
   late int _scoreB;
   late int _teamSize;
   late bool _offenseVsDefense;
+  ScrimmageMatch? _match;
   int _step = 0;
 
   @override
   void initState() {
     super.initState();
+    _match = widget.match ?? _findMatch(widget.matchId);
     final names = _randomTeamNames();
     _teamANameController = TextEditingController(
-      text: widget.match?.teamAName ?? names.$1,
+      text: _match?.teamAName ?? names.$1,
     );
     _teamBNameController = TextEditingController(
-      text: widget.match?.teamBName ?? names.$2,
+      text: _match?.teamBName ?? names.$2,
     );
-    _teamAIds = <String>{...?widget.match?.teamAIds};
-    _teamBIds = <String>{...?widget.match?.teamBIds};
-    _scoreA = widget.match?.scoreA ?? 0;
-    _scoreB = widget.match?.scoreB ?? 0;
-    _teamSize = widget.match?.teamSize ?? AppConstants.defaultTeamSize;
-    _offenseVsDefense = widget.match?.offenseVsDefense ?? false;
+    _teamAIds = <String>{...?_match?.teamAIds};
+    _teamBIds = <String>{...?_match?.teamBIds};
+    _scoreA = _match?.scoreA ?? 0;
+    _scoreB = _match?.scoreB ?? 0;
+    _teamSize = _match?.teamSize ?? AppConstants.defaultTeamSize;
+    _offenseVsDefense = _match?.offenseVsDefense ?? false;
   }
 
   @override
@@ -61,15 +69,13 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
     final recentTeams = ref.watch(recentMatchTeamsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.match == null ? 'Nuova partita' : 'Modifica partita',
-        ),
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+      body: SportScreenShell(
+        title: _match == null ? 'New match' : 'Edit match',
+        subtitle: 'Setup scrimmage',
+        child: Column(
           children: [
+            const SportBackButton(),
+            const SizedBox(height: 14),
             _StepHeader(step: _step),
             const SizedBox(height: 16),
             AnimatedSwitcher(
@@ -81,34 +87,34 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
                 child: _buildStep(players, recentTeams),
               ),
             ),
-            const SizedBox(height: 88),
+            const SizedBox(height: 18),
+            Container(
+              decoration: sportGlassDecoration(radius: 22),
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _FormNavButton(
+                      label: _step == 0 ? 'Annulla' : 'Indietro',
+                      outlined: true,
+                      onPressed: _step == 0
+                          ? () => _close()
+                          : () => setState(() => _step -= 1),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _FormNavButton(
+                      label: _step == 3 ? 'Salva' : 'Avanti',
+                      onPressed: _canContinue
+                          ? () => _continue(repository)
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: FButton(
-                  variant: .outline,
-                  onPress: _step == 0
-                      ? () => Navigator.pop(context)
-                      : () => setState(() => _step -= 1),
-                  child: Text(_step == 0 ? 'Annulla' : 'Indietro'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FButton(
-                  onPress: _canContinue ? () => _continue(repository) : null,
-                  child: Text(_step == 3 ? 'Salva' : 'Avanti'),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -243,8 +249,8 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
 
   Future<void> _save(EloRepository repository) async {
     final savedMatch = ScrimmageMatch(
-      id: widget.match?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
-      createdAt: widget.match?.createdAt ?? DateTime.now(),
+      id: _match?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
+      createdAt: _match?.createdAt ?? DateTime.now(),
       teamAIds: _teamAIds.toList(),
       teamBIds: _teamBIds.toList(),
       scoreA: _scoreA,
@@ -256,7 +262,20 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
     );
     await repository.upsertMatch(savedMatch);
     if (!mounted) return;
-    Navigator.pop(context);
+    _close();
+  }
+
+  ScrimmageMatch? _findMatch(String? matchId) {
+    if (matchId == null) return null;
+    return ref.read(matchDetailsProvider(matchId));
+  }
+
+  void _close() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.matches);
+    }
   }
 
   String get _teamALabel {
@@ -273,6 +292,50 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
     final names = _randomTeamNames();
     _teamANameController.text = names.$1;
     _teamBNameController.text = names.$2;
+  }
+}
+
+class _FormNavButton extends StatelessWidget {
+  const _FormNavButton({
+    required this.label,
+    required this.onPressed,
+    this.outlined = false,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool outlined;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onPressed != null;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onPressed,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 140),
+        height: 48,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: outlined
+              ? AppColors.white.withValues(alpha: enabled ? 0.08 : 0.04)
+              : AppColors.violet.withValues(alpha: enabled ? 1 : 0.35),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: outlined
+                ? AppColors.white.withValues(alpha: 0.14)
+                : AppColors.violet.withValues(alpha: enabled ? 1 : 0.35),
+          ),
+        ),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.white.withValues(alpha: enabled ? 1 : 0.45),
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
   }
 }
 

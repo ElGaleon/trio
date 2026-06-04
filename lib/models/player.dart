@@ -28,6 +28,8 @@ class Player {
     this.losses = 0,
     this.linePreference = PlayerLinePreference.offense,
     this.role = PlayerRole.cutter,
+    this.profileImagePath,
+    this.isExternal = false,
   });
 
   final String id;
@@ -38,13 +40,17 @@ class Player {
   int losses;
   PlayerLinePreference linePreference;
   PlayerRole role;
+  String? profileImagePath;
+  bool isExternal;
 
   String get initials {
-    List<String> split = name.split(" ");
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return '?';
+    List<String> split = trimmed.split(" ");
     if (split.length == 1) {
-      return name[0];
+      return trimmed[0].toUpperCase();
     }
-    return split.first[0] + split[1][0];
+    return (split.first[0] + split[1][0]).toUpperCase();
   }
 
   double get winRate => matchesPlayed == 0 ? 0 : wins / matchesPlayed;

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:go_router/go_router.dart';
 
 import '../app_constants.dart';
 import '../models/app_settings.dart';
 import '../providers/elo_providers.dart';
+import '../theme/app_colors.dart';
+import '../widgets/sport_style.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -42,17 +45,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Impostazioni')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          FCard.raw(
-            child: Padding(
+      body: SportScreenShell(
+        title: 'Settings',
+        subtitle: 'Theme and ELO',
+        child: Column(
+          children: [
+            const SportBackButton(),
+            const SizedBox(height: 14),
+            Container(
+              decoration: sportGlassDecoration(),
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Aspetto', style: textTheme.titleMedium),
+                  _SettingsSectionTitle(
+                    icon: FIcons.palette,
+                    title: 'Aspetto',
+                    textTheme: textTheme,
+                  ),
                   const SizedBox(height: 14),
                   FSelect<int>(
                     items: const {'Sistema': 0, 'Chiaro': 1, 'Scuro': 2},
@@ -69,15 +79,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          FCard.raw(
-            child: Padding(
+            const SizedBox(height: 12),
+            Container(
+              decoration: sportGlassDecoration(),
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Algoritmo ELO', style: textTheme.titleMedium),
+                  _SettingsSectionTitle(
+                    icon: FIcons.chartNoAxesCombined,
+                    title: 'Algoritmo ELO',
+                    textTheme: textTheme,
+                  ),
                   const SizedBox(height: 14),
                   FTextFormField(
                     control: FTextFieldControl.managed(
@@ -97,14 +110,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 18),
-          FButton(
-            onPress: _save,
-            prefix: const Icon(Icons.save_outlined, size: 16),
-            child: const Text('Salva impostazioni'),
-          ),
-        ],
+            const SizedBox(height: 18),
+            SportFloatingActionButton(
+              label: 'Salva',
+              icon: FIcons.save,
+              onPressed: _save,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -141,5 +154,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Impostazioni salvate.')));
+    if (context.canPop()) context.pop();
+  }
+}
+
+class _SettingsSectionTitle extends StatelessWidget {
+  const _SettingsSectionTitle({
+    required this.icon,
+    required this.title,
+    required this.textTheme,
+  });
+
+  final IconData icon;
+  final String title;
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: AppColors.violet, size: 18),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: textTheme.titleMedium?.copyWith(
+            color: AppColors.white,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ],
+    );
   }
 }

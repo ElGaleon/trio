@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import '../models/scrimmage_match.dart';
+import '../theme/app_colors.dart';
 import 'card_actions_menu.dart';
+import 'sport_style.dart';
 
 class MatchCard extends StatelessWidget {
   const MatchCard({
@@ -21,24 +23,28 @@ class MatchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
-      child: FCard.raw(
+      child: DecoratedBox(
+        decoration: sportGlassDecoration(),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 6, 14),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    FIcons.calendarDays,
-                    size: 15,
-                    color: colorScheme.primary,
-                  ),
+                  Icon(FIcons.calendarDays, size: 16, color: AppColors.violet),
                   const SizedBox(width: 6),
-                  Text(_dateLabel(match.createdAt), style: textTheme.bodySmall),
+                  Text(
+                    _dateLabel(match.createdAt),
+                    style: textTheme.bodySmall?.copyWith(
+                      color: sportMutedText,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const Spacer(),
                   CardActionsMenu(onEdit: onEdit, onDelete: onDelete),
                 ],
@@ -61,6 +67,7 @@ class MatchCard extends StatelessWidget {
                         Text(
                           '-',
                           style: textTheme.headlineSmall?.copyWith(
+                            color: AppColors.white,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -87,7 +94,7 @@ class MatchCard extends StatelessWidget {
                   Icon(
                     match.offenseVsDefense ? FIcons.shield : FIcons.users,
                     size: 15,
-                    color: colorScheme.onSurfaceVariant,
+                    color: sportMutedText,
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -95,7 +102,7 @@ class MatchCard extends StatelessWidget {
                         ? 'Attacco vs difesa'
                         : 'Squadre libere',
                     style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                      color: sportMutedText,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -125,7 +132,6 @@ class _TeamScoreBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
     final children = [
       _TeamLogo(name: name, highlighted: highlighted),
       const SizedBox(width: 10),
@@ -141,7 +147,7 @@ class _TeamScoreBadge extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: alignEnd ? TextAlign.end : TextAlign.start,
               style: textTheme.titleSmall?.copyWith(
-                color: highlighted ? colorScheme.primary : null,
+                color: highlighted ? AppColors.violet : AppColors.white,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -149,7 +155,7 @@ class _TeamScoreBadge extends StatelessWidget {
             Text(
               highlighted ? 'Winner' : 'Team',
               style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: sportMutedText,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -165,6 +171,7 @@ class _TeamScoreBadge extends StatelessWidget {
           return Text(
             value.round().toString(),
             style: textTheme.headlineMedium?.copyWith(
+              color: AppColors.white,
               fontWeight: FontWeight.w900,
             ),
           );
@@ -184,23 +191,24 @@ class _TeamLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       width: 46,
       height: 46,
       decoration: BoxDecoration(
         color: highlighted
-            ? colorScheme.primary.withValues(alpha: 0.14)
-            : colorScheme.surfaceContainerHighest,
+            ? AppColors.violet.withValues(alpha: 0.18)
+            : AppColors.white.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: highlighted ? colorScheme.primary : colorScheme.outlineVariant,
+          color: highlighted
+              ? AppColors.violet
+              : AppColors.white.withValues(alpha: 0.14),
         ),
       ),
       child: Icon(
         _teamIcon(name),
-        color: highlighted ? colorScheme.primary : colorScheme.onSurface,
+        color: highlighted ? AppColors.violet : AppColors.white,
       ),
     );
   }

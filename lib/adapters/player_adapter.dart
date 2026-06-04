@@ -15,6 +15,8 @@ class PlayerAdapter extends TypeAdapter<Player> {
     };
     final linePreference = _readLinePreference(fields[6]);
     final role = _readRole(fields[7]);
+    final profileImagePath = fields[8] as String?;
+    final isExternal = fields[9] as bool? ?? false;
     return Player(
       id: fields[0] as String,
       name: fields[1] as String,
@@ -24,13 +26,17 @@ class PlayerAdapter extends TypeAdapter<Player> {
       losses: fields[5] as int? ?? 0,
       linePreference: linePreference,
       role: role,
+      profileImagePath: profileImagePath?.trim().isEmpty ?? true
+          ? null
+          : profileImagePath,
+      isExternal: isExternal,
     );
   }
 
   @override
   void write(BinaryWriter writer, Player obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -46,7 +52,11 @@ class PlayerAdapter extends TypeAdapter<Player> {
       ..writeByte(6)
       ..write(obj.linePreference.index)
       ..writeByte(7)
-      ..write(obj.role.index);
+      ..write(obj.role.index)
+      ..writeByte(8)
+      ..write(obj.profileImagePath)
+      ..writeByte(9)
+      ..write(obj.isExternal);
   }
 
   PlayerLinePreference _readLinePreference(Object? value) {

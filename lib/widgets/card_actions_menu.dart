@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
+import '../theme/app_colors.dart';
+
 class CardActionsMenu extends StatelessWidget {
   const CardActionsMenu({
     super.key,
@@ -44,7 +46,7 @@ class CardActionsMenu extends StatelessWidget {
         variant: .ghost,
         size: .sm,
         onPress: controller.toggle,
-        child: const Icon(FIcons.ellipsis, size: 18),
+        child: const Icon(FIcons.ellipsis, color: AppColors.white, size: 18),
       ),
     );
   }

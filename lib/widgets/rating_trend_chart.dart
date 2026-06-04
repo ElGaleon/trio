@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
+
 class RatingTrendChart extends StatelessWidget {
   const RatingTrendChart({super.key, required this.values});
 
@@ -41,13 +43,13 @@ class _RatingTrendPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final backgroundPaint = Paint()
-      ..color = colorScheme.surfaceContainerHighest
+      ..color = AppColors.white.withValues(alpha: 0.04)
       ..style = PaintingStyle.fill;
     final borderRadius = BorderRadius.circular(18).toRRect(Offset.zero & size);
     canvas.drawRRect(borderRadius, backgroundPaint);
 
     final gridPaint = Paint()
-      ..color = colorScheme.outlineVariant
+      ..color = AppColors.white.withValues(alpha: 0.09)
       ..strokeWidth = 1;
     for (var i = 1; i < 4; i++) {
       final y = size.height * i / 4;
@@ -78,16 +80,16 @@ class _RatingTrendPainter extends CustomPainter {
     final metric = path.computeMetrics().first;
     final animatedPath = metric.extractPath(0, metric.length * progress);
     final linePaint = Paint()
-      ..color = colorScheme.primary
+      ..color = AppColors.violet
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4;
     canvas.drawPath(animatedPath, linePaint);
 
-    final dotPaint = Paint()..color = colorScheme.surface;
+    final dotPaint = Paint()..color = AppColors.sportDotSurface;
     final dotBorderPaint = Paint()
-      ..color = colorScheme.primary
+      ..color = AppColors.violet
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
     for (final point in points) {
@@ -97,7 +99,7 @@ class _RatingTrendPainter extends CustomPainter {
   }
 
   void _drawSingleValue(Canvas canvas, Size size) {
-    final paint = Paint()..color = colorScheme.primary;
+    final paint = Paint()..color = AppColors.violet;
     canvas.drawCircle(Offset(size.width / 2, size.height / 2), 6, paint);
   }
 

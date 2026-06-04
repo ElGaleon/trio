@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:trio/screens/my_home_screen.dart';
 
 import 'adapters/app_settings_adapter.dart';
 import 'adapters/player_adapter.dart';
 import 'adapters/scrimmage_match_adapter.dart';
 import 'app_constants.dart';
+import 'app_router.dart';
 import 'models/app_settings.dart';
 import 'models/player.dart';
 import 'models/scrimmage_match.dart';
 import 'providers/elo_providers.dart';
+import 'theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,26 +43,20 @@ class TrioApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(appSettingsProvider);
-    return MaterialApp(
+    final themeMode = switch (settings.themeModeIndex) {
+      1 => ThemeMode.light,
+      2 => ThemeMode.dark,
+      _ => ThemeMode.system,
+    };
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: AppConstants.appTitle,
-      themeMode: settings.themeMode,
+      themeMode: themeMode,
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
-      home: MyHomeScreen(),
+      routerConfig: appRouter,
       builder: (context, child) {
-        final platformBrightness = MediaQuery.platformBrightnessOf(context);
-        final brightness = switch (settings.themeMode) {
-          ThemeMode.light => Brightness.light,
-          ThemeMode.dark => Brightness.dark,
-          ThemeMode.system => platformBrightness,
-        };
-        return FTheme(
-          data: brightness == Brightness.dark
-              ? FThemes.violet.dark.touch
-              : FThemes.violet.light.touch,
-          child: child!,
-        );
+        return FTheme(data: FThemes.violet.dark.touch, child: child!);
       },
     );
   }
@@ -69,20 +64,38 @@ class TrioApp extends ConsumerWidget {
   ThemeData _buildTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
     final background = isDark
-        ? const Color(0xFF09090B)
-        : const Color(0xFFFAFAFA);
-    final surface = isDark ? const Color(0xFF18181B) : Colors.white;
-    final border = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+        ? AppColors.appDarkBackground
+        : AppColors.appLightBackground;
+    final surface = isDark
+        ? AppColors.appDarkSurface
+        : AppColors.appLightSurface;
+    final border = isDark
+        ? AppColors.appDarkElevated
+        : AppColors.appLightBorder;
     final foreground = isDark
-        ? const Color(0xFFFAFAFA)
-        : const Color(0xFF18181B);
-    const accent = AppConstants.seedColor;
+        ? AppColors.appDarkForeground
+        : AppColors.appLightForeground;
+    const accent = AppColors.violet;
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: accent,
+          brightness: brightness,
+        ).copyWith(
+          primary: accent,
+          onPrimary: AppColors.white,
+          secondary: AppColors.violetHover,
+          tertiary: accent,
+          surface: surface,
+          onSurface: foreground,
+          surfaceContainerHighest: isDark
+              ? AppColors.appDarkElevated
+              : AppColors.violetSoft,
+          outline: border,
+          outlineVariant: border,
+        );
 
     return ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppConstants.seedColor,
-        brightness: brightness,
-      ),
+      colorScheme: colorScheme,
       brightness: brightness,
       useMaterial3: false,
       scaffoldBackgroundColor: background,
@@ -96,7 +109,26 @@ class TrioApp extends ConsumerWidget {
         elevation: 0,
         backgroundColor: surface,
         selectedItemColor: accent,
-        unselectedItemColor: const Color(0xFF71717A),
+        unselectedItemColor: colorScheme.onSurfaceVariant,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: surface,
+        headerBackgroundColor: accent,
+        headerForegroundColor: AppColors.white,
+        todayForegroundColor: WidgetStateProperty.all(accent),
+        todayBorder: BorderSide(color: accent),
+        dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return AppColors.white;
+          return foreground;
+        }),
+        dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return accent;
+          return null;
+        }),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -109,17 +141,38 @@ class TrioApp extends ConsumerWidget {
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: accent,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.white,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
           backgroundColor: accent,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
         ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: accent,
+          side: const BorderSide(color: accent),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: accent),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: isDark ? AppColors.violetDarkSoft : accent,
+        contentTextStyle: const TextStyle(
+          color: AppColors.white,
+          fontWeight: FontWeight.w700,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
