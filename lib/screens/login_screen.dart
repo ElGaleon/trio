@@ -230,11 +230,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           FButton(
                             variant: .outline,
                             onPress: _isLoading ? null : _submitGoogle,
-                            prefix: Image.network(
-                              'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/48px-Google_%22G%22_logo.svg.png',
-                              height: 18,
-                              width: 18,
-                            ),
                             child: const Text('Accedi con Google'),
                           ),
                           // View Switcher
