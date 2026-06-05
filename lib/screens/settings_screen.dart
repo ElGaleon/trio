@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
@@ -9,7 +10,9 @@ import '../components/shared/sport_button.dart';
 import '../components/shared/sport_screen_shell.dart';
 import '../model/app_settings.dart';
 import '../model/scrimmage_match.dart';
+import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import '../theme/app_colors.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -171,6 +174,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         type: entry.key,
                         controller: entry.value,
                       ),
+                  ],
+                ),
+              ),
+            ),
+            DecoratedBox(
+              decoration: sportGlassDecoration(),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  spacing: 14,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SettingsSectionTitle(
+                      icon: FIcons.user,
+                      title: 'Account',
+                      textTheme: textTheme,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            FirebaseAuth.instance.currentUser?.email ?? 'Nessun utente loggato',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        FButton(
+                          variant: .outline,
+                          onPress: () async {
+                            await ref.read(authServiceProvider).signOut();
+                          },
+                          child: const Text('Disconnetti'),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

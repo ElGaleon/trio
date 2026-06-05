@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "901319599088",
+    "project_id": "steasy-aa1ad",
+    "storage_bucket": "steasy-aa1ad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901319599088:android:09db03f1790f3446dd3335",
+        "android_client_info": {
+          "package_name": "com.example.trio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_q-Ry9IHfIRqWpIc3GnEY8SfbTKBS9Cs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

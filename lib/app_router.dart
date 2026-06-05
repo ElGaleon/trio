@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trio/model/player.dart';
 import 'package:trio/model/scrimmage_match.dart';
 import 'package:trio/screens/home_screen.dart';
+import 'package:trio/screens/login_screen.dart';
 import 'package:trio/screens/matches_screen.dart';
 import 'package:trio/screens/players_screen.dart';
 import 'package:trio/screens/player_stats_screen.dart';
@@ -14,9 +18,27 @@ import 'package:trio/screens/player_form_screen.dart';
 import 'package:trio/screens/live_stats_screen.dart';
 import 'package:trio/screens/stats_match_setup_screen.dart';
 
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+          (dynamic _) => notifyListeners(),
+        );
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 class AppRoutes {
   const AppRoutes._();
 
+  static const login = '/login';
   static const ranking = '/ranking';
   static const matches = '/matches';
   static const players = '/players';
@@ -36,7 +58,26 @@ class AppRoutes {
 
 final appRouter = GoRouter(
   initialLocation: AppRoutes.ranking,
+  refreshListenable: GoRouterRefreshStream(FirebaseAuth.instance.authStateChanges()),
+  redirect: (context, state) {
+    final user = FirebaseAuth.instance.currentUser;
+    final isLoggingIn = state.matchedLocation == AppRoutes.login;
+
+    if (user == null) {
+      return isLoggingIn ? null : AppRoutes.login;
+    }
+
+    if (isLoggingIn) {
+      return AppRoutes.ranking;
+    }
+
+    return null;
+  },
   routes: [
+    GoRoute(
+      path: AppRoutes.login,
+      builder: (context, state) => const LoginScreen(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return HomeScreen(navigationShell: navigationShell);
