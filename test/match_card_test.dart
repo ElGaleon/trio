@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:trio/models/scrimmage_match.dart';
-import 'package:trio/widgets/match_card.dart';
+import 'package:trio/model/scrimmage_match.dart';
+import 'package:trio/components/shared/match_card.dart';
 
 void main() {
   testWidgets('match card keeps detailed data out of the main list', (

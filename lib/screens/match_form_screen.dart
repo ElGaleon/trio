@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
-import '../app_constants.dart';
 import '../app_router.dart';
-import '../models/player.dart';
-import '../models/scrimmage_match.dart';
+import '../components/match_form/form_nav_button.dart';
+import '../components/match_form/presence_step.dart';
+import '../components/match_form/score_step.dart';
+import '../components/match_form/setup_step.dart';
+import '../components/match_form/step_header.dart';
+import '../components/shared/sport_avatar_pill.dart';
+import '../components/shared/sport_button.dart';
+import '../components/shared/sport_screen_shell.dart';
+import '../model/player.dart';
+import '../model/scrimmage_match.dart';
 import '../providers/elo_providers.dart';
-import '../providers/match_provider.dart';
-import '../repositories/elo_repository.dart';
-import '../theme/app_colors.dart';
-import '../widgets/animated_score_stepper.dart';
-import '../widgets/sport_style.dart';
+import '../model/match_form_state.dart';
+import '../providers/match_form_provider.dart';
 
 class MatchFormScreen extends ConsumerStatefulWidget {
   const MatchFormScreen({super.key, this.match, this.matchId});
@@ -27,32 +30,24 @@ class MatchFormScreen extends ConsumerStatefulWidget {
 class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
   late final TextEditingController _teamANameController;
   late final TextEditingController _teamBNameController;
-  late final Set<String> _teamAIds;
-  late final Set<String> _teamBIds;
-  late int _scoreA;
-  late int _scoreB;
-  late int _teamSize;
-  late bool _offenseVsDefense;
-  ScrimmageMatch? _match;
-  int _step = 0;
 
   @override
   void initState() {
     super.initState();
-    _match = widget.match ?? _findMatch(widget.matchId);
-    final names = _randomTeamNames();
-    _teamANameController = TextEditingController(
-      text: _match?.teamAName ?? names.$1,
-    );
-    _teamBNameController = TextEditingController(
-      text: _match?.teamBName ?? names.$2,
-    );
-    _teamAIds = <String>{...?_match?.teamAIds};
-    _teamBIds = <String>{...?_match?.teamBIds};
-    _scoreA = _match?.scoreA ?? 0;
-    _scoreB = _match?.scoreB ?? 0;
-    _teamSize = _match?.teamSize ?? AppConstants.defaultTeamSize;
-    _offenseVsDefense = _match?.offenseVsDefense ?? false;
+    final initialState = ref.read(matchFormProvider(widget.matchId));
+    _teamANameController = TextEditingController(text: initialState.teamAName);
+    _teamBNameController = TextEditingController(text: initialState.teamBName);
+
+    _teamANameController.addListener(() {
+      ref
+          .read(matchFormProvider(widget.matchId).notifier)
+          .updateTeamAName(_teamANameController.text);
+    });
+    _teamBNameController.addListener(() {
+      ref
+          .read(matchFormProvider(widget.matchId).notifier)
+          .updateTeamBName(_teamBNameController.text);
+    });
   }
 
   @override
@@ -64,54 +59,81 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final repository = ref.watch(eloRepositoryProvider);
-    final players = repository.rankedPlayers;
+    final state = ref.watch(matchFormProvider(widget.matchId));
+    final notifier = ref.read(matchFormProvider(widget.matchId).notifier);
+
+    // Listen for state changes (e.g. mode changes or regeneration) to update controller values.
+    ref.listen<MatchFormState>(matchFormProvider(widget.matchId), (
+      previous,
+      next,
+    ) {
+      if (_teamANameController.text != next.teamAName) {
+        _teamANameController.text = next.teamAName;
+      }
+      if (_teamBNameController.text != next.teamBName) {
+        _teamBNameController.text = next.teamBName;
+      }
+    });
+
+    final players = ref.watch(rankedPlayersProvider);
     final recentTeams = ref.watch(recentMatchTeamsProvider);
 
     return Scaffold(
       body: SportScreenShell(
-        title: _match == null ? 'New match' : 'Edit match',
+        title: widget.matchId == null && widget.match == null
+            ? 'New match'
+            : 'Edit match',
         subtitle: 'Setup scrimmage',
         child: Column(
+          spacing: 14,
           children: [
             const SportBackButton(),
-            const SizedBox(height: 14),
-            _StepHeader(step: _step),
-            const SizedBox(height: 16),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: KeyedSubtree(
-                key: ValueKey(_step),
-                child: _buildStep(players, recentTeams),
+            StepHeader(step: state.step),
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 2,
+              ), // Adjust spacing: 14 + 2 = 16 total
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: KeyedSubtree(
+                  key: ValueKey(state.step),
+                  child: _buildStep(state, notifier, players, recentTeams),
+                ),
               ),
             ),
-            const SizedBox(height: 18),
-            Container(
-              decoration: sportGlassDecoration(radius: 22),
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _FormNavButton(
-                      label: _step == 0 ? 'Annulla' : 'Indietro',
-                      outlined: true,
-                      onPressed: _step == 0
-                          ? () => _close()
-                          : () => setState(() => _step -= 1),
-                    ),
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 4,
+              ), // Adjust spacing: 14 + 4 = 18 total
+              child: DecoratedBox(
+                decoration: sportGlassDecoration(radius: 22),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    spacing: 12,
+                    children: [
+                      Expanded(
+                        child: FormNavButton(
+                          label: state.step == 0 ? 'Annulla' : 'Indietro',
+                          outlined: true,
+                          onPressed: state.step == 0
+                              ? () => _close(context)
+                              : notifier.prevStep,
+                        ),
+                      ),
+                      Expanded(
+                        child: FormNavButton(
+                          label: state.step == 3 ? 'Salva' : 'Avanti',
+                          onPressed: _canContinue(state)
+                              ? () => _continue(context, state, notifier)
+                              : null,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _FormNavButton(
-                      label: _step == 3 ? 'Salva' : 'Avanti',
-                      onPressed: _canContinue
-                          ? () => _continue(repository)
-                          : null,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ],
@@ -120,628 +142,106 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
     );
   }
 
-  Widget _buildStep(List<Player> players, List<RecentMatchTeam> recentTeams) {
-    return switch (_step) {
-      0 => _SetupStep(
-        teamSize: _teamSize,
-        offenseVsDefense: _offenseVsDefense,
+  Widget _buildStep(
+    MatchFormState state,
+    MatchFormNotifier notifier,
+    List<Player> players,
+    List<RecentMatchTeam> recentTeams,
+  ) {
+    return switch (state.step) {
+      0 => SetupStep(
+        teamSize: state.teamSize,
+        offenseVsDefense: state.offenseVsDefense,
         teamANameController: _teamANameController,
         teamBNameController: _teamBNameController,
-        onTeamSizeChanged: (value) => setState(() => _teamSize = value),
-        onRegenerateNames: _regenerateTeamNames,
-        onModeChanged: (value) => setState(() {
-          _offenseVsDefense = value;
-          if (value) {
-            _teamANameController.text = 'Attacco';
-            _teamBNameController.text = 'Difesa';
-            _teamAIds
-              ..clear()
-              ..addAll(
-                players
-                    .where(
-                      (player) =>
-                          player.linePreference == PlayerLinePreference.offense,
-                    )
-                    .map((player) => player.id),
-              );
-            _teamBIds
-              ..clear()
-              ..addAll(
-                players
-                    .where(
-                      (player) =>
-                          player.linePreference == PlayerLinePreference.defense,
-                    )
-                    .map((player) => player.id),
-              );
-          } else {
-            _regenerateTeamNames();
-          }
-        }),
+        onTeamSizeChanged: notifier.updateTeamSize,
+        onModeChanged: notifier.updateMode,
+        onRegenerateNames: notifier.regenerateNames,
       ),
-      1 => _PresenceStep(
-        title: _teamALabel,
+      1 => PresenceStep(
+        title: state.teamAName.trim().isEmpty ? 'Squadra A' : state.teamAName,
         description: 'Segna tutti i presenti della prima squadra.',
-        count: _teamAIds.length,
-        minimum: _teamSize,
-        suggestedLine: _offenseVsDefense ? PlayerLinePreference.offense : null,
+        count: state.teamAIds.length,
+        minimum: state.teamSize,
+        suggestedLine: state.offenseVsDefense
+            ? PlayerLinePreference.offense
+            : null,
         players: players,
         recentTeams: recentTeams,
-        selectedIds: _teamAIds,
-        disabledIds: _teamBIds,
-        onChanged: _toggleTeamA,
-        onApplyRecentTeam: (team) => _applyRecentTeam(team, toTeamA: true),
+        selectedIds: state.teamAIds,
+        disabledIds: state.teamBIds,
+        onChanged: notifier.toggleTeamA,
+        onApplyRecentTeam: (team) =>
+            notifier.applyRecentTeam(team, toTeamA: true),
       ),
-      2 => _PresenceStep(
-        title: _teamBLabel,
+      2 => PresenceStep(
+        title: state.teamBName.trim().isEmpty ? 'Squadra B' : state.teamBName,
         description: 'Segna tutti i presenti della seconda squadra.',
-        count: _teamBIds.length,
-        minimum: _teamSize,
-        suggestedLine: _offenseVsDefense ? PlayerLinePreference.defense : null,
+        count: state.teamBIds.length,
+        minimum: state.teamSize,
+        suggestedLine: state.offenseVsDefense
+            ? PlayerLinePreference.defense
+            : null,
         players: players,
         recentTeams: recentTeams,
-        selectedIds: _teamBIds,
-        disabledIds: _teamAIds,
-        onChanged: _toggleTeamB,
-        onApplyRecentTeam: (team) => _applyRecentTeam(team, toTeamA: false),
+        selectedIds: state.teamBIds,
+        disabledIds: state.teamAIds,
+        onChanged: notifier.toggleTeamB,
+        onApplyRecentTeam: (team) =>
+            notifier.applyRecentTeam(team, toTeamA: false),
       ),
-      _ => _ScoreStep(
-        scoreA: _scoreA,
-        scoreB: _scoreB,
-        onScoreAChanged: (value) => setState(() => _scoreA = value),
-        onScoreBChanged: (value) => setState(() => _scoreB = value),
-        teamSize: _teamSize,
-        teamALabel: _teamALabel,
-        teamBLabel: _teamBLabel,
-        teamACount: _teamAIds.length,
-        teamBCount: _teamBIds.length,
+      _ => ScoreStep(
+        scoreA: state.scoreA,
+        scoreB: state.scoreB,
+        onScoreAChanged: notifier.updateScoreA,
+        onScoreBChanged: notifier.updateScoreB,
+        teamSize: state.teamSize,
+        teamALabel: state.teamAName.trim().isEmpty
+            ? 'Squadra A'
+            : state.teamAName,
+        teamBLabel: state.teamBName.trim().isEmpty
+            ? 'Squadra B'
+            : state.teamBName,
+        teamACount: state.teamAIds.length,
+        teamBCount: state.teamBIds.length,
       ),
     };
   }
 
-  bool get _canContinue {
-    return switch (_step) {
+  bool _canContinue(MatchFormState state) {
+    return switch (state.step) {
       0 => true,
-      1 => _teamAIds.length >= _teamSize,
-      2 => _teamBIds.length >= _teamSize,
-      _ => _teamAIds.length >= _teamSize && _teamBIds.length >= _teamSize,
+      1 => state.teamAIds.length >= state.teamSize,
+      2 => state.teamBIds.length >= state.teamSize,
+      _ =>
+        state.teamAIds.length >= state.teamSize &&
+            state.teamBIds.length >= state.teamSize,
     };
   }
 
-  void _continue(EloRepository repository) {
-    if (_step < 3) {
-      setState(() => _step += 1);
+  void _continue(
+    BuildContext context,
+    MatchFormState state,
+    MatchFormNotifier notifier,
+  ) {
+    if (state.step < 3) {
+      notifier.nextStep();
       return;
     }
-    _save(repository);
+    _save(context, notifier);
   }
 
-  void _toggleTeamA(String id) {
-    setState(() {
-      _teamAIds.contains(id) ? _teamAIds.remove(id) : _teamAIds.add(id);
-    });
+  Future<void> _save(BuildContext context, MatchFormNotifier notifier) async {
+    await notifier.save(widget.matchId);
+    if (!context.mounted) return;
+    _close(context);
   }
 
-  void _toggleTeamB(String id) {
-    setState(() {
-      _teamBIds.contains(id) ? _teamBIds.remove(id) : _teamBIds.add(id);
-    });
-  }
-
-  void _applyRecentTeam(RecentMatchTeam team, {required bool toTeamA}) {
-    setState(() {
-      final ids = team.playerIds.toSet();
-      if (toTeamA) {
-        _teamAIds
-          ..clear()
-          ..addAll(ids);
-        _teamBIds.removeAll(ids);
-        _teamANameController.text = team.name;
-      } else {
-        _teamBIds
-          ..clear()
-          ..addAll(ids);
-        _teamAIds.removeAll(ids);
-        _teamBNameController.text = team.name;
-      }
-    });
-  }
-
-  Future<void> _save(EloRepository repository) async {
-    final savedMatch = ScrimmageMatch(
-      id: _match?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
-      createdAt: _match?.createdAt ?? DateTime.now(),
-      teamAIds: _teamAIds.toList(),
-      teamBIds: _teamBIds.toList(),
-      scoreA: _scoreA,
-      scoreB: _scoreB,
-      teamSize: _teamSize,
-      offenseVsDefense: _offenseVsDefense,
-      teamAName: _teamALabel,
-      teamBName: _teamBLabel,
-    );
-    await repository.upsertMatch(savedMatch);
-    if (!mounted) return;
-    _close();
-  }
-
-  ScrimmageMatch? _findMatch(String? matchId) {
-    if (matchId == null) return null;
-    return ref.read(matchDetailsProvider(matchId));
-  }
-
-  void _close() {
+  void _close(BuildContext context) {
     if (context.canPop()) {
       context.pop();
     } else {
       context.go(AppRoutes.matches);
     }
   }
-
-  String get _teamALabel {
-    final name = _teamANameController.text.trim();
-    return name.isEmpty ? (_offenseVsDefense ? 'Attacco' : 'Squadra A') : name;
-  }
-
-  String get _teamBLabel {
-    final name = _teamBNameController.text.trim();
-    return name.isEmpty ? (_offenseVsDefense ? 'Difesa' : 'Squadra B') : name;
-  }
-
-  void _regenerateTeamNames() {
-    final names = _randomTeamNames();
-    _teamANameController.text = names.$1;
-    _teamBNameController.text = names.$2;
-  }
-}
-
-class _FormNavButton extends StatelessWidget {
-  const _FormNavButton({
-    required this.label,
-    required this.onPressed,
-    this.outlined = false,
-  });
-
-  final String label;
-  final VoidCallback? onPressed;
-  final bool outlined;
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled = onPressed != null;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onPressed,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 140),
-        height: 48,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: outlined
-              ? AppColors.white.withValues(alpha: enabled ? 0.08 : 0.04)
-              : AppColors.violet.withValues(alpha: enabled ? 1 : 0.35),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: outlined
-                ? AppColors.white.withValues(alpha: 0.14)
-                : AppColors.violet.withValues(alpha: enabled ? 1 : 0.35),
-          ),
-        ),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.white.withValues(alpha: enabled ? 1 : 0.45),
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StepHeader extends StatelessWidget {
-  const _StepHeader({required this.step});
-
-  final int step;
-
-  @override
-  Widget build(BuildContext context) {
-    final labels = ['Setup', 'A', 'B', 'Score'];
-    return Row(
-      children: List.generate(labels.length, (index) {
-        final active = index == step;
-        final completed = index < step;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: index == labels.length - 1 ? 0 : 8),
-            child: FBadge(
-              variant: active || completed ? .primary : .outline,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(completed ? FIcons.check : FIcons.circle, size: 12),
-                  const SizedBox(width: 5),
-                  Flexible(child: Text(labels[index])),
-                ],
-              ),
-            ),
-          ),
-        );
-      }),
-    );
-  }
-}
-
-class _SetupStep extends StatelessWidget {
-  const _SetupStep({
-    required this.teamSize,
-    required this.offenseVsDefense,
-    required this.teamANameController,
-    required this.teamBNameController,
-    required this.onTeamSizeChanged,
-    required this.onModeChanged,
-    required this.onRegenerateNames,
-  });
-
-  final int teamSize;
-  final bool offenseVsDefense;
-  final TextEditingController teamANameController;
-  final TextEditingController teamBNameController;
-  final ValueChanged<int> onTeamSizeChanged;
-  final ValueChanged<bool> onModeChanged;
-  final VoidCallback onRegenerateNames;
-
-  @override
-  Widget build(BuildContext context) {
-    return FCard(
-      title: const Text('Impostazioni partita'),
-      subtitle: const Text('Scegli formato e tipo di confronto.'),
-      child: Column(
-        children: [
-          FSelect<int>(
-            items: {
-              for (
-                var size = AppConstants.minTeamSize;
-                size <= AppConstants.maxTeamSize;
-                size++
-              )
-                '${size}vs$size': size,
-            },
-            hint: 'Formato',
-            control: FSelectControl.managed(
-              initial: teamSize,
-              onChange: (value) {
-                if (value != null) onTeamSizeChanged(value);
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          FTileGroup(
-            children: [
-              FTile(
-                prefix: const Icon(FIcons.users),
-                title: const Text('Squadre libere'),
-                subtitle: const Text('Selezione manuale dei presenti.'),
-                suffix: offenseVsDefense
-                    ? null
-                    : const Icon(FIcons.check, size: 18),
-                onPress: () => onModeChanged(false),
-              ),
-              FTile(
-                prefix: const Icon(FIcons.shield),
-                title: const Text('Attacco vs difesa'),
-                subtitle: const Text('Precompila le linee attacco e difesa.'),
-                suffix: offenseVsDefense
-                    ? const Icon(FIcons.check, size: 18)
-                    : null,
-                onPress: () => onModeChanged(true),
-              ),
-            ],
-          ),
-          if (!offenseVsDefense) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: FTextFormField(
-                    control: FTextFieldControl.managed(
-                      controller: teamANameController,
-                    ),
-                    hint: 'Nome squadra A',
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FTextFormField(
-                    control: FTextFieldControl.managed(
-                      controller: teamBNameController,
-                    ),
-                    hint: 'Nome squadra B',
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            FButton(
-              variant: .outline,
-              onPress: onRegenerateNames,
-              prefix: const Icon(FIcons.dices, size: 16),
-              child: const Text('Rigenera nomi'),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _PresenceStep extends StatelessWidget {
-  const _PresenceStep({
-    required this.title,
-    required this.description,
-    required this.count,
-    required this.minimum,
-    required this.players,
-    required this.recentTeams,
-    required this.selectedIds,
-    required this.disabledIds,
-    required this.onChanged,
-    required this.onApplyRecentTeam,
-    this.suggestedLine,
-  });
-
-  final String title;
-  final String description;
-  final int count;
-  final int minimum;
-  final List<Player> players;
-  final List<RecentMatchTeam> recentTeams;
-  final Set<String> selectedIds;
-  final Set<String> disabledIds;
-  final ValueChanged<String> onChanged;
-  final ValueChanged<RecentMatchTeam> onApplyRecentTeam;
-  final PlayerLinePreference? suggestedLine;
-
-  @override
-  Widget build(BuildContext context) {
-    final visiblePlayers = players.where((player) {
-      if (suggestedLine == null) return true;
-      if (disabledIds.contains(player.id)) return false;
-      return player.linePreference == suggestedLine;
-    }).toList();
-
-    final sortedPlayers = visiblePlayers
-      ..sort((a, b) {
-        final aSuggested = a.linePreference == suggestedLine ? 0 : 1;
-        final bSuggested = b.linePreference == suggestedLine ? 0 : 1;
-        final byLine = aSuggested.compareTo(bSuggested);
-        if (byLine != 0) return byLine;
-        return a.name.compareTo(b.name);
-      });
-
-    return FCard(
-      title: Row(
-        children: [
-          Expanded(child: Text(title)),
-          FBadge(
-            variant: count >= minimum ? .primary : .outline,
-            child: Text('$count/$minimum min'),
-          ),
-        ],
-      ),
-      subtitle: Text(description),
-      child: Column(
-        children: [
-          if (recentTeams.isNotEmpty) ...[
-            _RecentTeamsPicker(
-              recentTeams: recentTeams,
-              selectedIds: selectedIds,
-              onApplyRecentTeam: onApplyRecentTeam,
-            ),
-            const SizedBox(height: 12),
-          ],
-          FTileGroup(
-            children: [
-              ...sortedPlayers.map((player) {
-                final selected = selectedIds.contains(player.id);
-                final disabled = disabledIds.contains(player.id);
-                return FTile(
-                  enabled: !disabled,
-                  selected: selected,
-                  prefix: Icon(_lineIcon(player.linePreference)),
-                  title: Text(player.name),
-                  subtitle: Text(
-                    '${player.role.label} · ${player.linePreference.label}',
-                  ),
-                  suffix: selected
-                      ? const Icon(FIcons.check, size: 18)
-                      : disabled
-                      ? const Icon(FIcons.x, size: 18)
-                      : null,
-                  onPress: disabled ? null : () => onChanged(player.id),
-                );
-              }),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  IconData _lineIcon(PlayerLinePreference linePreference) {
-    return switch (linePreference) {
-      PlayerLinePreference.offense => FIcons.arrowUpRight,
-      PlayerLinePreference.defense => FIcons.shield,
-    };
-  }
-}
-
-class _RecentTeamsPicker extends StatelessWidget {
-  const _RecentTeamsPicker({
-    required this.recentTeams,
-    required this.selectedIds,
-    required this.onApplyRecentTeam,
-  });
-
-  final List<RecentMatchTeam> recentTeams;
-  final Set<String> selectedIds;
-  final ValueChanged<RecentMatchTeam> onApplyRecentTeam;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(FIcons.history, size: 16, color: colorScheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              'Squadre di oggi',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        FTileGroup(
-          children: [
-            ...recentTeams.map((team) {
-              final selected = _hasSameMembers(selectedIds, team.playerIds);
-              return FTile(
-                selected: selected,
-                prefix: const Icon(FIcons.zap, size: 18),
-                title: Text(team.name),
-                subtitle: Text(team.playerNames.join(', ')),
-                details: FBadge(
-                  variant: selected ? .primary : .secondary,
-                  child: Text('${team.playerIds.length}'),
-                ),
-                suffix: selected ? const Icon(FIcons.check, size: 18) : null,
-                onPress: () => onApplyRecentTeam(team),
-              );
-            }),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-bool _hasSameMembers(Set<String> selectedIds, List<String> teamIds) {
-  if (selectedIds.length != teamIds.length) return false;
-  return teamIds.every(selectedIds.contains);
-}
-
-class _ScoreStep extends StatelessWidget {
-  const _ScoreStep({
-    required this.scoreA,
-    required this.scoreB,
-    required this.onScoreAChanged,
-    required this.onScoreBChanged,
-    required this.teamSize,
-    required this.teamALabel,
-    required this.teamBLabel,
-    required this.teamACount,
-    required this.teamBCount,
-  });
-
-  final int scoreA;
-  final int scoreB;
-  final ValueChanged<int> onScoreAChanged;
-  final ValueChanged<int> onScoreBChanged;
-  final int teamSize;
-  final String teamALabel;
-  final String teamBLabel;
-  final int teamACount;
-  final int teamBCount;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        FCard(
-          title: const Text('Riepilogo'),
-          child: Column(
-            children: [
-              _SummaryRow(label: 'Formato', value: '${teamSize}vs$teamSize'),
-              _SummaryRow(label: teamALabel, value: '$teamACount presenti'),
-              _SummaryRow(label: teamBLabel, value: '$teamBCount presenti'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: AnimatedScoreStepper(
-                label: teamALabel,
-                value: scoreA,
-                onChanged: onScoreAChanged,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: AnimatedScoreStepper(
-                label: teamBLabel,
-                value: scoreB,
-                onChanged: onScoreBChanged,
-              ),
-            ),
-          ],
-        ),
-        if (scoreA == scoreB) ...[
-          const SizedBox(height: 10),
-          FBadge(variant: .secondary, child: const Text('Pareggio')),
-        ],
-      ],
-    );
-  }
-}
-
-class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Expanded(child: Text(label)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w900)),
-        ],
-      ),
-    );
-  }
-}
-
-(String, String) _randomTeamNames() {
-  const names = [
-    'Vento',
-    'Tuono',
-    'Lampo',
-    'Onde',
-    'Fuoco',
-    'Nebbia',
-    'Falchi',
-    'Comete',
-    'Spirali',
-    'Scie',
-    'Sole',
-    'Lune',
-  ];
-  final seed = DateTime.now().microsecondsSinceEpoch;
-  final first = seed % names.length;
-  final second = (first + 3 + (seed ~/ 7) % (names.length - 1)) % names.length;
-  return (
-    names[first],
-    names[second == first ? (second + 1) % names.length : second],
-  );
 }

@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 
 import '../app_constants.dart';
-import '../models/player.dart';
+import '../model/player.dart';
 
 class PlayerAdapter extends TypeAdapter<Player> {
   @override

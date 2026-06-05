@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../app_constants.dart';
-import '../models/app_settings.dart';
-import '../models/player.dart';
-import '../models/scrimmage_match.dart';
+import '../model/app_settings.dart';
+import '../model/player.dart';
+import '../model/scrimmage_match.dart';
 import '../repositories/elo_repository.dart';
 
 final playersBoxProvider = Provider<Box<Player>>((ref) {
@@ -113,6 +113,23 @@ final matchesStartDateFilterProvider = StateProvider<DateTime?>((ref) => null);
 
 final matchesEndDateFilterProvider = StateProvider<DateTime?>((ref) => null);
 
+enum MatchesViewMode { list, calendar }
+
+final matchesViewModeProvider = StateProvider<MatchesViewMode>(
+  (ref) => MatchesViewMode.list,
+);
+
+final matchesCalendarMonthProvider = StateProvider<DateTime>((ref) {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month);
+});
+
+final matchesCalendarSelectedDayProvider = StateProvider<DateTime?>(
+  (ref) => DateTime.now(),
+);
+
+final matchesCalendarExpandedProvider = StateProvider<bool>((ref) => false);
+
 final filteredMatchesProvider = Provider<List<ScrimmageMatch>>((ref) {
   final startDate = ref.watch(matchesStartDateFilterProvider);
   final endDate = ref.watch(matchesEndDateFilterProvider);
@@ -128,6 +145,27 @@ final filteredMatchesProvider = Provider<List<ScrimmageMatch>>((ref) {
     final afterStart = start == null || !createdAt.isBefore(start);
     final beforeEnd = end == null || !createdAt.isAfter(end);
     return afterStart && beforeEnd;
+  }).toList();
+});
+
+final calendarMonthMatchesProvider = Provider<List<ScrimmageMatch>>((ref) {
+  final month = ref.watch(matchesCalendarMonthProvider);
+  final start = DateTime(month.year, month.month);
+  final end = DateTime(month.year, month.month + 1);
+  return ref.watch(matchesProvider).where((match) {
+    return !match.createdAt.isBefore(start) && match.createdAt.isBefore(end);
+  }).toList();
+});
+
+final selectedCalendarDayMatchesProvider = Provider<List<ScrimmageMatch>>((
+  ref,
+) {
+  final selectedDay = ref.watch(matchesCalendarSelectedDayProvider);
+  if (selectedDay == null) return const [];
+  final start = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+  final end = start.add(const Duration(days: 1));
+  return ref.watch(matchesProvider).where((match) {
+    return !match.createdAt.isBefore(start) && match.createdAt.isBefore(end);
   }).toList();
 });
 

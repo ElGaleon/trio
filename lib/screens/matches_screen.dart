@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trio/widgets/app_empty_state.dart';
 
 import '../app_constants.dart';
 import '../app_router.dart';
+import '../components/matches/match_date_filters.dart';
+import '../components/matches/match_toolbar.dart';
+import '../components/matches/matches_calendar_view.dart';
+import '../components/matches/popup_option.dart';
+import '../components/live_stats/line_selection_modal.dart';
+import '../components/shared/app_empty_state.dart';
+import '../components/shared/sport_button.dart';
+import '../components/shared/sport_screen_shell.dart';
+import '../components/shared/match_card.dart';
 import '../providers/elo_providers.dart';
-import '../widgets/match_card.dart';
-import '../widgets/sport_style.dart';
+import '../theme/app_colors.dart';
 
 class MatchesScreen extends ConsumerWidget {
   const MatchesScreen({super.key});
@@ -20,6 +27,7 @@ class MatchesScreen extends ConsumerWidget {
     final filteredMatches = ref.watch(filteredMatchesProvider);
     final startDate = ref.watch(matchesStartDateFilterProvider);
     final endDate = ref.watch(matchesEndDateFilterProvider);
+    final viewMode = ref.watch(matchesViewModeProvider);
     final players = ref.watch(rankedPlayersProvider);
     final canCreate = players.length >= AppConstants.minTeamSize * 2;
     final hasFilters = startDate != null || endDate != null;
@@ -27,17 +35,22 @@ class MatchesScreen extends ConsumerWidget {
     return SportScreenShell(
       title: 'Matches',
       subtitle: 'Track every scrimmage',
+      headerActions: [
+        _MatchesHeaderViewSwitch(
+          selected: viewMode,
+          onChanged: (mode) =>
+              ref.read(matchesViewModeProvider.notifier).state = mode,
+        ),
+      ],
       floatingActionButton: SportFloatingActionButton(
         label: 'Nuova',
         onPressed: () => _openMatchForm(context, canCreate),
       ),
       child: matches.isEmpty
-          ? SportEmptyState(
+          ? const SportEmptyState(
               icon: Icons.scoreboard_outlined,
               title: 'Nessuna partitella',
-              message: canCreate
-                  ? 'Inserisci il risultato della prima partitella.'
-                  : 'Servono almeno sei giocatori per un 3vs3.',
+              message: 'Inserisci il risultato della prima partitella.',
             )
           : SafeArea(
               bottom: false,
@@ -45,47 +58,62 @@ class MatchesScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 spacing: 8,
                 children: [
-                  _MatchToolbar(
+                  MatchToolbar(
                     totalCount: matches.length,
                     filteredCount: filteredMatches.length,
                     hasFilters: hasFilters,
                     canCreate: canCreate,
                   ),
-                  _MatchDateFilters(
-                    startDate: startDate,
-                    endDate: endDate,
-                    onStartChanged: (value) =>
-                        ref
-                                .read(matchesStartDateFilterProvider.notifier)
-                                .state =
-                            value,
-                    onEndChanged: (value) =>
-                        ref.read(matchesEndDateFilterProvider.notifier).state =
-                            value,
-                  ),
-                  const SizedBox(height: 14),
-                  if (filteredMatches.isEmpty)
-                    const SportEmptyState(
-                      icon: Icons.event_busy_outlined,
-                      title: 'Nessuna partita',
-                      message: 'Non ci sono partite nel periodo selezionato.',
-                    )
-                  else
-                    ...filteredMatches.map((match) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: MatchCard(
-                          match: match,
-                          onTap: () =>
-                              context.push(AppRoutes.matchDetail(match.id)),
-                          onEdit: () => context.push(
-                            AppRoutes.editMatch(match.id),
-                            extra: match,
-                          ),
-                          onDelete: () => repository.deleteMatch(match.id),
-                        ),
-                      );
-                    }),
+                  if (viewMode == MatchesViewMode.list) ...[
+                    MatchDateFilters(
+                      startDate: startDate,
+                      endDate: endDate,
+                      onStartChanged: (value) =>
+                          ref
+                                  .read(matchesStartDateFilterProvider.notifier)
+                                  .state =
+                              value,
+                      onEndChanged: (value) =>
+                          ref
+                                  .read(matchesEndDateFilterProvider.notifier)
+                                  .state =
+                              value,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: filteredMatches.isEmpty
+                          ? const SportEmptyState(
+                              icon: Icons.event_busy_outlined,
+                              title: 'Nessuna partita',
+                              message:
+                                  'Non ci sono partite nel periodo selezionato.',
+                            )
+                          : Column(
+                              spacing: 12,
+                              children: filteredMatches.map((match) {
+                                return MatchCard(
+                                  match: match,
+                                  onTap: () => context.go(
+                                    AppRoutes.matchDetail(match.id),
+                                  ),
+                                  onEdit: () => context.go(
+                                    AppRoutes.editMatch(match.id),
+                                    extra: match,
+                                  ),
+                                  onDelete: () =>
+                                      repository.deleteMatch(match.id),
+                                );
+                              }).toList(),
+                            ),
+                    ),
+                  ] else
+                    MatchesCalendarView(
+                      onEdit: (match) => context.go(
+                        AppRoutes.editMatch(match.id),
+                        extra: match,
+                      ),
+                      onDelete: (match) => repository.deleteMatch(match.id),
+                    ),
                 ],
               ),
             ),
@@ -101,102 +129,136 @@ class MatchesScreen extends ConsumerWidget {
       );
       return;
     }
-    context.push(AppRoutes.newMatch);
-  }
-}
 
-class _MatchToolbar extends StatelessWidget {
-  const _MatchToolbar({
-    required this.totalCount,
-    required this.filteredCount,
-    required this.hasFilters,
-    required this.canCreate,
-  });
-
-  final int totalCount;
-  final int filteredCount;
-  final bool hasFilters;
-  final bool canCreate;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            canCreate
-                ? hasFilters
-                      ? '$filteredCount di $totalCount partite'
-                      : '$totalCount partite'
-                : 'Servono almeno 6 giocatori',
-            style: textTheme.bodySmall?.copyWith(
-              color: sportMutedText,
-              fontWeight: FontWeight.w700,
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.transparent,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: DecoratedBox(
+            decoration: solidPanelDecoration(radius: 28),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 12,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Nuova Partita',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Text(
+                    'Scegli il tipo di partita da registrare',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.sportMutedText,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: PopupOption(
+                      icon: FIcons.users,
+                      title: 'Allenamento (Solo Risultato & ELO)',
+                      subtitle: 'Partitella interna con calcolo ELO automatico',
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.go(AppRoutes.newMatch);
+                      },
+                    ),
+                  ),
+                  PopupOption(
+                    icon: FIcons.activity,
+                    title: 'Partita Ufficiale (Stats & vs Altri)',
+                    subtitle: 'Traccia statistiche in tempo reale vs esterni',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go(AppRoutes.newStatsMatch);
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _MatchDateFilters extends StatelessWidget {
-  const _MatchDateFilters({
-    required this.startDate,
-    required this.endDate,
-    required this.onStartChanged,
-    required this.onEndChanged,
-  });
-
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final ValueChanged<DateTime?> onStartChanged;
-  final ValueChanged<DateTime?> onEndChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 36,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        children: [
-          SportFilterPill(
-            icon: FIcons.calendar,
-            label: startDate == null ? 'Da' : 'Da ${_dateLabel(startDate!)}',
-            selected: startDate != null,
-            onPressed: () async {
-              final selected = await _pickDate(context, startDate);
-              onStartChanged(selected);
-            },
-          ),
-          const SizedBox(width: 8),
-          SportFilterPill(
-            icon: FIcons.calendar,
-            label: endDate == null ? 'A' : 'A ${_dateLabel(endDate!)}',
-            selected: endDate != null,
-            onPressed: () async {
-              final selected = await _pickDate(context, endDate);
-              onEndChanged(selected);
-            },
-          ),
-        ],
       ),
     );
   }
+}
 
-  Future<DateTime?> _pickDate(BuildContext context, DateTime? initial) {
-    final now = DateTime.now();
-    return showDatePicker(
-      context: context,
-      initialDate: initial ?? now,
-      firstDate: DateTime(now.year - 10),
-      lastDate: DateTime(now.year + 1),
+class _MatchesHeaderViewSwitch extends StatelessWidget {
+  const _MatchesHeaderViewSwitch({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final MatchesViewMode selected;
+  final ValueChanged<MatchesViewMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 4,
+          children: [
+            _HeaderSwitchIcon(
+              icon: FIcons.list,
+              selected: selected == MatchesViewMode.list,
+              onTap: () => onChanged(MatchesViewMode.list),
+            ),
+            _HeaderSwitchIcon(
+              icon: FIcons.calendarDays,
+              selected: selected == MatchesViewMode.calendar,
+              onTap: () => onChanged(MatchesViewMode.calendar),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-String _dateLabel(DateTime date) {
-  return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+class _HeaderSwitchIcon extends StatelessWidget {
+  const _HeaderSwitchIcon({
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOutCubic,
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.violet.withValues(alpha: 0.85)
+              : AppColors.transparent,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(icon, color: AppColors.white, size: 17),
+      ),
+    );
+  }
 }

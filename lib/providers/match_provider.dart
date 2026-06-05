@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trio/models/scrimmage_match.dart';
+import 'package:trio/model/scrimmage_match.dart';
 import 'package:trio/providers/elo_providers.dart';
 
 final matchDetailsProvider = Provider.family<ScrimmageMatch?, String>((

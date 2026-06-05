@@ -8,9 +8,9 @@ import 'adapters/player_adapter.dart';
 import 'adapters/scrimmage_match_adapter.dart';
 import 'app_constants.dart';
 import 'app_router.dart';
-import 'models/app_settings.dart';
-import 'models/player.dart';
-import 'models/scrimmage_match.dart';
+import 'model/app_settings.dart';
+import 'model/player.dart';
+import 'model/scrimmage_match.dart';
 import 'providers/elo_providers.dart';
 import 'theme/app_colors.dart';
 

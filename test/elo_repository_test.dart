@@ -5,10 +5,11 @@ import 'package:hive/hive.dart';
 import 'package:trio/adapters/player_adapter.dart';
 import 'package:trio/adapters/scrimmage_match_adapter.dart';
 import 'package:trio/app_constants.dart';
-import 'package:trio/models/app_settings.dart';
-import 'package:trio/models/player.dart';
-import 'package:trio/models/scrimmage_match.dart';
+import 'package:trio/model/app_settings.dart';
+import 'package:trio/model/player.dart';
+import 'package:trio/model/scrimmage_match.dart';
 import 'package:trio/repositories/elo_repository.dart';
+import 'package:trio/service/live_stats_service.dart';
 
 void main() {
   late Directory tempDir;
@@ -303,4 +304,59 @@ void main() {
     expect(player.role, PlayerRole.handler);
     expect(player.linePreference, PlayerLinePreference.offense);
   });
+
+  test(
+    'stores stat weight on each event without rewriting old stats',
+    () async {
+      final firstRepository = EloRepository(
+        playersBox,
+        matchesBox,
+        AppSettings(statWeights: {MatchStatType.pass: 1.5}),
+      );
+      for (final name in ['A', 'B', 'C', 'D', 'E', 'F']) {
+        await firstRepository.addPlayer(name);
+      }
+      final players = firstRepository.rankedPlayers;
+      final match = ScrimmageMatch(
+        id: 'stats-history',
+        createdAt: DateTime(2026, 6, 5),
+        teamAIds: players.take(3).map((player) => player.id).toList(),
+        teamBIds: players.skip(3).take(3).map((player) => player.id).toList(),
+        scoreA: 0,
+        scoreB: 0,
+      );
+      await firstRepository.upsertMatch(match);
+
+      final playersById = {for (final player in players) player.id: player};
+      await LiveStatsService.instance.record(
+        match,
+        type: MatchStatType.pass,
+        player: players.first,
+        playersById: playersById,
+        repository: firstRepository,
+      );
+
+      final secondRepository = EloRepository(
+        playersBox,
+        matchesBox,
+        AppSettings(statWeights: {MatchStatType.pass: 4}),
+      );
+      final savedMatch = matchesBox.get('stats-history')!;
+      await LiveStatsService.instance.record(
+        savedMatch,
+        type: MatchStatType.pass,
+        player: players[1],
+        playersById: playersById,
+        repository: secondRepository,
+      );
+
+      final statValues = matchesBox
+          .get('stats-history')!
+          .statEvents
+          .map((event) => event.statValue)
+          .toList();
+
+      expect(statValues, [1.5, 4]);
+    },
+  );
 }

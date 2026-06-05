@@ -2,15 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trio/widgets/app_empty_state.dart';
 
 import '../app_router.dart';
-import '../models/player.dart';
-import '../models/scrimmage_match.dart';
+import '../components/player_detail/player_detail_section_title.dart';
+import '../components/player_detail/player_hero.dart';
+import '../components/player_detail/player_match_row.dart';
+import '../components/player_detail/stat_box.dart';
+import '../components/ranking/rating_trend_chart.dart';
+import '../components/shared/app_empty_state.dart';
+import '../components/shared/sport_avatar_pill.dart';
+import '../components/shared/sport_button.dart';
+import '../components/shared/sport_screen_shell.dart';
+import '../model/player.dart';
+import '../model/scrimmage_match.dart';
 import '../providers/elo_providers.dart';
+import '../providers/player_stats_provider.dart';
 import '../theme/app_colors.dart';
-import '../widgets/rating_trend_chart.dart';
-import '../widgets/sport_style.dart';
 
 class PlayerDetailScreen extends ConsumerWidget {
   const PlayerDetailScreen({super.key, required this.playerId});
@@ -46,6 +53,15 @@ class PlayerDetailScreen extends ConsumerWidget {
 
     final currentPlayer = player;
     final matches = repository.matchesForPlayer(currentPlayer.id);
+    final filteredStats = ref.watch(
+      playerDetailStatsProvider(currentPlayer.id),
+    );
+    final tournamentFilter = ref.watch(
+      playerDetailTournamentFilterProvider(currentPlayer.id),
+    );
+    final matchFilter = ref.watch(
+      playerDetailMatchFilterProvider(currentPlayer.id),
+    );
     final history = repository.ratingHistoryForPlayer(currentPlayer.id);
     final playersById = {
       for (final rankedPlayer in players) rankedPlayer.id: rankedPlayer,
@@ -55,211 +71,229 @@ class PlayerDetailScreen extends ConsumerWidget {
       body: SportScreenShell(
         title: 'Player',
         subtitle: 'Performance profile',
+        showBackButton: true,
         child: Column(
+          spacing: 12,
           children: [
-            const SportBackButton(),
-            const SizedBox(height: 14),
-            _PlayerHero(player: currentPlayer),
-            const SizedBox(height: 12),
+            PlayerHero(player: currentPlayer),
             Align(
               alignment: Alignment.centerLeft,
               child: SportActionButton(
                 label: 'Modifica',
                 icon: FIcons.pencil,
-                onPressed: () => context.push(
+                onPressed: () => context.go(
                   AppRoutes.editPlayer(currentPlayer.id),
                   extra: currentPlayer,
                 ),
               ),
             ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                _StatBox(
-                  icon: FIcons.calendarCheck,
-                  label: 'Partite',
-                  value: '${currentPlayer.matchesPlayed}',
-                ),
-                const SizedBox(width: 10),
-                _StatBox(
-                  icon: FIcons.trophy,
-                  label: 'Vittorie',
-                  value: '${currentPlayer.wins}',
-                ),
-                const SizedBox(width: 10),
-                _StatBox(
-                  icon: FIcons.percent,
-                  label: 'Win rate',
-                  value: '${(currentPlayer.winRate * 100).round()}%',
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 2,
+              ), // 12 spacing + 2 padding = 14 total
+              child: Row(
+                spacing: 10,
+                children: [
+                  StatBox(
+                    icon: FIcons.calendarCheck,
+                    label: 'Partite',
+                    value: '${currentPlayer.matchesPlayed}',
+                  ),
+                  StatBox(
+                    icon: FIcons.trophy,
+                    label: 'Vittorie',
+                    value: '${currentPlayer.wins}',
+                  ),
+                  StatBox(
+                    icon: FIcons.percent,
+                    label: 'Win rate',
+                    value: '${(currentPlayer.winRate * 100).round()}%',
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            const _SectionTitle(icon: FIcons.activity, title: 'Andamento ELO'),
-            const SizedBox(height: 10),
-            Container(
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 8,
+              ), // 12 spacing + 8 padding = 20 total
+              child: const PlayerDetailSectionTitle(
+                icon: FIcons.activity,
+                title: 'Andamento ELO',
+              ),
+            ),
+            DecoratedBox(
               decoration: sportGlassDecoration(),
-              padding: const EdgeInsets.all(12),
-              child: RatingTrendChart(values: history),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: RatingTrendChart(values: history),
+              ),
             ),
-            const SizedBox(height: 20),
-            const _SectionTitle(icon: FIcons.history, title: 'Partite giocate'),
-            const SizedBox(height: 10),
-            if (matches.isEmpty)
-              const SportEmptyState(
+            if (filteredStats != null) ...[
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: const PlayerDetailSectionTitle(
+                  icon: FIcons.chartNoAxesCombined,
+                  title: 'Statistiche',
+                ),
+              ),
+              _PlayerStatsFilters(
+                playerId: currentPlayer.id,
+                matches: matches,
+                tournaments: filteredStats.tournaments,
+                selectedTournament: tournamentFilter,
+                selectedMatchId: matchFilter,
+              ),
+              _PlayerStatsSummary(data: filteredStats.data),
+            ],
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 8,
+              ), // 12 spacing + 8 padding = 20 total
+              child: const PlayerDetailSectionTitle(
                 icon: FIcons.history,
-                title: 'Nessuna partita',
-                message: 'Questo giocatore non ha ancora partite registrate.',
-              )
-            else
-              ...matches.map(
-                (match) => _PlayerMatchRow(
-                  player: currentPlayer,
-                  match: match,
-                  playersById: playersById,
-                ),
+                title: 'Partite giocate',
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PlayerHero extends StatelessWidget {
-  const _PlayerHero({required this.player});
-
-  final Player player;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Hero(
-      tag: 'player-${player.id}',
-      child: Container(
-        decoration: sportGlassDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.white.withValues(alpha: 0.16),
-              AppColors.white.withValues(alpha: 0.045),
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SportPlayerAvatar(
-                initials: player.initials,
-                imagePath: player.profileImagePath,
-                size: 76,
-                featured: true,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      player.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.headlineSmall?.copyWith(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _InfoPill(
-                          icon: FIcons.sparkles,
-                          label: '${player.rating.round()} ELO',
-                          emphasized: true,
-                        ),
-                        _InfoPill(label: player.role.label),
-                        _InfoPill(label: player.linePreference.label),
-                        if (player.isExternal)
-                          const _InfoPill(label: 'Esterno'),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoPill extends StatelessWidget {
-  const _InfoPill({required this.label, this.icon, this.emphasized = false});
-
-  final String label;
-  final IconData? icon;
-  final bool emphasized;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: emphasized
-            ? AppColors.violet.withValues(alpha: 0.22)
-            : AppColors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: emphasized
-              ? AppColors.violet
-              : AppColors.white.withValues(alpha: 0.12),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, color: AppColors.white, size: 13),
-            const SizedBox(width: 5),
-          ],
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w900,
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 2,
+              ), // 12 spacing + 2 padding = 14 total (or 10)
+              child: matches.isEmpty
+                  ? const SportEmptyState(
+                      icon: FIcons.history,
+                      title: 'Nessuna partita',
+                      message:
+                          'Questo giocatore non ha ancora partite registrate.',
+                    )
+                  : Column(
+                      children: matches
+                          .map(
+                            (match) => PlayerMatchRow(
+                              player: currentPlayer,
+                              match: match,
+                              playersById: playersById,
+                            ),
+                          )
+                          .toList(),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.icon, required this.title});
+class _PlayerStatsFilters extends ConsumerWidget {
+  const _PlayerStatsFilters({
+    required this.playerId,
+    required this.matches,
+    required this.tournaments,
+    required this.selectedTournament,
+    required this.selectedMatchId,
+  });
 
-  final IconData icon;
-  final String title;
+  final String playerId;
+  final List<ScrimmageMatch> matches;
+  final List<String> tournaments;
+  final String? selectedTournament;
+  final String? selectedMatchId;
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final visibleMatches = selectedTournament == null
+        ? matches
+        : matches
+              .where((match) => match.tournament.trim() == selectedTournament)
+              .toList();
+
+    return Column(
+      spacing: 8,
       children: [
-        Icon(icon, size: 18, color: AppColors.violet),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: AppColors.white,
-            fontWeight: FontWeight.w900,
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(
+            spacing: 8,
+            children: [
+              SportFilterPill(
+                label: 'Tutti tornei',
+                selected: selectedTournament == null,
+                onPressed: () {
+                  ref
+                          .read(
+                            playerDetailTournamentFilterProvider(
+                              playerId,
+                            ).notifier,
+                          )
+                          .state =
+                      null;
+                  ref
+                          .read(
+                            playerDetailMatchFilterProvider(playerId).notifier,
+                          )
+                          .state =
+                      null;
+                },
+              ),
+              for (final tournament in tournaments)
+                SportFilterPill(
+                  label: tournament,
+                  selected: selectedTournament == tournament,
+                  onPressed: () {
+                    ref
+                            .read(
+                              playerDetailTournamentFilterProvider(
+                                playerId,
+                              ).notifier,
+                            )
+                            .state =
+                        tournament;
+                    ref
+                            .read(
+                              playerDetailMatchFilterProvider(
+                                playerId,
+                              ).notifier,
+                            )
+                            .state =
+                        null;
+                  },
+                ),
+            ],
+          ),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(
+            spacing: 8,
+            children: [
+              SportFilterPill(
+                label: 'Tutte partite',
+                selected: selectedMatchId == null,
+                onPressed: () =>
+                    ref
+                            .read(
+                              playerDetailMatchFilterProvider(
+                                playerId,
+                              ).notifier,
+                            )
+                            .state =
+                        null,
+              ),
+              for (final match in visibleMatches)
+                SportFilterPill(
+                  label: _matchFilterLabel(match),
+                  selected: selectedMatchId == match.id,
+                  onPressed: () =>
+                      ref
+                          .read(
+                            playerDetailMatchFilterProvider(playerId).notifier,
+                          )
+                          .state = match
+                          .id,
+                ),
+            ],
           ),
         ),
       ],
@@ -267,42 +301,70 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _StatBox extends StatelessWidget {
-  const _StatBox({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
+class _PlayerStatsSummary extends StatelessWidget {
+  const _PlayerStatsSummary({required this.data});
 
-  final IconData icon;
+  final PlayerStatsCardData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: sportGlassDecoration(),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 1.7,
+          children: [
+            _MiniStat(label: '+/-', value: _signed(data.plusMinus)),
+            _MiniStat(label: 'Mete', value: '${data.goals}'),
+            _MiniStat(label: 'Assist', value: '${data.assists}'),
+            _MiniStat(label: 'Difese', value: '${data.defenses}'),
+            _MiniStat(label: 'Errori', value: '${data.errors}'),
+            _MiniStat(label: 'Pull dentro', value: _percent(data.pullInRate)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({required this.label, required this.value});
+
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Expanded(
-      child: Container(
-        decoration: sportGlassDecoration(radius: 22),
-        padding: const EdgeInsets.all(14),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.white.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.10)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: AppColors.violet),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              style: textTheme.bodySmall?.copyWith(
-                color: sportMutedText,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
             Text(
               value,
-              style: textTheme.titleLarge?.copyWith(
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: AppColors.white,
                 fontWeight: FontWeight.w900,
+              ),
+            ),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: sportMutedText,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ],
@@ -312,107 +374,21 @@ class _StatBox extends StatelessWidget {
   }
 }
 
-class _PlayerMatchRow extends StatelessWidget {
-  const _PlayerMatchRow({
-    required this.player,
-    required this.match,
-    required this.playersById,
-  });
-
-  final Player player;
-  final ScrimmageMatch match;
-  final Map<String, Player> playersById;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final isTeamA = match.teamAIds.contains(player.id);
-    final resultLabel = match.isDraw
-        ? 'Pareggio'
-        : (isTeamA == match.teamAWon ? 'Vittoria' : 'Sconfitta');
-    final delta = match.ratingDelta(player.id);
-    final color = _deltaColor(delta);
-    final sign = delta > 0 ? '+' : '';
-    final teammates = (isTeamA ? match.teamAIds : match.teamBIds)
-        .where((id) => id != player.id)
-        .map((id) => playersById[id]?.name)
-        .whereType<String>()
-        .join(', ');
-    final teamName = isTeamA ? match.teamAName : match.teamBName;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-      decoration: sportGlassDecoration(radius: 24),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.16),
-              shape: BoxShape.circle,
-              border: Border.all(color: color.withValues(alpha: 0.50)),
-            ),
-            child: Icon(_resultIcon(match, isTeamA, delta), color: color),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$teamName · ${match.scoreA} - ${match.scoreB}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.titleSmall?.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$resultLabel · ${teammates.isEmpty ? 'Nessun compagno' : teammates}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: sportMutedText,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: color.withValues(alpha: 0.45)),
-            ),
-            child: Text(
-              '$sign${delta.round()}',
-              style: textTheme.bodySmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+String _dateLabel(DateTime date) {
+  return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
 }
 
-IconData _resultIcon(ScrimmageMatch match, bool isTeamA, double delta) {
-  if (match.isDraw || delta == 0) return FIcons.minus;
-  return isTeamA == match.teamAWon ? FIcons.trendingUp : FIcons.trendingDown;
+String _matchFilterLabel(ScrimmageMatch match) {
+  final tournament = match.tournament.trim();
+  final prefix = tournament.isEmpty ? _dateLabel(match.createdAt) : tournament;
+  return '$prefix · ${match.scoreA}-${match.scoreB}';
 }
 
-Color _deltaColor(double delta) {
-  if (delta > 0) return AppColors.violet;
-  if (delta < 0) return AppColors.danger;
-  return sportMutedText;
+String _percent(double value) => '${(value * 100).round()}%';
+
+String _signed(double value) {
+  final rounded = value.toStringAsFixed(
+    value.truncateToDouble() == value ? 0 : 1,
+  );
+  return value > 0 ? '+$rounded' : rounded;
 }

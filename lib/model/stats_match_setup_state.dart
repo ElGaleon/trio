@@ -1,0 +1,89 @@
+import 'scrimmage_match.dart';
+
+class StatsMatchSetupState {
+  final int step;
+  final String teamName;
+  final String opponentName;
+  final String tournament;
+  final String location;
+  final String division;
+  final String matchType;
+  final int teamSize;
+  final int windKmh;
+  final int pointsLimit;
+  final int durationMinutes;
+  final bool hasHalfTime;
+  final int halfTimeSeconds;
+  final bool hasTimeouts;
+  final int timeoutsPerTeamPerHalf;
+  final int timeoutSeconds;
+  final Set<MatchStatType> enabledStatTypes;
+  final bool startOnOffense;
+  final Set<String> selectedPlayerIds;
+
+  StatsMatchSetupState({
+    required this.step,
+    required this.teamName,
+    required this.opponentName,
+    required this.tournament,
+    required this.location,
+    required this.division,
+    required this.matchType,
+    required this.teamSize,
+    required this.windKmh,
+    required this.pointsLimit,
+    required this.durationMinutes,
+    required this.hasHalfTime,
+    required this.halfTimeSeconds,
+    required this.hasTimeouts,
+    required this.timeoutsPerTeamPerHalf,
+    required this.timeoutSeconds,
+    required this.enabledStatTypes,
+    required this.startOnOffense,
+    required this.selectedPlayerIds,
+  });
+
+  StatsMatchSetupState copyWith({
+    int? step,
+    String? teamName,
+    String? opponentName,
+    String? tournament,
+    String? location,
+    String? division,
+    String? matchType,
+    int? teamSize,
+    int? windKmh,
+    int? pointsLimit,
+    int? durationMinutes,
+    bool? hasHalfTime,
+    int? halfTimeSeconds,
+    bool? hasTimeouts,
+    int? timeoutsPerTeamPerHalf,
+    int? timeoutSeconds,
+    Set<MatchStatType>? enabledStatTypes,
+    bool? startOnOffense,
+    Set<String>? selectedPlayerIds,
+  }) {
+    return StatsMatchSetupState(
+      step: step ?? this.step,
+      teamName: teamName ?? this.teamName,
+      opponentName: opponentName ?? this.opponentName,
+      tournament: tournament ?? this.tournament,
+      location: location ?? this.location,
+      division: division ?? this.division,
+      matchType: matchType ?? this.matchType,
+      teamSize: teamSize ?? this.teamSize,
+      windKmh: windKmh ?? this.windKmh,
+      pointsLimit: pointsLimit ?? this.pointsLimit,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      hasHalfTime: hasHalfTime ?? this.hasHalfTime,
+      halfTimeSeconds: halfTimeSeconds ?? this.halfTimeSeconds,
+      hasTimeouts: hasTimeouts ?? this.hasTimeouts,
+      timeoutsPerTeamPerHalf: timeoutsPerTeamPerHalf ?? this.timeoutsPerTeamPerHalf,
+      timeoutSeconds: timeoutSeconds ?? this.timeoutSeconds,
+      enabledStatTypes: enabledStatTypes ?? this.enabledStatTypes,
+      startOnOffense: startOnOffense ?? this.startOnOffense,
+      selectedPlayerIds: selectedPlayerIds ?? this.selectedPlayerIds,
+    );
+  }
+}

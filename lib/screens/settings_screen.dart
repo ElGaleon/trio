@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
-import '../app_constants.dart';
-import '../models/app_settings.dart';
-import '../providers/elo_providers.dart';
-import '../theme/app_colors.dart';
-import '../widgets/sport_style.dart';
+import '../components/settings/settings_section_title.dart';
+import '../components/shared/sport_avatar_pill.dart';
+import '../components/shared/sport_button.dart';
+import '../components/shared/sport_screen_shell.dart';
+import '../model/app_settings.dart';
+import '../model/scrimmage_match.dart';
+import '../providers/settings_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -17,104 +19,169 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  late int _themeModeIndex;
   late final TextEditingController _eloKFactorController;
   late final TextEditingController _initialRatingController;
+  late final Map<MatchStatType, TextEditingController> _statWeightControllers;
 
   @override
   void initState() {
     super.initState();
-    final settings = ref.read(appSettingsProvider);
-    _themeModeIndex = settings.themeModeIndex;
+    final initialState = ref.read(settingsFormProvider);
     _eloKFactorController = TextEditingController(
-      text: settings.eloKFactor.round().toString(),
+      text: initialState.eloKFactor,
     );
     _initialRatingController = TextEditingController(
-      text: settings.initialRating.round().toString(),
+      text: initialState.initialRating,
     );
+    _statWeightControllers = {
+      for (final type in AppSettings.defaultStatWeights.keys)
+        type: TextEditingController(
+          text: initialState.statWeights[type.name] ?? '0',
+        ),
+    };
+
+    _eloKFactorController.addListener(() {
+      ref
+          .read(settingsFormProvider.notifier)
+          .updateEloKFactor(_eloKFactorController.text);
+    });
+    _initialRatingController.addListener(() {
+      ref
+          .read(settingsFormProvider.notifier)
+          .updateInitialRating(_initialRatingController.text);
+    });
+    for (final entry in _statWeightControllers.entries) {
+      entry.value.addListener(() {
+        ref
+            .read(settingsFormProvider.notifier)
+            .updateStatWeight(entry.key, entry.value.text);
+      });
+    }
   }
 
   @override
   void dispose() {
     _eloKFactorController.dispose();
     _initialRatingController.dispose();
+    for (final controller in _statWeightControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(settingsFormProvider);
+    final notifier = ref.read(settingsFormProvider.notifier);
     final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       body: SportScreenShell(
         title: 'Settings',
         subtitle: 'Theme and ELO',
+        showBackButton: true,
         child: Column(
+          spacing: 12,
           children: [
-            const SportBackButton(),
-            const SizedBox(height: 14),
-            Container(
+            DecoratedBox(
               decoration: sportGlassDecoration(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SettingsSectionTitle(
-                    icon: FIcons.palette,
-                    title: 'Aspetto',
-                    textTheme: textTheme,
-                  ),
-                  const SizedBox(height: 14),
-                  FSelect<int>(
-                    items: const {'Sistema': 0, 'Chiaro': 1, 'Scuro': 2},
-                    hint: 'Tema',
-                    control: FSelectControl.managed(
-                      initial: _themeModeIndex,
-                      onChange: (value) {
-                        if (value != null) {
-                          setState(() => _themeModeIndex = value);
-                        }
-                      },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  spacing: 14,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SettingsSectionTitle(
+                      icon: FIcons.palette,
+                      title: 'Aspetto',
+                      textTheme: textTheme,
                     ),
-                  ),
-                ],
+                    FSelect<int>(
+                      items: const {'Sistema': 0, 'Chiaro': 1, 'Scuro': 2},
+                      hint: 'Tema',
+                      control: FSelectControl.managed(
+                        initial: state.themeModeIndex,
+                        onChange: (value) {
+                          if (value != null) {
+                            notifier.updateThemeMode(value);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 12),
-            Container(
+            DecoratedBox(
               decoration: sportGlassDecoration(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SettingsSectionTitle(
-                    icon: FIcons.chartNoAxesCombined,
-                    title: 'Algoritmo ELO',
-                    textTheme: textTheme,
-                  ),
-                  const SizedBox(height: 14),
-                  FTextFormField(
-                    control: FTextFieldControl.managed(
-                      controller: _eloKFactorController,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  spacing: 14,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SettingsSectionTitle(
+                      icon: FIcons.chartNoAxesCombined,
+                      title: 'Algoritmo ELO',
+                      textTheme: textTheme,
                     ),
-                    keyboardType: TextInputType.number,
-                    hint: 'Coefficiente ELO · default 32',
-                  ),
-                  const SizedBox(height: 12),
-                  FTextFormField(
-                    control: FTextFieldControl.managed(
-                      controller: _initialRatingController,
+                    FTextFormField(
+                      control: FTextFieldControl.managed(
+                        controller: _eloKFactorController,
+                      ),
+                      keyboardType: TextInputType.number,
+                      hint: 'Coefficiente ELO · default 32',
                     ),
-                    keyboardType: TextInputType.number,
-                    hint: 'Punteggio di partenza · default 1000',
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2), // Adjust spacing
+                      child: FTextFormField(
+                        control: FTextFieldControl.managed(
+                          controller: _initialRatingController,
+                        ),
+                        keyboardType: TextInputType.number,
+                        hint: 'Punteggio di partenza · default 1000',
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 18),
-            SportFloatingActionButton(
-              label: 'Salva',
-              icon: FIcons.save,
-              onPressed: _save,
+            DecoratedBox(
+              decoration: sportGlassDecoration(),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  spacing: 14,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SettingsSectionTitle(
+                      icon: FIcons.activity,
+                      title: 'Pesi statistiche',
+                      textTheme: textTheme,
+                    ),
+                    Text(
+                      'I nuovi valori valgono solo per le statistiche registrate dopo il salvataggio.',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: sportMutedText,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    for (final entry in _statWeightControllers.entries)
+                      _StatWeightField(
+                        type: entry.key,
+                        controller: entry.value,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: SportFloatingActionButton(
+                label: 'Salva',
+                icon: FIcons.save,
+                onPressed: () => _save(context, notifier),
+              ),
             ),
           ],
         ),
@@ -122,64 +189,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Future<void> _save() async {
-    final eloKFactor = double.tryParse(_eloKFactorController.text.trim());
-    final initialRating = double.tryParse(_initialRatingController.text.trim());
-    if (eloKFactor == null ||
-        initialRating == null ||
-        eloKFactor <= 0 ||
-        initialRating <= 0) {
+  Future<void> _save(
+    BuildContext context,
+    SettingsFormNotifier notifier,
+  ) async {
+    final success = await notifier.save();
+    if (!context.mounted) return;
+    if (success) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Impostazioni salvate.')));
+      if (context.canPop()) context.pop();
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Inserisci valori numerici maggiori di zero.'),
-        ),
+        const SnackBar(content: Text('Inserisci valori numerici validi.')),
       );
-      return;
     }
-
-    final settingsBox = ref.read(settingsBoxProvider);
-    await settingsBox.put(
-      AppConstants.settingsKey,
-      AppSettings(
-        themeModeIndex: _themeModeIndex,
-        eloKFactor: eloKFactor,
-        initialRating: initialRating,
-      ),
-    );
-    ref
-      ..invalidate(appSettingsProvider)
-      ..invalidate(eloRepositoryProvider);
-    await ref.read(eloRepositoryProvider).recalculateRatings();
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Impostazioni salvate.')));
-    if (context.canPop()) context.pop();
   }
 }
 
-class _SettingsSectionTitle extends StatelessWidget {
-  const _SettingsSectionTitle({
-    required this.icon,
-    required this.title,
-    required this.textTheme,
-  });
+class _StatWeightField extends StatelessWidget {
+  const _StatWeightField({required this.type, required this.controller});
 
-  final IconData icon;
-  final String title;
-  final TextTheme textTheme;
+  final MatchStatType type;
+  final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      spacing: 10,
       children: [
-        Icon(icon, color: AppColors.violet, size: 18),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: textTheme.titleMedium?.copyWith(
-            color: AppColors.white,
-            fontWeight: FontWeight.w900,
+        Expanded(
+          child: Text(
+            type.label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 96,
+          child: FTextFormField(
+            control: FTextFieldControl.managed(controller: controller),
+            keyboardType: const TextInputType.numberWithOptions(
+              signed: true,
+              decimal: true,
+            ),
+            hint: '0',
           ),
         ),
       ],

@@ -1,18 +1,15 @@
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../app_router.dart';
-import '../models/player.dart';
-import '../providers/elo_providers.dart';
+import '../components/shared/sport_avatar_pill.dart';
+import '../components/shared/sport_button.dart';
+import '../components/shared/sport_screen_shell.dart';
+import '../model/player.dart';
+import '../providers/player_form_provider.dart';
 import '../theme/app_colors.dart';
-import '../widgets/sport_style.dart';
 
 class PlayerFormScreen extends ConsumerStatefulWidget {
   const PlayerFormScreen({super.key, this.player, this.playerId});
@@ -26,21 +23,17 @@ class PlayerFormScreen extends ConsumerStatefulWidget {
 
 class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
   late final TextEditingController _nameController;
-  late PlayerLinePreference _linePreference;
-  late PlayerRole _role;
-  late bool _isExternal;
-  Player? _player;
-  String? _profileImagePath;
 
   @override
   void initState() {
     super.initState();
-    _player = widget.player ?? _findPlayer(widget.playerId);
-    _nameController = TextEditingController(text: _player?.name ?? '');
-    _linePreference = _player?.linePreference ?? PlayerLinePreference.offense;
-    _role = _player?.role ?? PlayerRole.cutter;
-    _isExternal = _player?.isExternal ?? false;
-    _profileImagePath = _player?.profileImagePath;
+    final initialState = ref.read(playerFormProvider(widget.playerId));
+    _nameController = TextEditingController(text: initialState.name);
+    _nameController.addListener(() {
+      ref
+          .read(playerFormProvider(widget.playerId).notifier)
+          .updateName(_nameController.text);
+    });
   }
 
   @override
@@ -51,125 +44,135 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(playerFormProvider(widget.playerId));
+    final notifier = ref.read(playerFormProvider(widget.playerId).notifier);
+
     return Scaffold(
       body: SportScreenShell(
-        title: _player == null ? 'New player' : 'Edit player',
+        title: widget.playerId == null && widget.player == null
+            ? 'New player'
+            : 'Edit player',
         subtitle: 'Roster profile',
         child: Column(
+          spacing: 14,
           children: [
             const SportBackButton(),
-            const SizedBox(height: 14),
-            Container(
+            DecoratedBox(
               decoration: sportGlassDecoration(),
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                children: [
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: _showImageSourcePicker,
-                    child: SportPlayerAvatar(
-                      initials: _nameController.text.trim().isEmpty
-                          ? '?'
-                          : _initials(_nameController.text),
-                      imagePath: _profileImagePath,
-                      size: 92,
-                      featured: true,
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  spacing: 12,
+                  children: [
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => _showImageSourcePicker(context, notifier),
+                      child: SportPlayerAvatar(
+                        initials: state.name.trim().isEmpty
+                            ? '?'
+                            : _initials(state.name),
+                        imagePath: state.profileImagePath,
+                        size: 92,
+                        featured: true,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  SportActionButton(
-                    label: _profileImagePath == null
-                        ? 'Carica foto'
-                        : 'Cambia foto',
-                    icon: FIcons.image,
-                    onPressed: _showImageSourcePicker,
-                  ),
-                  if (_profileImagePath != null) ...[
-                    const SizedBox(height: 8),
                     SportActionButton(
-                      label: 'Rimuovi foto',
-                      icon: FIcons.x,
-                      onPressed: () => setState(() => _profileImagePath = null),
+                      label: state.profileImagePath == null
+                          ? 'Carica foto'
+                          : 'Cambia foto',
+                      icon: FIcons.image,
+                      onPressed: () =>
+                          _showImageSourcePicker(context, notifier),
+                    ),
+                    if (state.profileImagePath != null)
+                      SportActionButton(
+                        label: 'Rimuovi foto',
+                        icon: FIcons.x,
+                        onPressed: notifier.removeImage,
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: FTextFormField(
+                        control: FTextFieldControl.managed(
+                          controller: _nameController,
+                        ),
+                        autofocus: true,
+                        textCapitalization: TextCapitalization.words,
+                        hint: 'Nome',
+                      ),
+                    ),
+                    FSelect<PlayerLinePreference>(
+                      items: {
+                        for (final line in PlayerLinePreference.values)
+                          line.label: line,
+                      },
+                      hint: 'Linea preferita',
+                      control: FSelectControl.managed(
+                        initial: state.linePreference,
+                        onChange: (value) {
+                          if (value != null) {
+                            notifier.updateLinePreference(value);
+                          }
+                        },
+                      ),
+                    ),
+                    FSelect<PlayerRole>(
+                      items: {
+                        for (final role in PlayerRole.values) role.label: role,
+                      },
+                      hint: 'Ruolo',
+                      control: FSelectControl.managed(
+                        initial: state.role,
+                        onChange: (value) {
+                          if (value != null) {
+                            notifier.updateRole(value);
+                          }
+                        },
+                      ),
+                    ),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: notifier.toggleIsExternal,
+                      child: DecoratedBox(
+                        decoration: sportGlassDecoration(radius: 18),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            spacing: 10,
+                            children: [
+                              Icon(
+                                state.isExternal ? FIcons.check : FIcons.circle,
+                                color: AppColors.white,
+                                size: 18,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  'Giocatore esterno',
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: AppColors.white,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: SportActionButton(
+                        label: 'Salva',
+                        icon: FIcons.check,
+                        onPressed: () => _save(context, notifier),
+                      ),
                     ),
                   ],
-                  const SizedBox(height: 18),
-                  FTextFormField(
-                    control: FTextFieldControl.managed(
-                      controller: _nameController,
-                      onChange: (_) => setState(() {}),
-                    ),
-                    autofocus: true,
-                    textCapitalization: TextCapitalization.words,
-                    hint: 'Nome',
-                  ),
-                  const SizedBox(height: 12),
-                  FSelect<PlayerLinePreference>(
-                    items: {
-                      for (final line in PlayerLinePreference.values)
-                        line.label: line,
-                    },
-                    hint: 'Linea preferita',
-                    control: FSelectControl.managed(
-                      initial: _linePreference,
-                      onChange: (value) {
-                        if (value != null) {
-                          setState(() => _linePreference = value);
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  FSelect<PlayerRole>(
-                    items: {
-                      for (final role in PlayerRole.values) role.label: role,
-                    },
-                    hint: 'Ruolo',
-                    control: FSelectControl.managed(
-                      initial: _role,
-                      onChange: (value) {
-                        if (value != null) setState(() => _role = value);
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => setState(() => _isExternal = !_isExternal),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      decoration: sportGlassDecoration(radius: 18),
-                      child: Row(
-                        children: [
-                          Icon(
-                            _isExternal ? FIcons.check : FIcons.circle,
-                            color: AppColors.white,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Giocatore esterno',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: AppColors.white,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  SportActionButton(
-                    label: 'Salva',
-                    icon: FIcons.check,
-                    onPressed: _save,
-                  ),
-                ],
+                ),
               ),
             ),
           ],
@@ -178,34 +181,40 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
     );
   }
 
-  Future<void> _showImageSourcePicker() async {
-    final source = await showModalBottomSheet<_ImageSourceChoice>(
+  Future<void> _showImageSourcePicker(
+    BuildContext context,
+    PlayerFormNotifier notifier,
+  ) async {
+    final source = await showModalBottomSheet<ImageSourceChoice>(
       context: context,
       backgroundColor: AppColors.transparent,
       builder: (context) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Container(
+          child: DecoratedBox(
             decoration: sportGlassDecoration(radius: 26),
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _ImageSourceTile(
-                  icon: FIcons.image,
-                  title: 'Galleria',
-                  subtitle: 'Scegli una foto dal rullino.',
-                  onTap: () =>
-                      Navigator.pop(context, _ImageSourceChoice.gallery),
-                ),
-                const SizedBox(height: 8),
-                _ImageSourceTile(
-                  icon: FIcons.folderOpen,
-                  title: 'Files',
-                  subtitle: 'Fallback utile anche sul simulatore.',
-                  onTap: () => Navigator.pop(context, _ImageSourceChoice.files),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                children: [
+                  ImageSourceTile(
+                    icon: FIcons.image,
+                    title: 'Galleria',
+                    subtitle: 'Scegli una foto dal rullino.',
+                    onTap: () =>
+                        Navigator.pop(context, ImageSourceChoice.gallery),
+                  ),
+                  ImageSourceTile(
+                    icon: FIcons.folderOpen,
+                    title: 'Files',
+                    subtitle: 'Fallback utile anche sul simulatore.',
+                    onTap: () =>
+                        Navigator.pop(context, ImageSourceChoice.files),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -213,97 +222,29 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
     );
     if (source == null) return;
 
-    final path = switch (source) {
-      _ImageSourceChoice.gallery => await _pickFromGallery(),
-      _ImageSourceChoice.files => await _pickFromFiles(),
+    final success = switch (source) {
+      ImageSourceChoice.gallery => await notifier.pickImageFromGallery(),
+      ImageSourceChoice.files => await notifier.pickImageFromFiles(),
     };
-    if (path == null) return;
-    setState(() => _profileImagePath = path);
-  }
 
-  Future<String?> _pickFromGallery() async {
-    try {
-      final image = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1400,
-        imageQuality: 86,
-      );
-      if (image == null) return null;
-      return _persistImage(File(image.path));
-    } catch (_) {
-      if (!mounted) return null;
+    if (!success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Galleria non disponibile. Prova con Files.'),
+          content: Text('Impossibile caricare la foto. Prova un altro metodo.'),
         ),
       );
-      return null;
     }
   }
 
-  Future<String?> _pickFromFiles() async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
-      withData: false,
-    );
-    final path = result?.files.single.path;
-    if (path == null || path.trim().isEmpty) return null;
-    return _persistImage(File(path));
-  }
-
-  Future<String> _persistImage(File source) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final imagesDirectory = Directory('${directory.path}/player_images');
-    if (!imagesDirectory.existsSync()) {
-      imagesDirectory.createSync(recursive: true);
-    }
-    final extension = _imageExtension(source.path);
-    final fileName = '${DateTime.now().microsecondsSinceEpoch}$extension';
-    final destination = File('${imagesDirectory.path}/$fileName');
-    return source.copy(destination.path).then((file) => file.path);
-  }
-
-  String _imageExtension(String path) {
-    final dot = path.lastIndexOf('.');
-    if (dot == -1 || dot == path.length - 1) return '.jpg';
-    return path.substring(dot).toLowerCase();
-  }
-
-  Future<void> _save() async {
-    final repository = ref.read(eloRepositoryProvider);
-    if (_player == null) {
-      await repository.addPlayerWithLine(
-        _nameController.text,
-        _linePreference,
-        _role,
-        _profileImagePath,
-        _isExternal,
-      );
-    } else {
-      await repository.savePlayer(
-        _player!,
-        name: _nameController.text,
-        linePreference: _linePreference,
-        role: _role,
-        profileImagePath: _profileImagePath,
-        isExternal: _isExternal,
-      );
-    }
-    if (!mounted) return;
+  Future<void> _save(BuildContext context, PlayerFormNotifier notifier) async {
+    if (_nameController.text.trim().isEmpty) return;
+    await notifier.save(widget.playerId);
+    if (!context.mounted) return;
     if (context.canPop()) {
       context.pop();
     } else {
       context.go(AppRoutes.players);
     }
-  }
-
-  Player? _findPlayer(String? playerId) {
-    if (playerId == null) return null;
-    for (final player in ref.read(rankedPlayersProvider)) {
-      if (player.id == playerId) return player;
-    }
-    return null;
   }
 
   String _initials(String name) {
@@ -316,10 +257,11 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
   }
 }
 
-enum _ImageSourceChoice { gallery, files }
+enum ImageSourceChoice { gallery, files }
 
-class _ImageSourceTile extends StatelessWidget {
-  const _ImageSourceTile({
+class ImageSourceTile extends StatelessWidget {
+  const ImageSourceTile({
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -337,41 +279,43 @@ class _ImageSourceTile extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: AppColors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
         ),
-        child: Row(
-          children: [
-            Icon(icon, color: AppColors.violet, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.w900,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Row(
+            spacing: 12,
+            children: [
+              Icon(icon, color: AppColors.violet, size: 20),
+              Expanded(
+                child: Column(
+                  spacing: 2,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: sportMutedText,
-                      fontWeight: FontWeight.w700,
+                    Text(
+                      subtitle,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppColors.sportMutedText,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const Icon(FIcons.chevronRight, color: AppColors.white, size: 18),
-          ],
+              const Icon(FIcons.chevronRight, color: AppColors.white, size: 18),
+            ],
+          ),
         ),
       ),
     );

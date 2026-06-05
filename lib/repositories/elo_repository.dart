@@ -2,9 +2,9 @@ import 'dart:math';
 
 import 'package:hive/hive.dart';
 
-import '../models/app_settings.dart';
-import '../models/player.dart';
-import '../models/scrimmage_match.dart';
+import '../model/app_settings.dart';
+import '../model/player.dart';
+import '../model/scrimmage_match.dart';
 
 class EloRepository {
   EloRepository(this.playersBox, this.matchesBox, this.settings);

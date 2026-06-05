@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trio/models/player.dart';
-import 'package:trio/models/scrimmage_match.dart';
+import 'package:trio/model/player.dart';
+import 'package:trio/model/scrimmage_match.dart';
 import 'package:trio/providers/elo_providers.dart';
+import 'package:trio/providers/player_stats_provider.dart';
 
 void main() {
   test('filters players by search, role and line with Riverpod', () {
@@ -136,5 +137,108 @@ void main() {
     expect(recentTeams.first.name, 'SQUADRA');
     expect(recentTeams.first.playerNames, ['Tizio', 'Caio', 'Sempronio']);
     expect(recentTeams.map((team) => team.name), isNot(contains('Ieri')));
+  });
+
+  test('builds calendar month and selected day matches', () {
+    final matches = [
+      ScrimmageMatch(
+        id: 'may',
+        createdAt: DateTime(2026, 5, 20, 20),
+        teamAIds: const [],
+        teamBIds: const [],
+        scoreA: 3,
+        scoreB: 2,
+      ),
+      ScrimmageMatch(
+        id: 'june',
+        createdAt: DateTime(2026, 6, 1, 20),
+        teamAIds: const [],
+        teamBIds: const [],
+        scoreA: 1,
+        scoreB: 0,
+      ),
+    ];
+    final container = ProviderContainer(
+      overrides: [matchesProvider.overrideWith((ref) => matches)],
+    );
+    addTearDown(container.dispose);
+
+    container.read(matchesCalendarMonthProvider.notifier).state = DateTime(
+      2026,
+      5,
+    );
+    container.read(matchesCalendarSelectedDayProvider.notifier).state =
+        DateTime(2026, 5, 20);
+
+    expect(container.read(calendarMonthMatchesProvider).single.id, 'may');
+    expect(container.read(selectedCalendarDayMatchesProvider).single.id, 'may');
+  });
+
+  test('aggregates player analytics with filters', () {
+    final players = [
+      Player(
+        id: 'p1',
+        name: 'Alice',
+        rating: 1100,
+        role: PlayerRole.handler,
+        linePreference: PlayerLinePreference.offense,
+      ),
+      Player(
+        id: 'p2',
+        name: 'Bob',
+        rating: 900,
+        role: PlayerRole.cutter,
+        linePreference: PlayerLinePreference.defense,
+      ),
+    ];
+    final matches = [
+      ScrimmageMatch(
+        id: 'm1',
+        createdAt: DateTime(2026, 5, 20),
+        teamAIds: const ['p1'],
+        teamBIds: const ['p2'],
+        scoreA: 1,
+        scoreB: 0,
+        statEvents: [
+          MatchStatEvent(
+            id: 'goal',
+            type: MatchStatType.goal,
+            createdAt: DateTime(2026, 5, 20, 20),
+            pointNumber: 1,
+            scoreA: 1,
+            scoreB: 0,
+            oursOnOffense: true,
+            playerId: 'p1',
+          ),
+          MatchStatEvent(
+            id: 'pull',
+            type: MatchStatType.pull,
+            createdAt: DateTime(2026, 5, 20, 20, 1),
+            pointNumber: 1,
+            scoreA: 0,
+            scoreB: 0,
+            oursOnOffense: false,
+            playerId: 'p2',
+            pullDurationSeconds: 7,
+            pullInBounds: true,
+          ),
+        ],
+      ),
+    ];
+    final container = ProviderContainer(
+      overrides: [
+        rankedPlayersProvider.overrideWith((ref) => players),
+        matchesProvider.overrideWith((ref) => matches),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    container.read(statsRoleFilterProvider.notifier).state = PlayerRole.handler;
+
+    final analytics = container.read(playerAnalyticsProvider);
+
+    expect(analytics.players.single.name, 'Alice');
+    expect(analytics.group.goals, 1);
+    expect(analytics.byId('p1')?.goals, 1);
   });
 }
