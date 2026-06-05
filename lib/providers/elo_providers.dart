@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -10,37 +12,198 @@ import '../model/player.dart';
 import '../model/scrimmage_match.dart';
 import '../repositories/elo_repository.dart';
 
-final playersBoxProvider = Provider<Box<Player>>((ref) {
-  return Hive.box<Player>(AppConstants.playersBox);
+class RecalculatedData {
+  final List<Player> players;
+  final List<ScrimmageMatch> matches;
+  RecalculatedData(this.players, this.matches);
+}
+
+RecalculatedData recalculateRatingsInMemory({
+  required List<Player> rawPlayers,
+  required List<ScrimmageMatch> rawMatches,
+  required AppSettings settings,
+}) {
+  final playersMap = {
+    for (final player in rawPlayers)
+      player.id: Player(
+        id: player.id,
+        name: player.name,
+        rating: settings.initialRating,
+        linePreference: player.linePreference,
+        role: player.role,
+        profileImagePath: player.profileImagePath,
+        isExternal: player.isExternal,
+      ),
+  };
+
+  final orderedMatches = rawMatches.map((match) {
+    return ScrimmageMatch(
+      id: match.id,
+      createdAt: match.createdAt,
+      teamAIds: List.from(match.teamAIds),
+      teamBIds: List.from(match.teamBIds),
+      scoreA: match.scoreA,
+      scoreB: match.scoreB,
+      teamSize: match.teamSize,
+      offenseVsDefense: match.offenseVsDefense,
+      teamAName: match.teamAName,
+      teamBName: match.teamBName,
+      isExternalOpponent: match.isExternalOpponent,
+      division: match.division,
+      tournament: match.tournament,
+      matchType: match.matchType,
+      windKmh: match.windKmh,
+      pointsLimit: match.pointsLimit,
+      durationMinutes: match.durationMinutes,
+      location: match.location,
+      hasHalfTime: match.hasHalfTime,
+      halfTimeSeconds: match.halfTimeSeconds,
+      hasTimeouts: match.hasTimeouts,
+      timeoutsPerTeamPerHalf: match.timeoutsPerTeamPerHalf,
+      timeoutSeconds: match.timeoutSeconds,
+      enabledStatTypes: List.from(match.enabledStatTypes),
+      statEvents: List.from(match.statEvents),
+    );
+  }).toList()..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+  for (final match in orderedMatches) {
+    final teamA = match.teamAIds.map((id) => playersMap[id]).nonNulls.toList();
+    final teamB = match.teamBIds.map((id) => playersMap[id]).nonNulls.toList();
+    if (teamA.isEmpty ||
+        teamB.isEmpty ||
+        teamA.length < match.teamSize ||
+        teamB.length < match.teamSize) {
+      continue;
+    }
+
+    final allPlayers = [...teamA, ...teamB];
+    final initialRatings = {
+      for (final player in allPlayers) player.id: player.rating,
+    };
+    final ratingA =
+        teamA.map((player) => player.rating).reduce((a, b) => a + b) /
+        teamA.length;
+    final ratingB =
+        teamB.map((player) => player.rating).reduce((a, b) => a + b) /
+        teamB.length;
+    final expectedA = 1 / (1 + pow(10, (ratingB - ratingA) / 400));
+    final expectedB = 1 - expectedA;
+    final actualA = match.isDraw ? 0.5 : (match.teamAWon ? 1.0 : 0.0);
+    final actualB = match.isDraw ? 0.5 : 1 - actualA;
+    final deltaA = settings.eloKFactor * (actualA - expectedA);
+    final deltaB = settings.eloKFactor * (actualB - expectedB);
+
+    for (final player in teamA) {
+      player
+        ..rating += deltaA
+        ..matchesPlayed += 1;
+      if (!match.isDraw) {
+        match.teamAWon ? player.wins += 1 : player.losses += 1;
+      }
+    }
+    for (final player in teamB) {
+      player
+        ..rating += deltaB
+        ..matchesPlayed += 1;
+      if (!match.isDraw) {
+        match.teamAWon ? player.losses += 1 : player.wins += 1;
+      }
+    }
+
+    match
+      ..initialRatings = initialRatings
+      ..finalRatings = {
+        for (final player in allPlayers) player.id: player.rating,
+      };
+  }
+
+  return RecalculatedData(
+    playersMap.values.toList(),
+    orderedMatches,
+  );
+}
+
+final firestoreProvider = Provider<FirebaseFirestore>((ref) {
+  return FirebaseFirestore.instance;
 });
 
-final matchesBoxProvider = Provider<Box<ScrimmageMatch>>((ref) {
-  return Hive.box<ScrimmageMatch>(AppConstants.matchesBox);
+final rawPlayersStreamProvider = StreamProvider<List<Player>>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return firestore.collection('players').snapshots().map((snapshot) {
+    return snapshot.docs.map((doc) => Player.fromMap(doc.data())).toList();
+  });
+});
+
+final rawMatchesStreamProvider = StreamProvider<List<ScrimmageMatch>>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return firestore.collection('matches').snapshots().map((snapshot) {
+    return snapshot.docs.map((doc) => ScrimmageMatch.fromMap(doc.data())).toList();
+  });
+});
+
+final globalSettingsStreamProvider = StreamProvider<AppSettings>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return firestore.collection('settings').doc('global').snapshots().map((doc) {
+    if (!doc.exists || doc.data() == null) {
+      return AppSettings();
+    }
+    return AppSettings.fromGlobalMap(doc.data()!);
+  });
 });
 
 final settingsBoxProvider = Provider<Box<AppSettings>>((ref) {
   return Hive.box<AppSettings>(AppConstants.settingsBox);
 });
 
+final themeModeProvider = StateProvider<int>((ref) {
+  final box = ref.watch(settingsBoxProvider);
+  final settings = box.get(AppConstants.settingsKey);
+  return settings?.themeModeIndex ?? 0;
+});
+
 final appSettingsProvider = Provider<AppSettings>((ref) {
-  ref.watch(hiveChangesProvider);
-  return ref
-          .watch(settingsBoxProvider)
-          .get(AppConstants.settingsKey, defaultValue: AppSettings()) ??
-      AppSettings();
+  final localThemeIndex = ref.watch(themeModeProvider);
+  final globalSettingsAsync = ref.watch(globalSettingsStreamProvider);
+  final globalSettings = globalSettingsAsync.value ?? AppSettings();
+  return globalSettings.copyWith(themeModeIndex: localThemeIndex);
+});
+
+final recalculatedDataProvider = Provider<RecalculatedData>((ref) {
+  final rawPlayers = ref.watch(rawPlayersStreamProvider).value ?? [];
+  final rawMatches = ref.watch(rawMatchesStreamProvider).value ?? [];
+  final settings = ref.watch(appSettingsProvider);
+  
+  return recalculateRatingsInMemory(
+    rawPlayers: rawPlayers,
+    rawMatches: rawMatches,
+    settings: settings,
+  );
+});
+
+final rankedPlayersProvider = Provider<List<Player>>((ref) {
+  final data = ref.watch(recalculatedDataProvider);
+  return List.from(data.players)
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+});
+
+final matchesProvider = Provider<List<ScrimmageMatch>>((ref) {
+  final data = ref.watch(recalculatedDataProvider);
+  return List.from(data.matches)
+    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 });
 
 final eloRepositoryProvider = Provider<EloRepository>((ref) {
+  final matches = ref.watch(matchesProvider);
+  final settings = ref.watch(appSettingsProvider);
+  final firestore = ref.watch(firestoreProvider);
   return EloRepository(
-    ref.watch(playersBoxProvider),
-    ref.watch(matchesBoxProvider),
-    ref.watch(appSettingsProvider),
+    matches: matches,
+    settings: settings,
+    firestore: firestore,
   );
 });
 
 final hiveChangesProvider = StreamProvider<int>((ref) {
-  final playersBox = ref.watch(playersBoxProvider);
-  final matchesBox = ref.watch(matchesBoxProvider);
   final settingsBox = ref.watch(settingsBoxProvider);
   final controller = StreamController<int>();
   var tick = 0;
@@ -49,32 +212,16 @@ final hiveChangesProvider = StreamProvider<int>((ref) {
     if (!controller.isClosed) controller.add(tick++);
   }
 
-  final playersListenable = playersBox.listenable();
-  final matchesListenable = matchesBox.listenable();
   final settingsListenable = settingsBox.listenable();
-  playersListenable.addListener(notify);
-  matchesListenable.addListener(notify);
   settingsListenable.addListener(notify);
   Future.microtask(notify);
 
   ref.onDispose(() {
-    playersListenable.removeListener(notify);
-    matchesListenable.removeListener(notify);
     settingsListenable.removeListener(notify);
     controller.close();
   });
 
   return controller.stream;
-});
-
-final rankedPlayersProvider = Provider<List<Player>>((ref) {
-  ref.watch(hiveChangesProvider);
-  return ref.watch(eloRepositoryProvider).rankedPlayers;
-});
-
-final matchesProvider = Provider<List<ScrimmageMatch>>((ref) {
-  ref.watch(hiveChangesProvider);
-  return ref.watch(eloRepositoryProvider).matches;
 });
 
 final playersSearchQueryProvider = StateProvider<String>((ref) => '');

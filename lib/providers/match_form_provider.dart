@@ -27,8 +27,14 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
       );
     }
 
-    final repository = ref.read(eloRepositoryProvider);
-    final match = repository.getMatch(arg!);
+    final matches = ref.read(matchesProvider);
+    ScrimmageMatch? match;
+    for (final m in matches) {
+      if (m.id == arg) {
+        match = m;
+        break;
+      }
+    }
     if (match == null) {
       final names = _randomTeamNames();
       return MatchFormState(
@@ -164,7 +170,16 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
 
   Future<void> save(String? matchId) async {
     final repository = ref.read(eloRepositoryProvider);
-    final originalMatch = matchId != null ? repository.getMatch(matchId) : null;
+    final matches = ref.read(matchesProvider);
+    ScrimmageMatch? originalMatch;
+    if (matchId != null) {
+      for (final m in matches) {
+        if (m.id == matchId) {
+          originalMatch = m;
+          break;
+        }
+      }
+    }
     final savedMatch = ScrimmageMatch(
       id: matchId ?? DateTime.now().microsecondsSinceEpoch.toString(),
       createdAt: originalMatch?.createdAt ?? DateTime.now(),

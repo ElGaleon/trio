@@ -24,8 +24,14 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
       );
     }
     
-    final repository = ref.read(eloRepositoryProvider);
-    final player = repository.playersBox.get(arg);
+    final players = ref.read(rankedPlayersProvider);
+    Player? player;
+    for (final p in players) {
+      if (p.id == arg) {
+        player = p;
+        break;
+      }
+    }
     if (player == null) {
       return PlayerFormState(
         name: '',
@@ -128,7 +134,14 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
         state.isExternal,
       );
     } else {
-      final player = repository.playersBox.get(playerId);
+      final players = ref.read(rankedPlayersProvider);
+      Player? player;
+      for (final p in players) {
+        if (p.id == playerId) {
+          player = p;
+          break;
+        }
+      }
       if (player != null) {
         await repository.savePlayer(
           player,

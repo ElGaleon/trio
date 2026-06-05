@@ -6,6 +6,9 @@ final matchDetailsProvider = Provider.family<ScrimmageMatch?, String>((
   ref,
   matchId,
 ) {
-  final repository = ref.watch(eloRepositoryProvider);
-  return repository.getMatch(matchId);
+  final matches = ref.watch(matchesProvider);
+  for (final m in matches) {
+    if (m.id == matchId) return m;
+  }
+  return null;
 });

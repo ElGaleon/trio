@@ -61,17 +61,21 @@ class SettingsFormNotifier extends Notifier<SettingsFormState> {
       AppConstants.settingsKey,
       AppSettings(
         themeModeIndex: state.themeModeIndex,
-        eloKFactor: eloKFactorVal,
-        initialRating: initialRatingVal,
-        statWeights: statWeights,
       ),
     );
+
+    final firestore = ref.read(firestoreProvider);
+    final globalSettings = AppSettings(
+      eloKFactor: eloKFactorVal,
+      initialRating: initialRatingVal,
+      statWeights: statWeights,
+    );
+    await firestore.collection('settings').doc('global').set(globalSettings.toGlobalMap());
 
     ref
       ..invalidate(appSettingsProvider)
       ..invalidate(eloRepositoryProvider);
 
-    await ref.read(eloRepositoryProvider).recalculateRatings();
     return true;
   }
 }

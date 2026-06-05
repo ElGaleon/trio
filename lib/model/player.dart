@@ -54,4 +54,32 @@ class Player {
   }
 
   double get winRate => matchesPlayed == 0 ? 0 : wins / matchesPlayed;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'linePreference': linePreference.name,
+      'role': role.name,
+      'profileImagePath': profileImagePath,
+      'isExternal': isExternal,
+    };
+  }
+
+  static Player fromMap(Map<dynamic, dynamic> map) {
+    return Player(
+      id: map['id'] as String? ?? '',
+      name: map['name'] as String? ?? '',
+      linePreference: PlayerLinePreference.values.firstWhere(
+        (e) => e.name == map['linePreference'],
+        orElse: () => PlayerLinePreference.offense,
+      ),
+      role: PlayerRole.values.firstWhere(
+        (e) => e.name == map['role'],
+        orElse: () => PlayerRole.cutter,
+      ),
+      profileImagePath: map['profileImagePath'] as String?,
+      isExternal: map['isExternal'] as bool? ?? false,
+    );
+  }
 }

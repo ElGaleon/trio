@@ -303,6 +303,13 @@ class TeamScoreBadge extends StatelessWidget {
             fontWeight: FontWeight.w900,
           ),
         ),
+        Text(
+          '$score',
+          style: textTheme.headlineMedium?.copyWith(
+            color: highlighted ? AppColors.violet : AppColors.white,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
       ],
     );
   }

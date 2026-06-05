@@ -1,31 +1,20 @@
-import 'dart:math';
-
-import 'package:hive/hive.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/app_settings.dart';
 import '../model/player.dart';
 import '../model/scrimmage_match.dart';
 
 class EloRepository {
-  EloRepository(this.playersBox, this.matchesBox, this.settings);
+  EloRepository({
+    required List<ScrimmageMatch> matches,
+    required this.settings,
+    FirebaseFirestore? firestore,
+  })  : matches = List.from(matches)..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
+        _firestore = firestore ?? FirebaseFirestore.instance;
 
-  final Box<Player> playersBox;
-  final Box<ScrimmageMatch> matchesBox;
+  final List<ScrimmageMatch> matches;
   final AppSettings settings;
-
-  List<Player> get rankedPlayers {
-    return playersBox.values.toList()
-      ..sort((a, b) => b.rating.compareTo(a.rating));
-  }
-
-  List<Player> get players {
-    return playersBox.values.toList()..sort((a, b) => b.name.compareTo(a.name));
-  }
-
-  List<ScrimmageMatch> get matches {
-    return matchesBox.values.toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-  }
+  final FirebaseFirestore _firestore;
 
   List<ScrimmageMatch> matchesForPlayer(String playerId) {
     return matches
@@ -40,7 +29,7 @@ class EloRepository {
   List<double> ratingHistoryForPlayer(String playerId) {
     final orderedMatches = matchesForPlayer(playerId).reversed.toList();
     if (orderedMatches.isEmpty) {
-      return [playersBox.get(playerId)?.rating ?? settings.initialRating];
+      return [settings.initialRating];
     }
 
     final history = <double>[
@@ -55,18 +44,16 @@ class EloRepository {
   Future<void> addPlayer(String name) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
-    final id = DateTime.now().microsecondsSinceEpoch.toString();
-    await playersBox.put(
-      id,
-      Player(id: id, name: trimmed, rating: settings.initialRating),
+    final id = _firestore.collection('players').doc().id;
+    await _firestore.collection('players').doc(id).set(
+      Player(id: id, name: trimmed, rating: settings.initialRating).toMap(),
     );
   }
 
   Future<void> renamePlayer(Player player, String name) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
-    player.name = trimmed;
-    await playersBox.put(player.id, player);
+    await _firestore.collection('players').doc(player.id).update({'name': trimmed});
   }
 
   Future<void> savePlayer(
@@ -79,13 +66,15 @@ class EloRepository {
   }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
-    player
-      ..name = trimmed
-      ..linePreference = linePreference
-      ..role = role
-      ..profileImagePath = _normalizedImagePath(profileImagePath)
-      ..isExternal = isExternal;
-    await playersBox.put(player.id, player);
+    final updatedPlayer = Player(
+      id: player.id,
+      name: trimmed,
+      linePreference: linePreference,
+      role: role,
+      profileImagePath: _normalizedImagePath(profileImagePath),
+      isExternal: isExternal,
+    );
+    await _firestore.collection('players').doc(player.id).set(updatedPlayer.toMap());
   }
 
   Future<void> addPlayerWithLine(
@@ -97,117 +86,49 @@ class EloRepository {
   ]) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
-    final id = DateTime.now().microsecondsSinceEpoch.toString();
-    await playersBox.put(
-      id,
-      Player(
-        id: id,
-        name: trimmed,
-        rating: settings.initialRating,
-        linePreference: linePreference,
-        role: role,
-        profileImagePath: _normalizedImagePath(profileImagePath),
-        isExternal: isExternal,
-      ),
+    final id = _firestore.collection('players').doc().id;
+    final player = Player(
+      id: id,
+      name: trimmed,
+      rating: settings.initialRating,
+      linePreference: linePreference,
+      role: role,
+      profileImagePath: _normalizedImagePath(profileImagePath),
+      isExternal: isExternal,
     );
+    await _firestore.collection('players').doc(id).set(player.toMap());
   }
 
   Future<void> deletePlayer(String playerId) async {
-    for (final match in matchesBox.values.toList()) {
-      if (match.teamAIds.contains(playerId) ||
-          match.teamBIds.contains(playerId)) {
-        await matchesBox.delete(match.id);
+    final matchesSnap = await _firestore.collection('matches').get();
+    for (final doc in matchesSnap.docs) {
+      final matchMap = doc.data();
+      final teamAIds = List<String>.from(matchMap['teamAIds'] as List? ?? []);
+      final teamBIds = List<String>.from(matchMap['teamBIds'] as List? ?? []);
+      if (teamAIds.contains(playerId) || teamBIds.contains(playerId)) {
+        await doc.reference.delete();
       }
     }
-    await playersBox.delete(playerId);
-    await recalculateRatings();
+    await _firestore.collection('players').doc(playerId).delete();
   }
 
   ScrimmageMatch? getMatch(String id) {
-    return matchesBox.get(id);
+    for (final match in matches) {
+      if (match.id == id) return match;
+    }
+    return null;
   }
 
   Future<void> upsertMatch(ScrimmageMatch match) async {
-    await matchesBox.put(match.id, match);
-    await recalculateRatings();
+    await _firestore.collection('matches').doc(match.id).set(match.toMap());
   }
 
   Future<void> deleteMatch(String matchId) async {
-    await matchesBox.delete(matchId);
-    await recalculateRatings();
+    await _firestore.collection('matches').doc(matchId).delete();
   }
 
   Future<void> recalculateRatings() async {
-    final players = {
-      for (final player in playersBox.values)
-        player.id: Player(
-          id: player.id,
-          name: player.name,
-          rating: settings.initialRating,
-          linePreference: player.linePreference,
-          role: player.role,
-          profileImagePath: player.profileImagePath,
-          isExternal: player.isExternal,
-        ),
-    };
-    final orderedMatches = matchesBox.values.toList()
-      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-
-    for (final match in orderedMatches) {
-      final teamA = match.teamAIds.map((id) => players[id]).nonNulls.toList();
-      final teamB = match.teamBIds.map((id) => players[id]).nonNulls.toList();
-      if (teamA.isEmpty ||
-          teamB.isEmpty ||
-          teamA.length < match.teamSize ||
-          teamB.length < match.teamSize) {
-        continue;
-      }
-
-      final allPlayers = [...teamA, ...teamB];
-      final initialRatings = {
-        for (final player in allPlayers) player.id: player.rating,
-      };
-      final ratingA =
-          teamA.map((player) => player.rating).reduce((a, b) => a + b) /
-          teamA.length;
-      final ratingB =
-          teamB.map((player) => player.rating).reduce((a, b) => a + b) /
-          teamB.length;
-      final expectedA = 1 / (1 + pow(10, (ratingB - ratingA) / 400));
-      final expectedB = 1 - expectedA;
-      final actualA = match.isDraw ? 0.5 : (match.teamAWon ? 1.0 : 0.0);
-      final actualB = match.isDraw ? 0.5 : 1 - actualA;
-      final deltaA = settings.eloKFactor * (actualA - expectedA);
-      final deltaB = settings.eloKFactor * (actualB - expectedB);
-
-      for (final player in teamA) {
-        player
-          ..rating += deltaA
-          ..matchesPlayed += 1;
-        if (!match.isDraw) {
-          match.teamAWon ? player.wins += 1 : player.losses += 1;
-        }
-      }
-      for (final player in teamB) {
-        player
-          ..rating += deltaB
-          ..matchesPlayed += 1;
-        if (!match.isDraw) {
-          match.teamAWon ? player.losses += 1 : player.wins += 1;
-        }
-      }
-
-      match
-        ..initialRatings = initialRatings
-        ..finalRatings = {
-          for (final player in allPlayers) player.id: player.rating,
-        };
-      await matchesBox.put(match.id, match);
-    }
-
-    for (final player in players.values) {
-      await playersBox.put(player.id, player);
-    }
+    return;
   }
 
   String? _normalizedImagePath(String? value) {

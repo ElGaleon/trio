@@ -75,6 +75,83 @@ class ScrimmageMatch {
   bool tracks(MatchStatType type) {
     return enabledStatTypes.contains(type);
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'createdAt': createdAt.millisecondsSinceEpoch,
+      'teamAIds': teamAIds,
+      'teamBIds': teamBIds,
+      'scoreA': scoreA,
+      'scoreB': scoreB,
+      'teamSize': teamSize,
+      'offenseVsDefense': offenseVsDefense,
+      'teamAName': teamAName,
+      'teamBName': teamBName,
+      'isExternalOpponent': isExternalOpponent,
+      'division': division,
+      'tournament': tournament,
+      'matchType': matchType,
+      'windKmh': windKmh,
+      'pointsLimit': pointsLimit,
+      'durationMinutes': durationMinutes,
+      'location': location,
+      'hasHalfTime': hasHalfTime,
+      'halfTimeSeconds': halfTimeSeconds,
+      'hasTimeouts': hasTimeouts,
+      'timeoutsPerTeamPerHalf': timeoutsPerTeamPerHalf,
+      'timeoutSeconds': timeoutSeconds,
+      'enabledStatTypes': enabledStatTypes.map((e) => e.name).toList(),
+      'statEvents': statEvents.map((e) => e.toMap()).toList(),
+    };
+  }
+
+  static ScrimmageMatch fromMap(Map<dynamic, dynamic> map) {
+    final rawCreatedAt = map['createdAt'];
+    DateTime parsedCreatedAt;
+    if (rawCreatedAt is int) {
+      parsedCreatedAt = DateTime.fromMillisecondsSinceEpoch(rawCreatedAt);
+    } else if (rawCreatedAt is String) {
+      parsedCreatedAt = DateTime.parse(rawCreatedAt);
+    } else {
+      parsedCreatedAt = DateTime.now();
+    }
+
+    return ScrimmageMatch(
+      id: map['id'] as String? ?? '',
+      createdAt: parsedCreatedAt,
+      teamAIds: List<String>.from(map['teamAIds'] as List? ?? []),
+      teamBIds: List<String>.from(map['teamBIds'] as List? ?? []),
+      scoreA: map['scoreA'] as int? ?? 0,
+      scoreB: map['scoreB'] as int? ?? 0,
+      teamSize: map['teamSize'] as int?,
+      offenseVsDefense: map['offenseVsDefense'] as bool? ?? false,
+      teamAName: map['teamAName'] as String?,
+      teamBName: map['teamBName'] as String?,
+      isExternalOpponent: map['isExternalOpponent'] as bool? ?? false,
+      division: map['division'] as String? ?? 'Mixed',
+      tournament: map['tournament'] as String? ?? '',
+      matchType: map['matchType'] as String? ?? 'Classic',
+      windKmh: map['windKmh'] as int? ?? 0,
+      pointsLimit: map['pointsLimit'] as int? ?? 15,
+      durationMinutes: map['durationMinutes'] as int? ?? 80,
+      location: map['location'] as String? ?? '',
+      hasHalfTime: map['hasHalfTime'] as bool? ?? true,
+      halfTimeSeconds: map['halfTimeSeconds'] as int? ?? 300,
+      hasTimeouts: map['hasTimeouts'] as bool? ?? true,
+      timeoutsPerTeamPerHalf: map['timeoutsPerTeamPerHalf'] as int? ?? 2,
+      timeoutSeconds: map['timeoutSeconds'] as int? ?? 90,
+      enabledStatTypes: (map['enabledStatTypes'] as List? ?? [])
+          .map((e) => MatchStatType.values.firstWhere(
+                (v) => v.name == e,
+                orElse: () => MatchStatType.pass,
+              ))
+          .toList(),
+      statEvents: (map['statEvents'] as List? ?? [])
+          .map((e) => MatchStatEvent.fromMap(e as Map))
+          .toList(),
+    );
+  }
 }
 
 enum MatchStatType {
@@ -211,6 +288,20 @@ class MatchStatEvent {
 
   static MatchStatEvent fromMap(Map<dynamic, dynamic> map) {
     final typeName = map['type'] as String? ?? MatchStatType.pass.name;
+    final rawCreatedAt = map['createdAt'];
+    DateTime parsedCreatedAt;
+    if (rawCreatedAt is DateTime) {
+      parsedCreatedAt = rawCreatedAt;
+    } else if (rawCreatedAt is int) {
+      parsedCreatedAt = DateTime.fromMillisecondsSinceEpoch(rawCreatedAt);
+    } else if (rawCreatedAt is String) {
+      parsedCreatedAt = DateTime.parse(rawCreatedAt);
+    } else if (rawCreatedAt != null && rawCreatedAt.runtimeType.toString().contains('Timestamp')) {
+      parsedCreatedAt = (rawCreatedAt as dynamic).toDate() as DateTime;
+    } else {
+      parsedCreatedAt = DateTime.now();
+    }
+
     return MatchStatEvent(
       id:
           map['id'] as String? ??
@@ -219,7 +310,7 @@ class MatchStatEvent {
         (type) => type.name == typeName,
         orElse: () => MatchStatType.pass,
       ),
-      createdAt: map['createdAt'] as DateTime? ?? DateTime.now(),
+      createdAt: parsedCreatedAt,
       pointNumber: map['pointNumber'] as int? ?? 1,
       scoreA: map['scoreA'] as int? ?? 0,
       scoreB: map['scoreB'] as int? ?? 0,

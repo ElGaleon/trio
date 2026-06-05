@@ -1,33 +1,23 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'adapters/app_settings_adapter.dart';
-import 'adapters/player_adapter.dart';
-import 'adapters/scrimmage_match_adapter.dart';
 import 'app_constants.dart';
 import 'app_router.dart';
 import 'model/app_settings.dart';
-import 'model/player.dart';
-import 'model/scrimmage_match.dart';
 import 'providers/elo_providers.dart';
 import 'theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   await Hive.initFlutter();
-  if (!Hive.isAdapterRegistered(AppConstants.playerTypeId)) {
-    Hive.registerAdapter(PlayerAdapter());
-  }
-  if (!Hive.isAdapterRegistered(AppConstants.matchTypeId)) {
-    Hive.registerAdapter(ScrimmageMatchAdapter());
-  }
   if (!Hive.isAdapterRegistered(AppConstants.settingsTypeId)) {
     Hive.registerAdapter(AppSettingsAdapter());
   }
-  await Hive.openBox<Player>(AppConstants.playersBox);
-  await Hive.openBox<ScrimmageMatch>(AppConstants.matchesBox);
   final settingsBox = await Hive.openBox<AppSettings>(AppConstants.settingsBox);
   await settingsBox.put(
     AppConstants.settingsKey,
