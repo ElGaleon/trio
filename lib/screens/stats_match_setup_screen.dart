@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_router.dart';
-import '../components/shared/sport_button.dart';
 import '../components/shared/sport_screen_shell.dart';
+import '../components/match_form/form_nav_button.dart';
 import '../components/stats_match_setup/match_settings_step.dart';
 import '../components/stats_match_setup/point_start_selector.dart';
 import '../components/stats_match_setup/roster_picker.dart';
+import '../components/stats_match_setup/stats_selection_step.dart';
+import '../components/stats_match_setup/stats_setup_step_header.dart';
 import '../model/player.dart';
 import '../providers/elo_providers.dart';
 import '../model/stats_match_setup_state.dart';
@@ -32,22 +33,34 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
   void initState() {
     super.initState();
     final initialState = ref.read(statsMatchSetupProvider);
-    _opponentController = TextEditingController(text: initialState.opponentName);
+    _opponentController = TextEditingController(
+      text: initialState.opponentName,
+    );
     _teamController = TextEditingController(text: initialState.teamName);
-    _tournamentController = TextEditingController(text: initialState.tournament);
+    _tournamentController = TextEditingController(
+      text: initialState.tournament,
+    );
     _locationController = TextEditingController(text: initialState.location);
 
     _opponentController.addListener(() {
-      ref.read(statsMatchSetupProvider.notifier).updateOpponentName(_opponentController.text);
+      ref
+          .read(statsMatchSetupProvider.notifier)
+          .updateOpponentName(_opponentController.text);
     });
     _teamController.addListener(() {
-      ref.read(statsMatchSetupProvider.notifier).updateTeamName(_teamController.text);
+      ref
+          .read(statsMatchSetupProvider.notifier)
+          .updateTeamName(_teamController.text);
     });
     _tournamentController.addListener(() {
-      ref.read(statsMatchSetupProvider.notifier).updateTournament(_tournamentController.text);
+      ref
+          .read(statsMatchSetupProvider.notifier)
+          .updateTournament(_tournamentController.text);
     });
     _locationController.addListener(() {
-      ref.read(statsMatchSetupProvider.notifier).updateLocation(_locationController.text);
+      ref
+          .read(statsMatchSetupProvider.notifier)
+          .updateLocation(_locationController.text);
     });
   }
 
@@ -67,13 +80,20 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
     final players = ref.watch(rankedPlayersProvider);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SportScreenShell(
         title: 'Stats match',
-        subtitle: state.step == 0 ? 'Match settings' : 'Point settings',
+        subtitle: switch (state.step) {
+          0 => 'Informazioni generali',
+          1 => 'Presenti alla partita',
+          2 => 'Statistiche da tracciare',
+          _ => 'Selezione linea',
+        },
         showBackButton: true,
         child: Column(
           spacing: 14,
           children: [
+            StatsSetupStepHeader(step: state.step),
             if (state.step == 0)
               MatchSettingsStep(
                 teamController: _teamController,
@@ -91,7 +111,6 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
                 hasTimeouts: state.hasTimeouts,
                 timeoutsPerTeamPerHalf: state.timeoutsPerTeamPerHalf,
                 timeoutSeconds: state.timeoutSeconds,
-                enabledStatTypes: state.enabledStatTypes,
                 onDivisionChanged: notifier.updateDivision,
                 onMatchTypeChanged: notifier.updateMatchType,
                 onTeamSizeChanged: notifier.updateTeamSize,
@@ -103,6 +122,25 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
                 onTimeoutToggle: notifier.toggleTimeouts,
                 onTimeoutsPerHalfChanged: notifier.updateTimeoutsPerHalf,
                 onTimeoutSecondsChanged: notifier.updateTimeoutSeconds,
+              )
+            else if (state.step == 1)
+              RosterPicker(
+                title: 'Presenti',
+                players: _sortedPlayers(
+                  players,
+                  state.startOnOffense,
+                  state.presentPlayerIds,
+                ),
+                selectedIds: state.presentPlayerIds,
+                minimum: state.teamSize,
+                preferredLine: state.startOnOffense
+                    ? PlayerLinePreference.offense
+                    : PlayerLinePreference.defense,
+                onToggle: notifier.togglePresentPlayer,
+              )
+            else if (state.step == 2)
+              StatsSelectionStep(
+                enabledStatTypes: state.enabledStatTypes,
                 onToggleStat: notifier.toggleStat,
               )
             else
@@ -114,9 +152,20 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
                     onChanged: notifier.updateStartOnOffense,
                   ),
                   RosterPicker(
-                    players: _sortedPlayers(players, state.startOnOffense, state.selectedPlayerIds),
+                    players: _sortedPlayers(
+                      players
+                          .where(
+                            (player) =>
+                                state.presentPlayerIds.contains(player.id),
+                          )
+                          .toList(),
+                      state.startOnOffense,
+                      state.selectedPlayerIds,
+                    ),
                     selectedIds: state.selectedPlayerIds,
                     minimum: state.teamSize,
+                    maximum: state.teamSize,
+                    title: 'Linea in campo',
                     preferredLine: state.startOnOffense
                         ? PlayerLinePreference.offense
                         : PlayerLinePreference.defense,
@@ -126,12 +175,40 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
               ),
             Padding(
               padding: const EdgeInsets.only(top: 4), // Adjust spacing
-              child: SportFloatingActionButton(
-                label: state.step == 0 ? 'Next' : 'Start',
-                icon: state.step == 0 ? FIcons.arrowRight : FIcons.play,
-                onPressed: state.step == 0
-                    ? () => notifier.setStep(1)
-                    : () => _tryStart(state, notifier),
+              child: Row(
+                spacing: 10,
+                children: [
+                  Expanded(
+                    child: FormNavButton(
+                      label: state.step == 0 ? 'Annulla' : 'Indietro',
+                      outlined: true,
+                      onPressed: () {
+                        if (state.step == 0) {
+                          context.go(AppRoutes.matches);
+                        } else {
+                          notifier.setStep(state.step - 1);
+                        }
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: FormNavButton(
+                      label: state.step == 3 ? 'Start' : 'Avanti',
+                      onPressed: () {
+                        if (state.step == 1 &&
+                            state.presentPlayerIds.length < state.teamSize) {
+                          _showMissingPresentPlayersMessage(state.teamSize);
+                          return;
+                        }
+                        if (state.step < 3) {
+                          notifier.setStep(state.step + 1);
+                        } else {
+                          _tryStart(state, notifier);
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -141,7 +218,7 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
   }
 
   void _tryStart(StatsMatchSetupState state, StatsMatchSetupNotifier notifier) {
-    if (state.selectedPlayerIds.length < state.teamSize) {
+    if (state.selectedPlayerIds.length != state.teamSize) {
       _showMissingPlayersMessage(state.teamSize);
       return;
     }
@@ -156,11 +233,21 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
 
   void _showMissingPlayersMessage(int teamSize) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Seleziona almeno $teamSize giocatori.')),
+      SnackBar(content: Text('Seleziona $teamSize giocatori in campo.')),
     );
   }
 
-  List<Player> _sortedPlayers(List<Player> players, bool startOnOffense, Set<String> selectedIds) {
+  void _showMissingPresentPlayersMessage(int teamSize) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Segna almeno $teamSize presenti.')));
+  }
+
+  List<Player> _sortedPlayers(
+    List<Player> players,
+    bool startOnOffense,
+    Set<String> selectedIds,
+  ) {
     final preferred = startOnOffense
         ? PlayerLinePreference.offense
         : PlayerLinePreference.defense;

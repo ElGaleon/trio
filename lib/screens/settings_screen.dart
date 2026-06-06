@@ -76,10 +76,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SportScreenShell(
         title: 'Settings',
         subtitle: 'Theme and ELO',
-        showBackButton: true,
         child: Column(
           spacing: 12,
           children: [

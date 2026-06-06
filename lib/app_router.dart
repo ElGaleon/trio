@@ -95,10 +95,6 @@ final appRouter = GoRouter(
                 ),
               ],
             ),
-            GoRoute(
-              path: AppRoutes.settings,
-              builder: (context, state) => const SettingsScreen(),
-            ),
           ],
         ),
         StatefulShellBranch(
@@ -142,6 +138,14 @@ final appRouter = GoRouter(
             GoRoute(
               path: AppRoutes.stats,
               builder: (context, state) => const PlayerStatsScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.settings,
+              builder: (context, state) => const SettingsScreen(),
             ),
           ],
         ),

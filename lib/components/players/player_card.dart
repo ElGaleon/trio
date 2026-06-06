@@ -65,6 +65,8 @@ class PlayerCard extends StatelessWidget {
                         [
                           player.role.label,
                           player.linePreference.label,
+                          if (player.jerseyNumber != null)
+                            '#${player.jerseyNumber}',
                           if (player.isExternal) 'Esterno',
                         ].join(' · '),
                         style: textTheme.bodySmall?.copyWith(

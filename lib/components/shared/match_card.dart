@@ -111,7 +111,9 @@ class MatchCard extends StatelessWidget {
                                 variant: match.isDraw ? .secondary : .outline,
                                 child: Text(
                                   '${match.teamSize}v${match.teamSize}',
-                                  style: textTheme.bodySmall?.copyWith(color: AppColors.sportMutedText),
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: AppColors.sportMutedText,
+                                  ),
                                 ),
                               ),
                             ],
@@ -293,6 +295,13 @@ class TeamScoreBadge extends StatelessWidget {
       spacing: 4,
       children: [
         TeamLogo(name: name, highlighted: highlighted),
+        Text(
+          '$score',
+          style: textTheme.headlineSmall?.copyWith(
+            color: AppColors.white,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
         Text(
           name,
           maxLines: 1,

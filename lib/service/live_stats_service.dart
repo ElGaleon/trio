@@ -291,6 +291,43 @@ class LiveStatsService {
     await repository.upsertMatch(match);
   }
 
+  Future<void> replaceInjuredPlayer(
+    ScrimmageMatch match, {
+    required Player injured,
+    required Player replacement,
+    required bool oursOnOffense,
+    required EloRepository repository,
+  }) async {
+    if (!match.teamAIds.contains(injured.id)) return;
+    final last = match.statEvents.lastOrNull;
+    final newLineup = match.teamAIds
+        .map((id) => id == injured.id ? replacement.id : id)
+        .toList();
+    final nextDiscHolderId = last?.discHolderId == injured.id
+        ? replacement.id
+        : last?.discHolderId;
+
+    match
+      ..teamAIds = newLineup
+      ..statEvents = [
+        ...match.statEvents,
+        MatchStatEvent(
+          id: DateTime.now().microsecondsSinceEpoch.toString(),
+          type: MatchStatType.injury,
+          createdAt: DateTime.now(),
+          pointNumber: last?.pointNumber ?? 1,
+          scoreA: match.scoreA,
+          scoreB: match.scoreB,
+          oursOnOffense: oursOnOffense,
+          playerId: injured.id,
+          discHolderId: nextDiscHolderId,
+          lineupIds: newLineup,
+          description: '${injured.name} infortunio · entra ${replacement.name}',
+        ),
+      ];
+    await repository.upsertMatch(match);
+  }
+
   String _descriptionFor({
     required MatchStatType type,
     Player? player,

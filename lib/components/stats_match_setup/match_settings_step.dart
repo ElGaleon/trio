@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import '../../model/scrimmage_match.dart';
 import '../shared/sport_avatar_pill.dart';
 import 'setting_stepper.dart';
-import 'stats_settings_selector.dart';
 import 'toggle_setting.dart';
 
 class MatchSettingsStep extends StatelessWidget {
@@ -25,7 +23,6 @@ class MatchSettingsStep extends StatelessWidget {
     required this.hasTimeouts,
     required this.timeoutsPerTeamPerHalf,
     required this.timeoutSeconds,
-    required this.enabledStatTypes,
     required this.onDivisionChanged,
     required this.onMatchTypeChanged,
     required this.onTeamSizeChanged,
@@ -37,7 +34,6 @@ class MatchSettingsStep extends StatelessWidget {
     required this.onTimeoutToggle,
     required this.onTimeoutsPerHalfChanged,
     required this.onTimeoutSecondsChanged,
-    required this.onToggleStat,
   });
 
   final TextEditingController teamController;
@@ -55,7 +51,6 @@ class MatchSettingsStep extends StatelessWidget {
   final bool hasTimeouts;
   final int timeoutsPerTeamPerHalf;
   final int timeoutSeconds;
-  final Set<MatchStatType> enabledStatTypes;
   final ValueChanged<String> onDivisionChanged;
   final ValueChanged<String> onMatchTypeChanged;
   final ValueChanged<int> onTeamSizeChanged;
@@ -67,7 +62,6 @@ class MatchSettingsStep extends StatelessWidget {
   final VoidCallback onTimeoutToggle;
   final ValueChanged<int> onTimeoutsPerHalfChanged;
   final ValueChanged<int> onTimeoutSecondsChanged;
-  final ValueChanged<MatchStatType> onToggleStat;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +87,9 @@ class MatchSettingsStep extends StatelessWidget {
               ),
             ),
             FTextFormField(
-              control: FTextFieldControl.managed(controller: opponentController),
+              control: FTextFieldControl.managed(
+                controller: opponentController,
+              ),
               hint: 'Squadra avversaria',
             ),
             FTextFormField(
@@ -127,7 +123,9 @@ class MatchSettingsStep extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 4), // Small extra spacing for the steppers group
+              padding: const EdgeInsets.only(
+                top: 4,
+              ), // Small extra spacing for the steppers group
               child: Column(
                 children: [
                   SettingStepper(
@@ -161,7 +159,9 @@ class MatchSettingsStep extends StatelessWidget {
               ),
             ),
             FTextFormField(
-              control: FTextFieldControl.managed(controller: locationController),
+              control: FTextFieldControl.managed(
+                controller: locationController,
+              ),
               hint: 'Location',
             ),
             ToggleSetting(
@@ -211,10 +211,6 @@ class MatchSettingsStep extends StatelessWidget {
                       ],
                     )
                   : null,
-            ),
-            StatsSettingsSelector(
-              enabledStatTypes: enabledStatTypes,
-              onToggle: onToggleStat,
             ),
           ],
         ),

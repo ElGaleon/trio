@@ -42,6 +42,10 @@ class HomeScreen extends ConsumerWidget {
             icon: Icon(FIcons.activity),
             label: Text('Stats'),
           ),
+          FBottomNavigationBarItem(
+            icon: Icon(FIcons.settings),
+            label: Text('Settings'),
+          ),
         ],
       ),
       child: navigationShell,

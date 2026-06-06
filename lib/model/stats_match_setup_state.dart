@@ -18,6 +18,7 @@ class StatsMatchSetupState {
   final int timeoutsPerTeamPerHalf;
   final int timeoutSeconds;
   final Set<MatchStatType> enabledStatTypes;
+  final Set<String> presentPlayerIds;
   final bool startOnOffense;
   final Set<String> selectedPlayerIds;
 
@@ -39,6 +40,7 @@ class StatsMatchSetupState {
     required this.timeoutsPerTeamPerHalf,
     required this.timeoutSeconds,
     required this.enabledStatTypes,
+    required this.presentPlayerIds,
     required this.startOnOffense,
     required this.selectedPlayerIds,
   });
@@ -61,6 +63,7 @@ class StatsMatchSetupState {
     int? timeoutsPerTeamPerHalf,
     int? timeoutSeconds,
     Set<MatchStatType>? enabledStatTypes,
+    Set<String>? presentPlayerIds,
     bool? startOnOffense,
     Set<String>? selectedPlayerIds,
   }) {
@@ -79,9 +82,11 @@ class StatsMatchSetupState {
       hasHalfTime: hasHalfTime ?? this.hasHalfTime,
       halfTimeSeconds: halfTimeSeconds ?? this.halfTimeSeconds,
       hasTimeouts: hasTimeouts ?? this.hasTimeouts,
-      timeoutsPerTeamPerHalf: timeoutsPerTeamPerHalf ?? this.timeoutsPerTeamPerHalf,
+      timeoutsPerTeamPerHalf:
+          timeoutsPerTeamPerHalf ?? this.timeoutsPerTeamPerHalf,
       timeoutSeconds: timeoutSeconds ?? this.timeoutSeconds,
       enabledStatTypes: enabledStatTypes ?? this.enabledStatTypes,
+      presentPlayerIds: presentPlayerIds ?? this.presentPlayerIds,
       startOnOffense: startOnOffense ?? this.startOnOffense,
       selectedPlayerIds: selectedPlayerIds ?? this.selectedPlayerIds,
     );

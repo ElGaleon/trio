@@ -39,6 +39,13 @@ class ScrimmageMatchAdapter extends TypeAdapter<ScrimmageMatch> {
       hasTimeouts: fields[22] as bool? ?? true,
       timeoutsPerTeamPerHalf: fields[23] as int? ?? 2,
       timeoutSeconds: fields[24] as int? ?? 90,
+      presentPlayerIds: List<String>.from(
+        fields[27] as List? ??
+            {
+              ...List<String>.from(fields[2] as List? ?? []),
+              ...List<String>.from(fields[3] as List? ?? []),
+            },
+      ),
       enabledStatTypes: (fields[26] as List?)
           ?.whereType<String>()
           .map(
@@ -61,7 +68,7 @@ class ScrimmageMatchAdapter extends TypeAdapter<ScrimmageMatch> {
   @override
   void write(BinaryWriter writer, ScrimmageMatch obj) {
     writer
-      ..writeByte(27)
+      ..writeByte(28)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -115,6 +122,8 @@ class ScrimmageMatchAdapter extends TypeAdapter<ScrimmageMatch> {
       ..writeByte(25)
       ..write(obj.statEvents.map((event) => event.toMap()).toList())
       ..writeByte(26)
-      ..write(obj.enabledStatTypes.map((type) => type.name).toList());
+      ..write(obj.enabledStatTypes.map((type) => type.name).toList())
+      ..writeByte(27)
+      ..write(obj.presentPlayerIds);
   }
 }

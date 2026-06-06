@@ -23,22 +23,32 @@ class PlayerFormScreen extends ConsumerStatefulWidget {
 
 class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
   late final TextEditingController _nameController;
+  late final TextEditingController _jerseyNumberController;
 
   @override
   void initState() {
     super.initState();
     final initialState = ref.read(playerFormProvider(widget.playerId));
     _nameController = TextEditingController(text: initialState.name);
+    _jerseyNumberController = TextEditingController(
+      text: initialState.jerseyNumber,
+    );
     _nameController.addListener(() {
       ref
           .read(playerFormProvider(widget.playerId).notifier)
           .updateName(_nameController.text);
+    });
+    _jerseyNumberController.addListener(() {
+      ref
+          .read(playerFormProvider(widget.playerId).notifier)
+          .updateJerseyNumber(_jerseyNumberController.text);
     });
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _jerseyNumberController.dispose();
     super.dispose();
   }
 
@@ -48,15 +58,16 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
     final notifier = ref.read(playerFormProvider(widget.playerId).notifier);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SportScreenShell(
         title: widget.playerId == null && widget.player == null
             ? 'New player'
             : 'Edit player',
         subtitle: 'Roster profile',
+        showBackButton: true,
         child: Column(
           spacing: 14,
           children: [
-            const SportBackButton(),
             DecoratedBox(
               decoration: sportGlassDecoration(),
               child: Padding(
@@ -96,10 +107,16 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
                         control: FTextFieldControl.managed(
                           controller: _nameController,
                         ),
-                        autofocus: true,
                         textCapitalization: TextCapitalization.words,
                         hint: 'Nome',
                       ),
+                    ),
+                    FTextFormField(
+                      control: FTextFieldControl.managed(
+                        controller: _jerseyNumberController,
+                      ),
+                      keyboardType: TextInputType.number,
+                      hint: 'Numero di maglia (opzionale)',
                     ),
                     FSelect<PlayerLinePreference>(
                       items: {
@@ -192,13 +209,33 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: DecoratedBox(
-            decoration: sportGlassDecoration(radius: 26),
+            decoration: BoxDecoration(
+              color: AppColors.sportHeaderDark,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: AppColors.white.withValues(alpha: 0.14),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.black.withValues(alpha: 0.42),
+                  blurRadius: 30,
+                  offset: const Offset(0, 18),
+                ),
+              ],
+            ),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 spacing: 8,
                 children: [
+                  ImageSourceTile(
+                    icon: FIcons.camera,
+                    title: 'Fotocamera',
+                    subtitle: 'Scatta una nuova foto profilo.',
+                    onTap: () =>
+                        Navigator.pop(context, ImageSourceChoice.camera),
+                  ),
                   ImageSourceTile(
                     icon: FIcons.image,
                     title: 'Galleria',
@@ -223,6 +260,7 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
     if (source == null) return;
 
     final success = switch (source) {
+      ImageSourceChoice.camera => await notifier.pickImageFromCamera(),
       ImageSourceChoice.gallery => await notifier.pickImageFromGallery(),
       ImageSourceChoice.files => await notifier.pickImageFromFiles(),
     };
@@ -238,6 +276,13 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
 
   Future<void> _save(BuildContext context, PlayerFormNotifier notifier) async {
     if (_nameController.text.trim().isEmpty) return;
+    final jersey = _jerseyNumberController.text.trim();
+    if (jersey.isNotEmpty && int.tryParse(jersey) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Inserisci un numero di maglia valido.')),
+      );
+      return;
+    }
     await notifier.save(widget.playerId);
     if (!context.mounted) return;
     if (context.canPop()) {
@@ -257,7 +302,7 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
   }
 }
 
-enum ImageSourceChoice { gallery, files }
+enum ImageSourceChoice { camera, gallery, files }
 
 class ImageSourceTile extends StatelessWidget {
   const ImageSourceTile({

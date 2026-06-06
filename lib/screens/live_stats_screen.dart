@@ -759,7 +759,10 @@ class LiveStatsScreen extends ConsumerWidget {
         }
 
         Future<void> triggerShowLineSelection(bool nextOnOffense) async {
-          final allPlayers = ref.read(rankedPlayersProvider);
+          final allPlayers = ref
+              .read(rankedPlayersProvider)
+              .where((player) => match.presentPlayerIds.contains(player.id))
+              .toList();
           final result = await showLineSelectionSheet(
             context,
             match: match,
@@ -775,6 +778,26 @@ class LiveStatsScreen extends ConsumerWidget {
               repository,
             );
           }
+        }
+
+        Future<void> triggerInjurySubstitution() async {
+          final allPlayers = ref
+              .read(rankedPlayersProvider)
+              .where((player) => match.presentPlayerIds.contains(player.id))
+              .toList();
+          final draft = await showInjurySubstitutionSheet(
+            context,
+            currentPlayers: players,
+            allPlayers: allPlayers,
+          );
+          if (draft == null) return;
+          await service.replaceInjuredPlayer(
+            match,
+            injured: draft.injured,
+            replacement: draft.replacement,
+            oursOnOffense: oursOnOffense,
+            repository: repository,
+          );
         }
 
         return Scaffold(
@@ -945,12 +968,7 @@ class LiveStatsScreen extends ConsumerWidget {
                                 repository: repository,
                               )
                             : null,
-                        onInjury: () => service.record(
-                          match,
-                          type: MatchStatType.injury,
-                          playersById: playersById,
-                          repository: repository,
-                        ),
+                        onInjury: triggerInjurySubstitution,
                         onUndo: match.statEvents.length > 1
                             ? () => service.undo(match, repository)
                             : null,

@@ -17,6 +17,7 @@ class PlayerAdapter extends TypeAdapter<Player> {
     final role = _readRole(fields[7]);
     final profileImagePath = fields[8] as String?;
     final isExternal = fields[9] as bool? ?? false;
+    final jerseyNumber = fields[10] as int?;
     return Player(
       id: fields[0] as String,
       name: fields[1] as String,
@@ -30,13 +31,14 @@ class PlayerAdapter extends TypeAdapter<Player> {
           ? null
           : profileImagePath,
       isExternal: isExternal,
+      jerseyNumber: jerseyNumber,
     );
   }
 
   @override
   void write(BinaryWriter writer, Player obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -56,7 +58,9 @@ class PlayerAdapter extends TypeAdapter<Player> {
       ..writeByte(8)
       ..write(obj.profileImagePath)
       ..writeByte(9)
-      ..write(obj.isExternal);
+      ..write(obj.isExternal)
+      ..writeByte(10)
+      ..write(obj.jerseyNumber);
   }
 
   PlayerLinePreference _readLinePreference(Object? value) {

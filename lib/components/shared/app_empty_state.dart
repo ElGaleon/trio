@@ -25,6 +25,8 @@ class SportEmptyState extends StatelessWidget {
         padding: const EdgeInsets.all(28),
         child: Column(
           spacing: 8,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
           children: [
             Icon(icon, color: AppColors.violet, size: 42),
             Padding(

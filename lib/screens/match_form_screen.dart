@@ -79,6 +79,7 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
     final recentTeams = ref.watch(recentMatchTeamsProvider);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SportScreenShell(
         title: widget.matchId == null && widget.match == null
             ? 'New match'

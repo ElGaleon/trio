@@ -25,6 +25,7 @@ class ScrimmageMatch {
     this.hasTimeouts = true,
     this.timeoutsPerTeamPerHalf = 2,
     this.timeoutSeconds = 90,
+    List<String>? presentPlayerIds,
     List<MatchStatType>? enabledStatTypes,
     List<MatchStatEvent>? statEvents,
   }) : teamSize = teamSize ?? teamAIds.length,
@@ -32,6 +33,8 @@ class ScrimmageMatch {
        teamBName = teamBName ?? (offenseVsDefense ? 'Difesa' : 'B'),
        initialRatings = initialRatings ?? {},
        finalRatings = finalRatings ?? {},
+       presentPlayerIds =
+           presentPlayerIds ?? {...teamAIds, ...teamBIds}.toList(),
        enabledStatTypes = enabledStatTypes ?? MatchStatType.defaultEnabled,
        statEvents = statEvents ?? [];
 
@@ -60,6 +63,7 @@ class ScrimmageMatch {
   bool hasTimeouts;
   int timeoutsPerTeamPerHalf;
   int timeoutSeconds;
+  List<String> presentPlayerIds;
   List<MatchStatType> enabledStatTypes;
   List<MatchStatEvent> statEvents;
 

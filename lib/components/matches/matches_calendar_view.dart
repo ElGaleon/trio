@@ -280,9 +280,7 @@ class _CompactWeekCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final start = selectedDay.subtract(
-      Duration(days: selectedDay.weekday - DateTime.monday),
-    );
+    final start = selectedDay.subtract(const Duration(days: 3));
     final days = [for (var i = 0; i < 7; i++) start.add(Duration(days: i))];
     final matchCounts = <String, int>{};
     for (final match in matches) {
@@ -292,20 +290,19 @@ class _CompactWeekCalendar extends StatelessWidget {
 
     return SizedBox(
       height: 92,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        itemCount: days.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final day = days[index];
-          return _CompactDayCard(
-            day: day,
-            selected: _sameDay(day, selectedDay),
-            matchCount: matchCounts[_dayKey(day)] ?? 0,
-            onTap: () => onSelect(day),
-          );
-        },
+      child: Row(
+        spacing: 8,
+        children: [
+          for (final day in days)
+            Expanded(
+              child: _CompactDayCard(
+                day: day,
+                selected: _sameDay(day, selectedDay),
+                matchCount: matchCounts[_dayKey(day)] ?? 0,
+                onTap: () => onSelect(day),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -332,7 +329,6 @@ class _CompactDayCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
-        width: 66,
         height: 88,
         decoration: BoxDecoration(
           color: selected
@@ -359,7 +355,7 @@ class _CompactDayCard extends StatelessWidget {
           children: [
             if (matchCount > 0)
               Positioned(
-                right: 10,
+                right: 8,
                 top: 9,
                 child: Container(
                   width: 6,
@@ -375,21 +371,28 @@ class _CompactDayCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 5,
                 children: [
-                  Text(
-                    day.day.toString(),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: selected ? AppColors.black : AppColors.white,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      day.day.toString(),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            color: selected ? AppColors.black : AppColors.white,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0,
+                          ),
                     ),
                   ),
-                  Text(
-                    _weekdayShort(day),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: selected
-                          ? AppColors.black.withValues(alpha: 0.70)
-                          : sportMutedText,
-                      fontWeight: FontWeight.w900,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      _weekdayShort(day),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: selected
+                            ? AppColors.black.withValues(alpha: 0.70)
+                            : sportMutedText,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                 ],

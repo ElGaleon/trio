@@ -126,13 +126,22 @@ class PlayerStatRow extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                clipBehavior: Clip.none,
-                child: Row(
-                  spacing: 6,
-                  children: _buttons(),
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final actions = _visibleActions();
+                  final useFullLabels = _fullLabelsFit(
+                    actions,
+                    constraints.maxWidth,
+                  );
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    clipBehavior: Clip.none,
+                    child: Row(
+                      spacing: 6,
+                      children: _buttons(actions, useFullLabels),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -141,36 +150,122 @@ class PlayerStatRow extends StatelessWidget {
     );
   }
 
-  List<Widget> _buttons() {
+  List<({String short, String full, MatchStatType type, bool destructive})>
+  _visibleActions() {
     final enabled = enabledStatTypes.toSet();
     final actions = oursOnOffense
         ? hasDisc
               ? [
-                  ('TE', MatchStatType.throwError, true),
-                  ('S', MatchStatType.stallOut, true),
+                  (
+                    short: 'TE',
+                    full: 'Throw error',
+                    type: MatchStatType.throwError,
+                    destructive: true,
+                  ),
+                  (
+                    short: 'Stall',
+                    full: 'Stall out',
+                    type: MatchStatType.stallOut,
+                    destructive: true,
+                  ),
                 ]
               : noDiscHolder
               ? [
-                  ('C', MatchStatType.catchDisc, false),
-                  ('RE', MatchStatType.catchError, true),
+                  (
+                    short: 'Catch',
+                    full: 'Catch',
+                    type: MatchStatType.catchDisc,
+                    destructive: false,
+                  ),
+                  (
+                    short: 'RE',
+                    full: 'Receive error',
+                    type: MatchStatType.catchError,
+                    destructive: true,
+                  ),
                 ]
               : [
-                  ('P', MatchStatType.pass, false),
-                  ('H', MatchStatType.huck, false),
-                  ('RE', MatchStatType.catchError, true),
+                  (
+                    short: 'Pass',
+                    full: 'Passaggio',
+                    type: MatchStatType.pass,
+                    destructive: false,
+                  ),
+                  (
+                    short: 'Huck',
+                    full: 'Huck',
+                    type: MatchStatType.huck,
+                    destructive: false,
+                  ),
+                  (
+                    short: 'RE',
+                    full: 'Receive error',
+                    type: MatchStatType.catchError,
+                    destructive: true,
+                  ),
                 ]
         : [
-            ('S', MatchStatType.stallOut, false),
-            ('C', MatchStatType.catchDisc, false),
-            ('B', MatchStatType.block, false),
-            ('A', MatchStatType.openError, true),
-            ('BU', MatchStatType.deepError, true),
-            ('R', MatchStatType.resetError, true),
+            (
+              short: 'Stall',
+              full: 'Stall out',
+              type: MatchStatType.stallOut,
+              destructive: false,
+            ),
+            (
+              short: 'Catch',
+              full: 'Catch',
+              type: MatchStatType.catchDisc,
+              destructive: false,
+            ),
+            (
+              short: 'Block',
+              full: 'Block',
+              type: MatchStatType.block,
+              destructive: false,
+            ),
+            (
+              short: 'A',
+              full: 'Aperto',
+              type: MatchStatType.openError,
+              destructive: true,
+            ),
+            (
+              short: 'Buco',
+              full: 'Buco',
+              type: MatchStatType.deepError,
+              destructive: true,
+            ),
+            (
+              short: 'Reset',
+              full: 'Reset',
+              type: MatchStatType.resetError,
+              destructive: true,
+            ),
           ];
 
-    final visibleActions = actions
-        .where((action) => enabled.contains(action.$2))
+    return actions
+        .where((action) => enabled.contains(action.type))
         .toList(growable: false);
+  }
+
+  bool _fullLabelsFit(
+    List<({String short, String full, MatchStatType type, bool destructive})>
+    actions,
+    double maxWidth,
+  ) {
+    final estimated = actions.fold<double>(
+      0,
+      (total, action) => total + 24 + (action.full.length * 7.4),
+    );
+    final spacing = actions.isEmpty ? 0 : (actions.length - 1) * 6;
+    return estimated + spacing <= maxWidth + 24;
+  }
+
+  List<Widget> _buttons(
+    List<({String short, String full, MatchStatType type, bool destructive})>
+    visibleActions,
+    bool useFullLabels,
+  ) {
     if (visibleActions.isEmpty) {
       return [
         const Text(
@@ -186,14 +281,15 @@ class PlayerStatRow extends StatelessWidget {
     return [
       for (final action in visibleActions)
         StatButton(
-          label: action.$1,
-          destructive: action.$3,
-          onTap: () => onEvent(action.$2),
+          label: useFullLabels ? action.full : action.short,
+          destructive: action.destructive,
+          onTap: () => onEvent(action.type),
         ),
     ];
   }
 
   String _numberLabel(Player player) {
-    return ((player.id.hashCode.abs() % 98) + 1).toString();
+    return player.jerseyNumber?.toString() ??
+        ((player.id.hashCode.abs() % 98) + 1).toString();
   }
 }

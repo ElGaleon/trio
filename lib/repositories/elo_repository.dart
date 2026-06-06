@@ -76,6 +76,7 @@ class EloRepository {
     required PlayerRole role,
     String? profileImagePath,
     required bool isExternal,
+    int? jerseyNumber,
   }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
@@ -84,7 +85,8 @@ class EloRepository {
       ..linePreference = linePreference
       ..role = role
       ..profileImagePath = _normalizedImagePath(profileImagePath)
-      ..isExternal = isExternal;
+      ..isExternal = isExternal
+      ..jerseyNumber = jerseyNumber;
     await playersBox.put(player.id, player);
   }
 
@@ -94,6 +96,7 @@ class EloRepository {
     PlayerRole role, [
     String? profileImagePath,
     bool isExternal = false,
+    int? jerseyNumber,
   ]) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
@@ -108,6 +111,7 @@ class EloRepository {
         role: role,
         profileImagePath: _normalizedImagePath(profileImagePath),
         isExternal: isExternal,
+        jerseyNumber: jerseyNumber,
       ),
     );
   }
@@ -148,6 +152,7 @@ class EloRepository {
           role: player.role,
           profileImagePath: player.profileImagePath,
           isExternal: player.isExternal,
+          jerseyNumber: player.jerseyNumber,
         ),
     };
     final orderedMatches = matchesBox.values.toList()

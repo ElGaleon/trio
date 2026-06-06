@@ -30,6 +30,7 @@ class Player {
     this.role = PlayerRole.cutter,
     this.profileImagePath,
     this.isExternal = false,
+    this.jerseyNumber,
   });
 
   final String id;
@@ -42,6 +43,7 @@ class Player {
   PlayerRole role;
   String? profileImagePath;
   bool isExternal;
+  int? jerseyNumber;
 
   String get initials {
     final trimmed = name.trim();

@@ -20,10 +20,11 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
         linePreference: PlayerLinePreference.offense,
         role: PlayerRole.cutter,
         isExternal: false,
+        jerseyNumber: '',
         profileImagePath: null,
       );
     }
-    
+
     final repository = ref.read(eloRepositoryProvider);
     final player = repository.playersBox.get(arg);
     if (player == null) {
@@ -32,21 +33,27 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
         linePreference: PlayerLinePreference.offense,
         role: PlayerRole.cutter,
         isExternal: false,
+        jerseyNumber: '',
         profileImagePath: null,
       );
     }
-    
+
     return PlayerFormState(
       name: player.name,
       linePreference: player.linePreference,
       role: player.role,
       isExternal: player.isExternal,
+      jerseyNumber: player.jerseyNumber?.toString() ?? '',
       profileImagePath: player.profileImagePath,
     );
   }
 
   void updateName(String name) {
     state = state.copyWith(name: name);
+  }
+
+  void updateJerseyNumber(String value) {
+    state = state.copyWith(jerseyNumber: value);
   }
 
   void updateLinePreference(PlayerLinePreference line) {
@@ -69,6 +76,22 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
     try {
       final image = await ImagePicker().pickImage(
         source: ImageSource.gallery,
+        maxWidth: 1400,
+        imageQuality: 86,
+      );
+      if (image == null) return false;
+      final savedPath = await _persistImage(File(image.path));
+      state = state.copyWith(profileImagePath: savedPath);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> pickImageFromCamera() async {
+    try {
+      final image = await ImagePicker().pickImage(
+        source: ImageSource.camera,
         maxWidth: 1400,
         imageQuality: 86,
       );
@@ -126,6 +149,7 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
         state.role,
         state.profileImagePath,
         state.isExternal,
+        _jerseyNumberOrNull(),
       );
     } else {
       final player = repository.playersBox.get(playerId);
@@ -137,12 +161,20 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
           role: state.role,
           profileImagePath: state.profileImagePath,
           isExternal: state.isExternal,
+          jerseyNumber: _jerseyNumberOrNull(),
         );
       }
     }
   }
+
+  int? _jerseyNumberOrNull() {
+    final trimmed = state.jerseyNumber.trim();
+    if (trimmed.isEmpty) return null;
+    return int.tryParse(trimmed);
+  }
 }
 
-final playerFormProvider = NotifierProvider.family<PlayerFormNotifier, PlayerFormState, String?>(
-  PlayerFormNotifier.new,
-);
+final playerFormProvider =
+    NotifierProvider.family<PlayerFormNotifier, PlayerFormState, String?>(
+      PlayerFormNotifier.new,
+    );

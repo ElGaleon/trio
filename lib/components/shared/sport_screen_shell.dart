@@ -66,6 +66,8 @@ class _SportScreenShellState extends State<SportScreenShell> {
   @override
   Widget build(BuildContext context) {
     final safeTop = MediaQuery.paddingOf(context).top;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final floatingInset = widget.floatingActionButton == null ? 0.0 : 76.0;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: AppColors.transparent,
@@ -94,6 +96,8 @@ class _SportScreenShellState extends State<SportScreenShell> {
                   children: [
                     CustomScrollView(
                       controller: _scrollController,
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
                       slivers: [
                         SliverAppBar(
                           pinned: true,
@@ -124,9 +128,7 @@ class _SportScreenShellState extends State<SportScreenShell> {
                         SliverPadding(
                           padding: widget.padding.add(
                             EdgeInsets.only(
-                              bottom: widget.floatingActionButton == null
-                                  ? 0
-                                  : 76,
+                              bottom: floatingInset + keyboardInset + 24,
                             ),
                           ),
                           sliver: SliverToBoxAdapter(child: widget.child),
@@ -136,7 +138,7 @@ class _SportScreenShellState extends State<SportScreenShell> {
                     if (widget.floatingActionButton != null)
                       Positioned(
                         right: 16,
-                        bottom: 16,
+                        bottom: 16 + keyboardInset,
                         child: widget.floatingActionButton!,
                       ),
                   ],
@@ -242,14 +244,7 @@ class SportHeaderContent extends StatelessWidget {
                 ],
               ),
             ),
-            if (actions case final actions?)
-              ...actions
-            else
-              HeaderIconButton(
-                size: actionSize,
-                icon: FIcons.settings,
-                onTap: () => context.go(AppRoutes.settings),
-              ),
+            if (actions case final actions?) ...actions,
           ],
         ),
       ),

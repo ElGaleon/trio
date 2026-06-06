@@ -66,8 +66,9 @@ class PlayerHero extends StatelessWidget {
                         ),
                         InfoPill(label: player.role.label),
                         InfoPill(label: player.linePreference.label),
-                        if (player.isExternal)
-                          const InfoPill(label: 'Esterno'),
+                        if (player.jerseyNumber != null)
+                          InfoPill(label: '#${player.jerseyNumber}'),
+                        if (player.isExternal) const InfoPill(label: 'Esterno'),
                       ],
                     ),
                   ],
