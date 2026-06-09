@@ -21,6 +21,11 @@ class StatsMatchSetupState {
   final Set<String> presentPlayerIds;
   final bool startOnOffense;
   final Set<String> selectedPlayerIds;
+  final bool isInternalScrimmage;
+  final Set<String> teamARosterIds;
+  final Set<String> teamBRosterIds;
+  final bool isTrainingMatch;
+  final bool isAttackVsDefense;
 
   StatsMatchSetupState({
     required this.step,
@@ -43,6 +48,11 @@ class StatsMatchSetupState {
     required this.presentPlayerIds,
     required this.startOnOffense,
     required this.selectedPlayerIds,
+    required this.isInternalScrimmage,
+    required this.teamARosterIds,
+    required this.teamBRosterIds,
+    required this.isTrainingMatch,
+    required this.isAttackVsDefense,
   });
 
   StatsMatchSetupState copyWith({
@@ -66,6 +76,11 @@ class StatsMatchSetupState {
     Set<String>? presentPlayerIds,
     bool? startOnOffense,
     Set<String>? selectedPlayerIds,
+    bool? isInternalScrimmage,
+    Set<String>? teamARosterIds,
+    Set<String>? teamBRosterIds,
+    bool? isTrainingMatch,
+    bool? isAttackVsDefense,
   }) {
     return StatsMatchSetupState(
       step: step ?? this.step,
@@ -89,6 +104,11 @@ class StatsMatchSetupState {
       presentPlayerIds: presentPlayerIds ?? this.presentPlayerIds,
       startOnOffense: startOnOffense ?? this.startOnOffense,
       selectedPlayerIds: selectedPlayerIds ?? this.selectedPlayerIds,
+      isInternalScrimmage: isInternalScrimmage ?? this.isInternalScrimmage,
+      teamARosterIds: teamARosterIds ?? this.teamARosterIds,
+      teamBRosterIds: teamBRosterIds ?? this.teamBRosterIds,
+      isTrainingMatch: isTrainingMatch ?? this.isTrainingMatch,
+      isAttackVsDefense: isAttackVsDefense ?? this.isAttackVsDefense,
     );
   }
 }

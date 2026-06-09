@@ -26,7 +26,7 @@ class Player {
     this.matchesPlayed = 0,
     this.wins = 0,
     this.losses = 0,
-    this.linePreference = PlayerLinePreference.offense,
+    this.linePreference,
     this.role = PlayerRole.cutter,
     this.profileImagePath,
     this.isExternal = false,
@@ -39,7 +39,7 @@ class Player {
   int matchesPlayed;
   int wins;
   int losses;
-  PlayerLinePreference linePreference;
+  PlayerLinePreference? linePreference;
   PlayerRole role;
   String? profileImagePath;
   bool isExternal;

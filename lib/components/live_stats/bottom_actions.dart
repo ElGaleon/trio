@@ -10,6 +10,9 @@ class BottomActions extends StatelessWidget {
     required this.oursOnOffense,
     required this.showThrowaway,
     required this.timeoutLabel,
+    this.goalLabel = 'GOAL',
+    this.opponentGoalLabel = 'META AVV',
+    this.opponentErrorLabel = 'THROWAWAY',
     required this.onGoal,
     required this.onOpponentGoal,
     required this.onOpponentError,
@@ -22,6 +25,9 @@ class BottomActions extends StatelessWidget {
   final bool oursOnOffense;
   final bool showThrowaway;
   final String timeoutLabel;
+  final String goalLabel;
+  final String opponentGoalLabel;
+  final String opponentErrorLabel;
   final VoidCallback onGoal;
   final VoidCallback onOpponentGoal;
   final VoidCallback onOpponentError;
@@ -46,7 +52,7 @@ class BottomActions extends StatelessWidget {
                   Expanded(
                     flex: oursOnOffense ? 5 : 4,
                     child: GeneralActionButton(
-                      label: oursOnOffense ? 'GOAL' : 'THROWAWAY',
+                      label: oursOnOffense ? goalLabel : opponentErrorLabel,
                       icon: oursOnOffense ? FIcons.flag : FIcons.rotateCcw,
                       accent: AppColors.violet,
                       onTap: oursOnOffense ? onGoal : onOpponentError,
@@ -56,7 +62,7 @@ class BottomActions extends StatelessWidget {
                   Expanded(
                     flex: 3,
                     child: GeneralActionButton(
-                      label: 'META AVV',
+                      label: opponentGoalLabel,
                       icon: FIcons.circleDot,
                       accent: AppColors.danger,
                       compact: true,
@@ -73,7 +79,7 @@ class BottomActions extends StatelessWidget {
             Row(
               spacing: 8,
               children: [
-                if (!oursOnOffense && onPull != null)
+                if (onPull != null)
                   Expanded(
                     child: GeneralActionButton(
                       label: 'PULL',

@@ -665,15 +665,37 @@ Future<void> confirmAndRecordGoal(
     await onShowLineSelection(res.oursOnOffense);
   }
 }
-
-class LiveStatsScreen extends ConsumerWidget {
+class LiveStatsScreen extends ConsumerStatefulWidget {
   const LiveStatsScreen({super.key, required this.matchId});
 
   final String matchId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final match = ref.watch(matchDetailsProvider(matchId));
+  ConsumerState<LiveStatsScreen> createState() => _LiveStatsScreenState();
+}
+
+class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
+  String _selectedTeamTab = 'teamA';
+  bool _firstLoadChecked = false;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(
+      initialPage: _selectedTeamTab == 'teamA' ? 0 : 1,
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final match = ref.watch(matchDetailsProvider(widget.matchId));
     if (match == null) {
       return const Scaffold(
         body: SportScreenShell(
@@ -703,10 +725,7 @@ class LiveStatsScreen extends ConsumerWidget {
           for (final player in ref.watch(rankedPlayersProvider))
             player.id: player,
         };
-        final players = match.teamAIds
-            .map((id) => playersById[id])
-            .nonNulls
-            .toList();
+
         final lastEvent = match.statEvents.isEmpty
             ? null
             : match.statEvents.last;
@@ -770,14 +789,23 @@ class LiveStatsScreen extends ConsumerWidget {
             getPointsPlayed: (pid) => service.pointsPlayed(match, pid),
             nextOnOffense: nextOnOffense,
           );
-          if (result != null && result.length == match.teamSize) {
+          if (result != null) {
             await service.updateLineup(
               match,
-              result.toList(),
+              result.teamAIds.toList(),
+              result.teamBIds.toList(),
               nextOnOffense,
               repository,
             );
           }
+        }
+
+        // Automatic line selection prompt on first load if lineup is empty
+        if (!_firstLoadChecked && match.teamAIds.isEmpty) {
+          _firstLoadChecked = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            triggerShowLineSelection(lastEvent?.oursOnOffense ?? true);
+          });
         }
 
         Future<void> triggerInjurySubstitution() async {
@@ -785,9 +813,12 @@ class LiveStatsScreen extends ConsumerWidget {
               .read(rankedPlayersProvider)
               .where((player) => match.presentPlayerIds.contains(player.id))
               .toList();
+          final currentPlayersList = match.isExternalOpponent
+              ? match.teamAIds.map((id) => playersById[id]).nonNulls.toList()
+              : [...match.teamAIds, ...match.teamBIds].map((id) => playersById[id]).nonNulls.toList();
           final draft = await showInjurySubstitutionSheet(
             context,
-            currentPlayers: players,
+            currentPlayers: currentPlayersList,
             allPlayers: allPlayers,
           );
           if (draft == null) return;
@@ -799,6 +830,55 @@ class LiveStatsScreen extends ConsumerWidget {
             repository: repository,
           );
         }
+
+        Widget buildPlayerList({
+          required List<String> activeIds,
+          required bool playerOnOffense,
+        }) {
+          final listPlayers = activeIds
+              .map((id) => playersById[id])
+              .nonNulls
+              .toList();
+
+          return ListView(
+            padding: EdgeInsets.zero,
+            children: listPlayers
+                .map(
+                  (player) => PlayerStatRow(
+                    player: player,
+                    enabledStatTypes: match.enabledStatTypes,
+                    oursOnOffense: playerOnOffense,
+                    hasDisc: player.id == discHolderId,
+                    noDiscHolder: playerOnOffense && discHolderId == null,
+                    onEvent: (type) async {
+                      final res = await service.record(
+                        match,
+                        type: type,
+                        player: player,
+                        playersById: playersById,
+                        repository: repository,
+                      );
+                      if (res.finished) {
+                        await triggerFinishMatch();
+                      } else if (res.scoredPoint && context.mounted) {
+                        if (match.teamAIds.isEmpty) {
+                          await triggerShowLineSelection(
+                            res.oursOnOffense,
+                          );
+                        }
+                      }
+                    },
+                  ),
+                )
+                .toList(),
+          );
+        }
+
+        final defendingActiveIds = oursOnOffense ? match.teamBIds : match.teamAIds;
+        final defendingPlayers = defendingActiveIds
+            .map((id) => playersById[id])
+            .nonNulls
+            .toList();
 
         return Scaffold(
           body: DecoratedBox(
@@ -815,8 +895,9 @@ class LiveStatsScreen extends ConsumerWidget {
               ),
             ),
             child: SafeArea(
+              bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                 child: Column(
                   spacing: 8,
                   children: [
@@ -848,49 +929,55 @@ class LiveStatsScreen extends ConsumerWidget {
                       halfTimeDue: halfTimeDue,
                       onHalfTime: halfTimeDue
                           ? () => showHalfTimePrompt(
-                              context,
-                              service,
-                              match,
-                              playersById,
-                              repository,
-                            )
+                                context,
+                                service,
+                                match,
+                                playersById,
+                                repository,
+                              )
                           : null,
                     ),
+                    if (!match.isExternalOpponent && activePause == null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 16,
+                          children: [
+                            _TeamTabHeader(
+                              label: match.teamAName,
+                              selected: _selectedTeamTab == 'teamA',
+                              count: match.teamAIds.length,
+                              teamSize: match.teamSize,
+                              onTap: () {
+                                setState(() => _selectedTeamTab = 'teamA');
+                                _pageController.animateToPage(
+                                  0,
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                            ),
+                            _TeamTabHeader(
+                              label: match.teamBName,
+                              selected: _selectedTeamTab == 'teamB',
+                              count: match.teamBIds.length,
+                              teamSize: match.teamSize,
+                              onTap: () {
+                                setState(() => _selectedTeamTab = 'teamB');
+                                _pageController.animateToPage(
+                                  1,
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                     Expanded(
-                      child: activePause == null
-                          ? ListView(
-                              padding: EdgeInsets.zero,
-                              children: players
-                                  .map(
-                                    (player) => PlayerStatRow(
-                                      player: player,
-                                      enabledStatTypes: match.enabledStatTypes,
-                                      oursOnOffense: oursOnOffense,
-                                      hasDisc: player.id == discHolderId,
-                                      noDiscHolder:
-                                          oursOnOffense && discHolderId == null,
-                                      onEvent: (type) async {
-                                        final res = await service.record(
-                                          match,
-                                          type: type,
-                                          player: player,
-                                          playersById: playersById,
-                                          repository: repository,
-                                        );
-                                        if (res.finished) {
-                                          await triggerFinishMatch();
-                                        } else if (res.scoredPoint &&
-                                            context.mounted) {
-                                          await triggerShowLineSelection(
-                                            res.oursOnOffense,
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  )
-                                  .toList(),
-                            )
-                          : PausePanel(
+                      child: activePause != null
+                          ? PausePanel(
                               pause: activePause,
                               summary: summary,
                               onSelectLine: () => triggerShowLineSelection(
@@ -903,7 +990,30 @@ class LiveStatsScreen extends ConsumerWidget {
                                 activePause.nextOnOffense,
                                 repository,
                               ),
-                            ),
+                            )
+                          : match.isExternalOpponent
+                              ? buildPlayerList(
+                                  activeIds: match.teamAIds,
+                                  playerOnOffense: oursOnOffense,
+                                )
+                              : PageView(
+                                  controller: _pageController,
+                                  onPageChanged: (page) {
+                                    setState(() {
+                                      _selectedTeamTab = page == 0 ? 'teamA' : 'teamB';
+                                    });
+                                  },
+                                  children: [
+                                    buildPlayerList(
+                                      activeIds: match.teamAIds,
+                                      playerOnOffense: oursOnOffense,
+                                    ),
+                                    buildPlayerList(
+                                      activeIds: match.teamBIds,
+                                      playerOnOffense: !oursOnOffense,
+                                    ),
+                                  ],
+                                ),
                     ),
                     if (activePause == null)
                       BottomActions(
@@ -912,6 +1022,9 @@ class LiveStatsScreen extends ConsumerWidget {
                           MatchStatType.opponentError,
                         ),
                         timeoutLabel: 'TIMEOUT',
+                        goalLabel: match.isExternalOpponent ? 'GOAL' : 'META ${match.teamAName.toUpperCase()}',
+                        opponentGoalLabel: match.isExternalOpponent ? 'META AVV' : 'META ${match.teamBName.toUpperCase()}',
+                        opponentErrorLabel: match.isExternalOpponent ? 'THROWAWAY' : 'PALLA PERSA ${match.teamBName.toUpperCase()}',
                         onGoal: () => confirmAndRecordGoal(
                           context,
                           service,
@@ -944,11 +1057,11 @@ class LiveStatsScreen extends ConsumerWidget {
                           }
                         },
                         onPull:
-                            !oursOnOffense && match.tracks(MatchStatType.pull)
+                            (!oursOnOffense || !match.isExternalOpponent) && match.tracks(MatchStatType.pull)
                             ? () async {
                                 final draft = await showPullSheet(
                                   context,
-                                  players,
+                                  defendingPlayers,
                                 );
                                 if (draft == null) return;
                                 await service.recordPull(
@@ -981,6 +1094,75 @@ class LiveStatsScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _TeamTabHeader extends StatelessWidget {
+  const _TeamTabHeader({
+    required this.label,
+    required this.selected,
+    required this.count,
+    required this.teamSize,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final int count;
+  final int teamSize;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.violet.withValues(alpha: 0.20)
+              : AppColors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: selected
+                ? AppColors.violet
+                : AppColors.white.withValues(alpha: 0.10),
+          ),
+        ),
+        child: Row(
+          spacing: 8,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: selected ? AppColors.white : sportMutedText,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: count == teamSize
+                    ? AppColors.violetLight.withValues(alpha: 0.3)
+                    : AppColors.black.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                '$count/$teamSize',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: count == teamSize
+                      ? AppColors.violetLight
+                      : sportMutedText,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

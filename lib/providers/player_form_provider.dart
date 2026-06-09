@@ -17,7 +17,7 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
     if (arg == null) {
       return PlayerFormState(
         name: '',
-        linePreference: PlayerLinePreference.offense,
+        linePreference: null,
         role: PlayerRole.cutter,
         isExternal: false,
         jerseyNumber: '',
@@ -30,7 +30,7 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
     if (player == null) {
       return PlayerFormState(
         name: '',
-        linePreference: PlayerLinePreference.offense,
+        linePreference: null,
         role: PlayerRole.cutter,
         isExternal: false,
         jerseyNumber: '',
@@ -56,7 +56,7 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
     state = state.copyWith(jerseyNumber: value);
   }
 
-  void updateLinePreference(PlayerLinePreference line) {
+  void updateLinePreference(PlayerLinePreference? line) {
     state = state.copyWith(linePreference: line);
   }
 
@@ -175,6 +175,6 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
 }
 
 final playerFormProvider =
-    NotifierProvider.family<PlayerFormNotifier, PlayerFormState, String?>(
+    NotifierProvider.autoDispose.family<PlayerFormNotifier, PlayerFormState, String?>(
       PlayerFormNotifier.new,
     );

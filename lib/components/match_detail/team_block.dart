@@ -84,7 +84,7 @@ class TeamBlock extends StatelessWidget {
                             Text(
                               [
                                 player.role.label,
-                                player.linePreference.label,
+                                player.linePreference?.label ?? 'Nessuna',
                                 if (player.isExternal) 'Esterno',
                               ].join(' · '),
                               style: textTheme.bodySmall?.copyWith(

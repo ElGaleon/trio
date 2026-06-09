@@ -64,7 +64,7 @@ class PlayerCard extends StatelessWidget {
                       Text(
                         [
                           player.role.label,
-                          player.linePreference.label,
+                          player.linePreference?.label ?? 'Nessuna linea',
                           if (player.jerseyNumber != null)
                             '#${player.jerseyNumber}',
                           if (player.isExternal) 'Esterno',

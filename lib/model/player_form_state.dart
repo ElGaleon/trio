@@ -2,7 +2,7 @@ import 'player.dart';
 
 class PlayerFormState {
   final String name;
-  final PlayerLinePreference linePreference;
+  final PlayerLinePreference? linePreference;
   final PlayerRole role;
   final bool isExternal;
   final String jerseyNumber;
@@ -10,7 +10,7 @@ class PlayerFormState {
 
   PlayerFormState({
     required this.name,
-    required this.linePreference,
+    this.linePreference,
     required this.role,
     required this.isExternal,
     required this.jerseyNumber,

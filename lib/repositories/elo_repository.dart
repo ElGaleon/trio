@@ -72,7 +72,7 @@ class EloRepository {
   Future<void> savePlayer(
     Player player, {
     required String name,
-    required PlayerLinePreference linePreference,
+    required PlayerLinePreference? linePreference,
     required PlayerRole role,
     String? profileImagePath,
     required bool isExternal,
@@ -92,7 +92,7 @@ class EloRepository {
 
   Future<void> addPlayerWithLine(
     String name,
-    PlayerLinePreference linePreference,
+    PlayerLinePreference? linePreference,
     PlayerRole role, [
     String? profileImagePath,
     bool isExternal = false,
@@ -159,8 +159,10 @@ class EloRepository {
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
     for (final match in orderedMatches) {
-      final teamA = match.teamAIds.map((id) => players[id]).nonNulls.toList();
-      final teamB = match.teamBIds.map((id) => players[id]).nonNulls.toList();
+      final rosterA = match.teamARosterIds.isNotEmpty ? match.teamARosterIds : match.teamAIds;
+      final rosterB = match.teamBRosterIds.isNotEmpty ? match.teamBRosterIds : match.teamBIds;
+      final teamA = rosterA.map((id) => players[id]).nonNulls.toList();
+      final teamB = rosterB.map((id) => players[id]).nonNulls.toList();
       if (teamA.isEmpty ||
           teamB.isEmpty ||
           teamA.length < match.teamSize ||

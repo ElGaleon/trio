@@ -92,7 +92,7 @@ class LineupPlayerTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${player.linePreference.label} · ${player.role.label}',
+                      '${player.linePreference?.label ?? 'Nessuna'} · ${player.role.label}',
                       style: textTheme.bodySmall?.copyWith(
                         color: sportMutedText,
                         fontWeight: FontWeight.w700,
@@ -147,7 +147,82 @@ class InjurySubstitutionDraft {
   final Player replacement;
 }
 
-Future<Set<String>?> showLineSelectionSheet(
+class LineupSelectionResult {
+  final Set<String> teamAIds;
+  final Set<String> teamBIds;
+  const LineupSelectionResult({required this.teamAIds, required this.teamBIds});
+}
+
+class _TeamTabHeader extends StatelessWidget {
+  const _TeamTabHeader({
+    required this.label,
+    required this.selected,
+    required this.count,
+    required this.teamSize,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final int count;
+  final int teamSize;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.violet.withValues(alpha: 0.20)
+              : AppColors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: selected
+                ? AppColors.violet
+                : AppColors.white.withValues(alpha: 0.10),
+          ),
+        ),
+        child: Row(
+          spacing: 8,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: selected ? AppColors.white : sportMutedText,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: count == teamSize
+                    ? AppColors.violetLight.withValues(alpha: 0.3)
+                    : AppColors.black.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                '$count/$teamSize',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: count == teamSize
+                      ? AppColors.violetLight
+                      : sportMutedText,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Future<LineupSelectionResult?> showLineSelectionSheet(
   BuildContext context, {
   required ScrimmageMatch match,
   required List<Player> allPlayers,
@@ -157,7 +232,23 @@ Future<Set<String>?> showLineSelectionSheet(
   final preferred = nextOnOffense
       ? PlayerLinePreference.offense
       : PlayerLinePreference.defense;
-  final selected = match.teamAIds.toSet();
+
+  final selectedA = match.teamAIds.toSet();
+  final selectedB = match.teamBIds.toSet();
+  var activeTab = 'teamA';
+
+  List<Player> getSortedTeamPlayers(List<String> rosterIds) {
+    final rosterPlayers = allPlayers.where((p) => rosterIds.contains(p.id)).toList();
+    return rosterPlayers
+      ..sort((a, b) {
+        final byLine = (a.linePreference == preferred ? 0 : 1).compareTo(
+          b.linePreference == preferred ? 0 : 1,
+        );
+        if (byLine != 0) return byLine;
+        return a.name.compareTo(b.name);
+      });
+  }
+
   final sortedPlayers = [...allPlayers]
     ..sort((a, b) {
       final byLine = (a.linePreference == preferred ? 0 : 1).compareTo(
@@ -166,24 +257,43 @@ Future<Set<String>?> showLineSelectionSheet(
       if (byLine != 0) return byLine;
       return a.name.compareTo(b.name);
     });
-  final preferredPlayers = sortedPlayers
-      .where((player) => player.linePreference == preferred)
-      .toList();
-  final otherPlayers = sortedPlayers
-      .where((player) => player.linePreference != preferred)
-      .toList();
-  final otherLineLabel = preferred == PlayerLinePreference.offense
-      ? PlayerLinePreference.defense.label
-      : PlayerLinePreference.offense.label;
+
   var showOtherLine = false;
 
-  return showModalBottomSheet<Set<String>>(
+  return showModalBottomSheet<LineupSelectionResult>(
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.transparent,
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setSheetState) {
+          final isScrimmage = !match.isExternalOpponent;
+
+          List<Player> visiblePlayers;
+          Set<String> activeSelection;
+          if (isScrimmage) {
+            final roster = activeTab == 'teamA' ? match.teamARosterIds : match.teamBRosterIds;
+            visiblePlayers = getSortedTeamPlayers(roster);
+            activeSelection = activeTab == 'teamA' ? selectedA : selectedB;
+          } else {
+            visiblePlayers = sortedPlayers;
+            activeSelection = selectedA;
+          }
+
+          final preferredPlayers = visiblePlayers
+              .where((player) => player.linePreference == preferred)
+              .toList();
+          final otherPlayers = visiblePlayers
+              .where((player) => player.linePreference != preferred)
+              .toList();
+          final otherLineLabel = preferred == PlayerLinePreference.offense
+              ? PlayerLinePreference.defense.label
+              : PlayerLinePreference.offense.label;
+
+          final canSubmit = isScrimmage
+              ? (selectedA.length == match.teamSize && selectedB.length == match.teamSize)
+              : selectedA.length == match.teamSize;
+
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(14),
@@ -203,13 +313,36 @@ Future<Set<String>?> showLineSelectionSheet(
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    Text(
-                      '${selected.length}/${match.teamSize} in campo',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: sportMutedText,
-                        fontWeight: FontWeight.w800,
+                    if (isScrimmage) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _TeamTabHeader(
+                            label: match.teamAName,
+                            selected: activeTab == 'teamA',
+                            count: selectedA.length,
+                            teamSize: match.teamSize,
+                            onTap: () => setSheetState(() => activeTab = 'teamA'),
+                          ),
+                          const SizedBox(width: 16),
+                          _TeamTabHeader(
+                            label: match.teamBName,
+                            selected: activeTab == 'teamB',
+                            count: selectedB.length,
+                            teamSize: match.teamSize,
+                            onTap: () => setSheetState(() => activeTab = 'teamB'),
+                          ),
+                        ],
                       ),
-                    ),
+                    ] else ...[
+                      Text(
+                        '${selectedA.length}/${match.teamSize} in campo',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: sportMutedText,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
                     Expanded(
                       child: ListView(
                         children: [
@@ -218,9 +351,9 @@ Future<Set<String>?> showLineSelectionSheet(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: _SelectableLineupTile(
                                 player: player,
-                                selected: selected.contains(player.id),
+                                selected: activeSelection.contains(player.id),
                                 pointsPlayed: getPointsPlayed(player.id),
-                                selectedIds: selected,
+                                selectedIds: activeSelection,
                                 teamSize: match.teamSize,
                                 onChanged: setSheetState,
                               ),
@@ -262,7 +395,7 @@ Future<Set<String>?> showLineSelectionSheet(
                                       ),
                                     ),
                                     Text(
-                                      '${otherPlayers.where((player) => selected.contains(player.id)).length}/${otherPlayers.length}',
+                                      '${otherPlayers.where((player) => activeSelection.contains(player.id)).length}/${otherPlayers.length}',
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
@@ -298,9 +431,9 @@ Future<Set<String>?> showLineSelectionSheet(
                                     padding: const EdgeInsets.only(bottom: 8),
                                     child: _SelectableLineupTile(
                                       player: player,
-                                      selected: selected.contains(player.id),
+                                      selected: activeSelection.contains(player.id),
                                       pointsPlayed: getPointsPlayed(player.id),
-                                      selectedIds: selected,
+                                      selectedIds: activeSelection,
                                       teamSize: match.teamSize,
                                       onChanged: setSheetState,
                                     ),
@@ -317,12 +450,20 @@ Future<Set<String>?> showLineSelectionSheet(
                       ),
                     ),
                     SportFloatingActionButton(
-                      label: selected.length == match.teamSize
+                      label: canSubmit
                           ? 'Start point'
-                          : 'Seleziona ${match.teamSize}',
+                          : isScrimmage
+                              ? 'Seleziona ${match.teamSize} per team'
+                              : 'Seleziona ${match.teamSize}',
                       icon: FIcons.play,
-                      onPressed: selected.length == match.teamSize
-                          ? () => Navigator.pop(context, selected)
+                      onPressed: canSubmit
+                          ? () => Navigator.pop(
+                                context,
+                                LineupSelectionResult(
+                                  teamAIds: selectedA,
+                                  teamBIds: selectedB,
+                                ),
+                              )
                           : () {},
                     ),
                   ],
@@ -568,7 +709,7 @@ class _SubstitutionSection extends StatelessWidget {
                                       ),
                                 ),
                                 Text(
-                                  '${player.role.label} · ${player.linePreference.label}',
+                                  '${player.role.label} · ${player.linePreference?.label ?? 'Nessuna'}',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: sportMutedText,

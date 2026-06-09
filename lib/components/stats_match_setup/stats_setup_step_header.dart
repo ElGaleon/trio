@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 class StatsSetupStepHeader extends StatelessWidget {
-  const StatsSetupStepHeader({super.key, required this.step});
+  const StatsSetupStepHeader({
+    super.key,
+    required this.step,
+    required this.labels,
+  });
 
   final int step;
+  final List<String> labels;
 
   @override
   Widget build(BuildContext context) {
-    const labels = ['Info', 'Presenti', 'Stats', 'Linea'];
     return Row(
       spacing: 8,
       children: List.generate(labels.length, (index) {
@@ -16,7 +20,7 @@ class StatsSetupStepHeader extends StatelessWidget {
         final completed = index < step;
         return Expanded(
           child: FBadge(
-            variant: active || completed ? .primary : .outline,
+            variant: active || completed ? FBadgeVariant.primary : FBadgeVariant.outline,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,

@@ -131,16 +131,21 @@ class _MatchScoreHeaderDelegate extends SliverPersistentHeaderDelegate {
             if (showExpanded)
               Expanded(
                 child: ClipRect(
-                  child: Opacity(
-                    opacity: (1 - (progress / 0.82)).clamp(0.0, 1.0),
-                    child: Transform.translate(
-                      offset: Offset(0, -10 * progress),
-                      child: Center(
-                        child: Hero(
-                          tag: matchHeroTag(match.id),
-                          child: MatchScoreHeroPanel(
-                            match: match,
-                            framed: false,
+                  child: OverflowBox(
+                    minHeight: 0,
+                    maxHeight: 240,
+                    alignment: Alignment.center,
+                    child: Opacity(
+                      opacity: (1 - (progress / 0.82)).clamp(0.0, 1.0),
+                      child: Transform.translate(
+                        offset: Offset(0, -10 * progress),
+                        child: Center(
+                          child: Hero(
+                            tag: matchHeroTag(match.id),
+                            child: MatchScoreHeroPanel(
+                              match: match,
+                              framed: false,
+                            ),
                           ),
                         ),
                       ),
@@ -414,11 +419,13 @@ class MatchDetailScreen extends ConsumerWidget {
     }
 
     final playersById = {for (final player in players) player.id: player};
-    final teamA = currentMatch.teamAIds
+    final rosterA = currentMatch.teamARosterIds.isNotEmpty ? currentMatch.teamARosterIds : currentMatch.teamAIds;
+    final rosterB = currentMatch.teamBRosterIds.isNotEmpty ? currentMatch.teamBRosterIds : currentMatch.teamBIds;
+    final teamA = rosterA
         .map((id) => playersById[id])
         .nonNulls
         .toList();
-    final teamB = currentMatch.teamBIds
+    final teamB = rosterB
         .map((id) => playersById[id])
         .nonNulls
         .toList();

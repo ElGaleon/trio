@@ -82,7 +82,7 @@ class PresenceStep extends StatelessWidget {
                   prefix: Icon(_lineIcon(player.linePreference)),
                   title: Text(player.name),
                   subtitle: Text(
-                    '${player.role.label} · ${player.linePreference.label}',
+                    '${player.role.label} · ${player.linePreference?.label ?? 'Nessuna'}',
                   ),
                   suffix: selected
                       ? const Icon(FIcons.check, size: 18)
@@ -99,10 +99,11 @@ class PresenceStep extends StatelessWidget {
     );
   }
 
-  IconData _lineIcon(PlayerLinePreference linePreference) {
+  IconData _lineIcon(PlayerLinePreference? linePreference) {
     return switch (linePreference) {
       PlayerLinePreference.offense => FIcons.arrowUpRight,
       PlayerLinePreference.defense => FIcons.shield,
+      null => FIcons.user,
     };
   }
 }

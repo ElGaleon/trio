@@ -132,6 +132,7 @@ class MatchesScreen extends ConsumerWidget {
 
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: AppColors.transparent,
       builder: (context) => SafeArea(
         child: Padding(
@@ -140,47 +141,58 @@ class MatchesScreen extends ConsumerWidget {
             decoration: solidPanelDecoration(radius: 28),
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 12,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Nuova Partita',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.w900,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 12,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Nuova Partita',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Scegli il tipo di partita da registrare',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.sportMutedText,
-                      fontWeight: FontWeight.w800,
+                    Text(
+                      'Scegli il tipo di partita da registrare',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.sportMutedText,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: PopupOption(
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: PopupOption(
+                        icon: FIcons.plus,
+                        title: 'Partita Rapida (Solo Risultato & ELO)',
+                        subtitle: 'Inserisci a posteriori il risultato finale',
+                        onTap: () {
+                          Navigator.pop(context);
+                          context.go(AppRoutes.newMatch);
+                        },
+                      ),
+                    ),
+                    PopupOption(
                       icon: FIcons.users,
-                      title: 'Allenamento (Solo Risultato & ELO)',
-                      subtitle: 'Partitella interna con calcolo ELO automatico',
+                      title: 'Partita di Allenamento (Stats)',
+                      subtitle: 'Traccia statistiche in tempo reale per partitella interna',
                       onTap: () {
                         Navigator.pop(context);
-                        context.go(AppRoutes.newMatch);
+                        context.go('${AppRoutes.newStatsMatch}?type=training');
                       },
                     ),
-                  ),
-                  PopupOption(
-                    icon: FIcons.activity,
-                    title: 'Partita Ufficiale (Stats & vs Altri)',
-                    subtitle: 'Traccia statistiche in tempo reale vs esterni',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.go(AppRoutes.newStatsMatch);
-                    },
-                  ),
-                ],
+                    PopupOption(
+                      icon: FIcons.activity,
+                      title: 'Partita Ufficiale (Stats & vs Altri)',
+                      subtitle: 'Traccia statistiche in tempo reale vs esterni',
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.go('${AppRoutes.newStatsMatch}?type=official');
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -89,18 +89,34 @@ class LiveStatsService {
         ? null
         : playersById[discHolderId];
 
+    final isPlayerTeamA = player == null || (match.isExternalOpponent ? true : !match.teamBRosterIds.contains(player.id));
+    final activeLineupA = [...match.teamAIds];
+    final activeLineupB = [...match.teamBIds];
+
     final scoredPoint =
         type == MatchStatType.goal || type == MatchStatType.opponentGoal;
+
+    final shouldClearA = match.matchType != 'Allenamento' &&
+        (match.isExternalOpponent
+            ? match.presentPlayerIds.length > match.teamSize
+            : match.teamARosterIds.length > match.teamSize);
+    final shouldClearB = match.matchType != 'Allenamento' &&
+        (!match.isExternalOpponent && match.teamBRosterIds.length > match.teamSize);
+
     if (type == MatchStatType.goal) {
       scoreA += 1;
       point += 1;
       oursOnOffense = false;
       discHolderId = null;
+      if (shouldClearA) match.teamAIds = [];
+      if (shouldClearB) match.teamBIds = [];
     } else if (type == MatchStatType.opponentGoal) {
       scoreB += 1;
       point += 1;
       oursOnOffense = true;
       discHolderId = null;
+      if (shouldClearA) match.teamAIds = [];
+      if (shouldClearB) match.teamBIds = [];
     } else if (type == MatchStatType.timeout ||
         type == MatchStatType.injury ||
         type == MatchStatType.halfTime ||
@@ -110,19 +126,19 @@ class LiveStatsService {
         type == MatchStatType.pull) {
       // No possession change.
     } else if (type == MatchStatType.pass || type == MatchStatType.huck) {
-      oursOnOffense = true;
+      oursOnOffense = isPlayerTeamA;
       discHolderId = player?.id;
     } else if (type == MatchStatType.catchDisc) {
-      oursOnOffense = true;
+      oursOnOffense = isPlayerTeamA;
       discHolderId = player?.id;
     } else if (type == MatchStatType.defense || type == MatchStatType.block) {
-      oursOnOffense = true;
+      oursOnOffense = isPlayerTeamA;
       discHolderId = player?.id;
     } else if (type == MatchStatType.opponentError) {
       oursOnOffense = true;
       discHolderId = null;
     } else if (type.isError) {
-      oursOnOffense = false;
+      oursOnOffense = !isPlayerTeamA;
       discHolderId = null;
     }
 
@@ -136,11 +152,12 @@ class LiveStatsService {
       oursOnOffense: oursOnOffense,
       playerId: player?.id,
       discHolderId: discHolderId,
-      lineupIds: match.teamAIds,
+      lineupIds: match.isExternalOpponent ? activeLineupA : [...activeLineupA, ...activeLineupB],
       statValue: player == null
           ? null
           : repository.settings.statWeightFor(type),
       description: _descriptionFor(
+        match: match,
         type: type,
         player: player,
         previousHolder: previousHolder,
@@ -172,6 +189,9 @@ class LiveStatsService {
     required EloRepository repository,
   }) async {
     final lastEvent = match.statEvents.isEmpty ? null : match.statEvents.last;
+    final isPlayerTeamA = match.isExternalOpponent ? true : !match.teamBRosterIds.contains(player.id);
+    final nextOnOffense = !isPlayerTeamA;
+
     final event = MatchStatEvent(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       type: MatchStatType.pull,
@@ -179,10 +199,10 @@ class LiveStatsService {
       pointNumber: lastEvent?.pointNumber ?? 1,
       scoreA: match.scoreA,
       scoreB: match.scoreB,
-      oursOnOffense: false,
+      oursOnOffense: nextOnOffense,
       playerId: player.id,
       discHolderId: lastEvent?.discHolderId,
-      lineupIds: match.teamAIds,
+      lineupIds: match.isExternalOpponent ? match.teamAIds : [...match.teamAIds, ...match.teamBIds],
       pullDurationSeconds: durationSeconds,
       pullInBounds: inBounds,
       statValue: repository.settings.statWeightFor(MatchStatType.pull),
@@ -197,7 +217,7 @@ class LiveStatsService {
       scoredPoint: false,
       finished: false,
       halfTimeDue: isHalfTimeDue(match, DateTime.now()),
-      oursOnOffense: false,
+      oursOnOffense: nextOnOffense,
     );
   }
 
@@ -220,7 +240,7 @@ class LiveStatsService {
         scoreB: match.scoreB,
         oursOnOffense: last?.oursOnOffense ?? nextOnOffense,
         discHolderId: last?.discHolderId,
-        lineupIds: match.teamAIds,
+        lineupIds: match.isExternalOpponent ? match.teamAIds : [...match.teamAIds, ...match.teamBIds],
         description: 'Fine ${title.toLowerCase()}',
       ),
     ];
@@ -244,7 +264,7 @@ class LiveStatsService {
           scoreA: match.scoreA,
           scoreB: match.scoreB,
           oursOnOffense: match.statEvents.lastOrNull?.oursOnOffense ?? true,
-          lineupIds: match.teamAIds,
+          lineupIds: match.isExternalOpponent ? match.teamAIds : [...match.teamAIds, ...match.teamBIds],
           description: 'Partita conclusa',
         ),
       ];
@@ -256,6 +276,16 @@ class LiveStatsService {
     if (match.statEvents.isEmpty) return;
     final events = [...match.statEvents]..removeLast();
     final last = events.isEmpty ? null : events.last;
+    
+    final lastLineup = last?.lineupIds ?? <String>[];
+    if (match.isExternalOpponent) {
+      match.teamAIds = lastLineup;
+      match.teamBIds = [];
+    } else {
+      match.teamAIds = lastLineup.where((id) => match.teamARosterIds.contains(id)).toList();
+      match.teamBIds = lastLineup.where((id) => match.teamBRosterIds.contains(id)).toList();
+    }
+
     match
       ..scoreA = last?.scoreA ?? 0
       ..scoreB = last?.scoreB ?? 0
@@ -265,14 +295,16 @@ class LiveStatsService {
 
   Future<void> updateLineup(
     ScrimmageMatch match,
-    List<String> playerIds,
+    List<String> playerIdsA,
+    List<String> playerIdsB,
     bool nextOnOffense,
     EloRepository repository,
   ) async {
     if (match.statEvents.isEmpty) return;
     final last = match.statEvents.last;
     match
-      ..teamAIds = playerIds
+      ..teamAIds = playerIdsA
+      ..teamBIds = playerIdsB
       ..statEvents = [
         ...match.statEvents,
         MatchStatEvent(
@@ -283,7 +315,7 @@ class LiveStatsService {
           scoreA: match.scoreA,
           scoreB: match.scoreB,
           oursOnOffense: nextOnOffense,
-          lineupIds: playerIds,
+          lineupIds: match.isExternalOpponent ? playerIdsA : [...playerIdsA, ...playerIdsB],
           description:
               'Linea ${nextOnOffense ? 'attacco' : 'difesa'} selezionata',
         ),
@@ -298,41 +330,56 @@ class LiveStatsService {
     required bool oursOnOffense,
     required EloRepository repository,
   }) async {
-    if (!match.teamAIds.contains(injured.id)) return;
     final last = match.statEvents.lastOrNull;
-    final newLineup = match.teamAIds
-        .map((id) => id == injured.id ? replacement.id : id)
-        .toList();
+    final isInjuredTeamA = match.isExternalOpponent ? true : match.teamARosterIds.contains(injured.id);
+    
+    if (isInjuredTeamA) {
+      if (!match.teamAIds.contains(injured.id)) return;
+      final newLineup = match.teamAIds
+          .map((id) => id == injured.id ? replacement.id : id)
+          .toList();
+      match.teamAIds = newLineup;
+    } else {
+      if (!match.teamBIds.contains(injured.id)) return;
+      final newLineup = match.teamBIds
+          .map((id) => id == injured.id ? replacement.id : id)
+          .toList();
+      match.teamBIds = newLineup;
+    }
+    
     final nextDiscHolderId = last?.discHolderId == injured.id
         ? replacement.id
         : last?.discHolderId;
 
-    match
-      ..teamAIds = newLineup
-      ..statEvents = [
-        ...match.statEvents,
-        MatchStatEvent(
-          id: DateTime.now().microsecondsSinceEpoch.toString(),
-          type: MatchStatType.injury,
-          createdAt: DateTime.now(),
-          pointNumber: last?.pointNumber ?? 1,
-          scoreA: match.scoreA,
-          scoreB: match.scoreB,
-          oursOnOffense: oursOnOffense,
-          playerId: injured.id,
-          discHolderId: nextDiscHolderId,
-          lineupIds: newLineup,
-          description: '${injured.name} infortunio · entra ${replacement.name}',
-        ),
-      ];
+    final activeLineupA = match.teamAIds;
+    final activeLineupB = match.teamBIds;
+
+    match.statEvents = [
+      ...match.statEvents,
+      MatchStatEvent(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        type: MatchStatType.injury,
+        createdAt: DateTime.now(),
+        pointNumber: last?.pointNumber ?? 1,
+        scoreA: match.scoreA,
+        scoreB: match.scoreB,
+        oursOnOffense: oursOnOffense,
+        playerId: injured.id,
+        discHolderId: nextDiscHolderId,
+        lineupIds: match.isExternalOpponent ? activeLineupA : [...activeLineupA, ...activeLineupB],
+        description: '${injured.name} infortunio · entra ${replacement.name}',
+      ),
+    ];
     await repository.upsertMatch(match);
   }
 
   String _descriptionFor({
     required MatchStatType type,
+    ScrimmageMatch? match,
     Player? player,
     Player? previousHolder,
   }) {
+    final isTraining = match != null && !match.isExternalOpponent;
     if (type == MatchStatType.pass || type == MatchStatType.huck) {
       final receiver = player?.name ?? 'ricevitore';
       final thrower = previousHolder?.name ?? 'Disco';
@@ -342,13 +389,19 @@ class LiveStatsService {
       return '${player.name} · Receive error';
     }
     if (type == MatchStatType.opponentError) {
-      return 'Throwaway avversario';
+      return isTraining
+          ? 'Throwaway ${match.teamBName}'
+          : 'Throwaway avversario';
     }
     if (type == MatchStatType.goal) {
-      return 'Meta nostra';
+      return isTraining
+          ? 'Meta ${match.teamAName}'
+          : 'Meta nostra';
     }
     if (type == MatchStatType.opponentGoal) {
-      return 'Meta avversaria';
+      return isTraining
+          ? 'Meta ${match.teamBName}'
+          : 'Meta avversaria';
     }
     if (type == MatchStatType.halfTime) {
       return 'Half time avviato';

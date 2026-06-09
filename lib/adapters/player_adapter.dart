@@ -52,7 +52,7 @@ class PlayerAdapter extends TypeAdapter<Player> {
       ..writeByte(5)
       ..write(obj.losses)
       ..writeByte(6)
-      ..write(obj.linePreference.index)
+      ..write(obj.linePreference?.index)
       ..writeByte(7)
       ..write(obj.role.index)
       ..writeByte(8)
@@ -63,7 +63,7 @@ class PlayerAdapter extends TypeAdapter<Player> {
       ..write(obj.jerseyNumber);
   }
 
-  PlayerLinePreference _readLinePreference(Object? value) {
+  PlayerLinePreference? _readLinePreference(Object? value) {
     if (value is int &&
         value >= 0 &&
         value < PlayerLinePreference.values.length) {
@@ -82,7 +82,7 @@ class PlayerAdapter extends TypeAdapter<Player> {
         return PlayerLinePreference.defense;
       }
     }
-    return PlayerLinePreference.offense;
+    return null;
   }
 
   PlayerRole _readRole(Object? value) {

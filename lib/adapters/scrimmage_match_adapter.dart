@@ -62,13 +62,15 @@ class ScrimmageMatchAdapter extends TypeAdapter<ScrimmageMatch> {
               .whereType<Map>()
               .map(MatchStatEvent.fromMap)
               .toList(),
+      teamARosterIds: List<String>.from(fields[28] as List? ?? []),
+      teamBRosterIds: List<String>.from(fields[29] as List? ?? []),
     );
   }
 
   @override
   void write(BinaryWriter writer, ScrimmageMatch obj) {
     writer
-      ..writeByte(28)
+      ..writeByte(30)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -124,6 +126,10 @@ class ScrimmageMatchAdapter extends TypeAdapter<ScrimmageMatch> {
       ..writeByte(26)
       ..write(obj.enabledStatTypes.map((type) => type.name).toList())
       ..writeByte(27)
-      ..write(obj.presentPlayerIds);
+      ..write(obj.presentPlayerIds)
+      ..writeByte(28)
+      ..write(obj.teamARosterIds)
+      ..writeByte(29)
+      ..write(obj.teamBRosterIds);
   }
 }

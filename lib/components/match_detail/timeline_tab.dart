@@ -35,7 +35,10 @@ class TimelineSeparator extends StatelessWidget {
     IconData icon = FIcons.flag;
 
     if (isGoal) {
-      label = event.type == MatchStatType.goal ? 'Meta Noi' : 'Meta Avversari';
+      final isTraining = !match.isExternalOpponent;
+      label = event.type == MatchStatType.goal
+          ? (isTraining ? 'Meta ${match.teamAName}' : 'Meta Noi')
+          : (isTraining ? 'Meta ${match.teamBName}' : 'Meta Avversari');
       color = event.type == MatchStatType.goal
           ? AppColors.violet
           : AppColors.danger;

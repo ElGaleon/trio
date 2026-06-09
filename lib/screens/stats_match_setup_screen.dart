@@ -15,6 +15,14 @@ import '../providers/elo_providers.dart';
 import '../model/stats_match_setup_state.dart';
 import '../providers/stats_match_setup_provider.dart';
 
+enum SetupStep {
+  settings,
+  rosterA,
+  rosterB,
+  stats,
+  lineup,
+}
+
 class StatsMatchSetupScreen extends ConsumerStatefulWidget {
   const StatsMatchSetupScreen({super.key});
 
@@ -62,6 +70,19 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
           .read(statsMatchSetupProvider.notifier)
           .updateLocation(_locationController.text);
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final stateOfRouter = GoRouterState.of(context);
+      final isTraining = stateOfRouter.uri.queryParameters['type'] == 'training';
+      final allPlayers = ref.read(rankedPlayersProvider);
+      ref.read(statsMatchSetupProvider.notifier).initializeForMatch(
+        isTraining: isTraining,
+        allPlayers: allPlayers,
+      );
+      final newState = ref.read(statsMatchSetupProvider);
+      _teamController.text = newState.teamName;
+      _opponentController.text = newState.opponentName;
+    });
   }
 
   @override
@@ -73,28 +94,68 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
     super.dispose();
   }
 
+  List<SetupStep> _getSteps(StatsMatchSetupState state) {
+    if (state.isTrainingMatch) {
+      if (state.isAttackVsDefense) {
+        return [SetupStep.settings, SetupStep.stats];
+      } else {
+        return [SetupStep.settings, SetupStep.rosterA, SetupStep.rosterB, SetupStep.stats];
+      }
+    } else {
+      return [SetupStep.settings, SetupStep.rosterA, SetupStep.stats, SetupStep.lineup];
+    }
+  }
+
+  List<String> _getStepLabels(StatsMatchSetupState state) {
+    if (state.isTrainingMatch) {
+      if (state.isAttackVsDefense) {
+        return ['Info', 'Stats'];
+      } else {
+        return ['Info', state.teamName, state.opponentName, 'Stats'];
+      }
+    } else {
+      return ['Info', 'Presenti', 'Stats', 'Linea'];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(statsMatchSetupProvider);
     final notifier = ref.read(statsMatchSetupProvider.notifier);
     final players = ref.watch(rankedPlayersProvider);
 
+    ref.listen<StatsMatchSetupState>(statsMatchSetupProvider, (previous, next) {
+      if (previous?.teamName != next.teamName &&
+          _teamController.text != next.teamName) {
+        _teamController.text = next.teamName;
+      }
+      if (previous?.opponentName != next.opponentName &&
+          _opponentController.text != next.opponentName) {
+        _opponentController.text = next.opponentName;
+      }
+    });
+
+    final steps = _getSteps(state);
+    final stepLabels = _getStepLabels(state);
+    final activeStep = steps[state.step];
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SportScreenShell(
         title: 'Stats match',
-        subtitle: switch (state.step) {
-          0 => 'Informazioni generali',
-          1 => 'Presenti alla partita',
-          2 => 'Statistiche da tracciare',
-          _ => 'Selezione linea',
+        subtitle: switch (activeStep) {
+          SetupStep.settings => 'Informazioni generali',
+          SetupStep.rosterA => state.isTrainingMatch ? 'Roster ${state.teamName}' : 'Presenti alla partita',
+          SetupStep.rosterB => 'Roster ${state.opponentName}',
+          SetupStep.stats => 'Statistiche da tracciare',
+          SetupStep.lineup => 'Selezione linea',
         },
         showBackButton: true,
         child: Column(
           spacing: 14,
           children: [
-            StatsSetupStepHeader(step: state.step),
-            if (state.step == 0)
+            StatsSetupStepHeader(step: state.step, labels: stepLabels),
+            if (activeStep == SetupStep.settings)
               MatchSettingsStep(
                 teamController: _teamController,
                 opponentController: _opponentController,
@@ -122,28 +183,48 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
                 onTimeoutToggle: notifier.toggleTimeouts,
                 onTimeoutsPerHalfChanged: notifier.updateTimeoutsPerHalf,
                 onTimeoutSecondsChanged: notifier.updateTimeoutSeconds,
+                isInternalScrimmage: state.isInternalScrimmage,
+                onInternalScrimmageToggle: notifier.toggleInternalScrimmage,
+                isTrainingMatch: state.isTrainingMatch,
+                isAttackVsDefense: state.isAttackVsDefense,
+                onAttackVsDefenseToggle: () => notifier.toggleAttackVsDefense(players),
               )
-            else if (state.step == 1)
+            else if (activeStep == SetupStep.rosterA)
               RosterPicker(
-                title: 'Presenti',
+                title: state.isTrainingMatch ? 'Roster ${state.teamName}' : 'Presenti',
                 players: _sortedPlayers(
                   players,
                   state.startOnOffense,
-                  state.presentPlayerIds,
+                  state.isTrainingMatch ? state.teamARosterIds : state.presentPlayerIds,
                 ),
-                selectedIds: state.presentPlayerIds,
+                selectedIds: state.isTrainingMatch ? state.teamARosterIds : state.presentPlayerIds,
                 minimum: state.teamSize,
                 preferredLine: state.startOnOffense
                     ? PlayerLinePreference.offense
                     : PlayerLinePreference.defense,
-                onToggle: notifier.togglePresentPlayer,
+                onToggle: state.isTrainingMatch ? notifier.toggleTeamARoster : notifier.togglePresentPlayer,
               )
-            else if (state.step == 2)
+            else if (activeStep == SetupStep.rosterB)
+              RosterPicker(
+                title: 'Roster ${state.opponentName}',
+                players: _sortedPlayers(
+                  players.where((p) => !state.teamARosterIds.contains(p.id)).toList(),
+                  state.startOnOffense,
+                  state.teamBRosterIds,
+                ),
+                selectedIds: state.teamBRosterIds,
+                minimum: state.teamSize,
+                preferredLine: state.startOnOffense
+                    ? PlayerLinePreference.offense
+                    : PlayerLinePreference.defense,
+                onToggle: notifier.toggleTeamBRoster,
+              )
+            else if (activeStep == SetupStep.stats)
               StatsSelectionStep(
                 enabledStatTypes: state.enabledStatTypes,
                 onToggleStat: notifier.toggleStat,
               )
-            else
+            else if (activeStep == SetupStep.lineup)
               Column(
                 spacing: 14,
                 children: [
@@ -193,17 +274,31 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
                   ),
                   Expanded(
                     child: FormNavButton(
-                      label: state.step == 3 ? 'Start' : 'Avanti',
+                      label: state.step == steps.length - 1 ? 'Start' : 'Avanti',
                       onPressed: () {
-                        if (state.step == 1 &&
-                            state.presentPlayerIds.length < state.teamSize) {
-                          _showMissingPresentPlayersMessage(state.teamSize);
-                          return;
+                        if (activeStep == SetupStep.rosterA) {
+                          final count = state.isTrainingMatch
+                              ? state.teamARosterIds.length
+                              : state.presentPlayerIds.length;
+                          if (count < state.teamSize) {
+                            _showMissingPresentPlayersMessage(state.teamSize);
+                            return;
+                          }
                         }
-                        if (state.step < 3) {
+                        if (activeStep == SetupStep.rosterB) {
+                          if (state.teamBRosterIds.length < state.teamSize) {
+                            _showMissingPresentPlayersMessage(state.teamSize);
+                            return;
+                          }
+                        }
+                        if (state.step < steps.length - 1) {
                           notifier.setStep(state.step + 1);
                         } else {
-                          _tryStart(state, notifier);
+                          if (state.isInternalScrimmage) {
+                            _startMatch(notifier);
+                          } else {
+                            _tryStart(state, notifier);
+                          }
                         }
                       },
                     ),

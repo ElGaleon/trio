@@ -67,6 +67,38 @@ void main() {
 
     expect(player.jerseyNumber, 23);
   });
+
+  test('reads null line preference', () {
+    final reader = _FakeBinaryReader([
+      11,
+      0,
+      'player-3',
+      1,
+      'Null Line Player',
+      2,
+      1000.0,
+      3,
+      0,
+      4,
+      0,
+      5,
+      0,
+      6,
+      null,
+      7,
+      PlayerRole.cutter.index,
+      8,
+      null,
+      9,
+      false,
+      10,
+      null,
+    ]);
+
+    final player = PlayerAdapter().read(reader);
+
+    expect(player.linePreference, isNull);
+  });
 }
 
 class _FakeBinaryReader extends BinaryReader {

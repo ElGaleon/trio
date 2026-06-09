@@ -28,6 +28,8 @@ class ScrimmageMatch {
     List<String>? presentPlayerIds,
     List<MatchStatType>? enabledStatTypes,
     List<MatchStatEvent>? statEvents,
+    List<String>? teamARosterIds,
+    List<String>? teamBRosterIds,
   }) : teamSize = teamSize ?? teamAIds.length,
        teamAName = teamAName ?? (offenseVsDefense ? 'Attacco' : 'A'),
        teamBName = teamBName ?? (offenseVsDefense ? 'Difesa' : 'B'),
@@ -36,7 +38,9 @@ class ScrimmageMatch {
        presentPlayerIds =
            presentPlayerIds ?? {...teamAIds, ...teamBIds}.toList(),
        enabledStatTypes = enabledStatTypes ?? MatchStatType.defaultEnabled,
-       statEvents = statEvents ?? [];
+       statEvents = statEvents ?? [],
+       teamARosterIds = teamARosterIds ?? [],
+       teamBRosterIds = teamBRosterIds ?? [];
 
   final String id;
   final DateTime createdAt;
@@ -66,6 +70,8 @@ class ScrimmageMatch {
   List<String> presentPlayerIds;
   List<MatchStatType> enabledStatTypes;
   List<MatchStatEvent> statEvents;
+  List<String> teamARosterIds;
+  List<String> teamBRosterIds;
 
   bool get isDraw => scoreA == scoreB;
 

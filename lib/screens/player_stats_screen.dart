@@ -250,7 +250,7 @@ class _IndividualStatsPanel extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${data.player.role.label} · ${data.player.linePreference.label}',
+                        '${data.player.role.label} · ${data.player.linePreference?.label ?? 'Nessuna'}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: sportMutedText,
                           fontWeight: FontWeight.w800,

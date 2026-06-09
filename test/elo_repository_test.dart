@@ -359,4 +359,37 @@ void main() {
       expect(statValues, [1.5, 4]);
     },
   );
+
+  test('recalculates ELO using teamARosterIds and teamBRosterIds in scrimmage', () async {
+    final repository = EloRepository(playersBox, matchesBox, AppSettings());
+    for (final name in ['A', 'B', 'C', 'D', 'E', 'F']) {
+      await repository.addPlayer(name);
+    }
+
+    final players = repository.rankedPlayers;
+    final rosterA = players.take(3).map((player) => player.id).toList();
+    final rosterB = players.skip(3).take(3).map((player) => player.id).toList();
+
+    await repository.upsertMatch(
+      ScrimmageMatch(
+        id: 'scrimmage-rosters-1',
+        createdAt: DateTime(2026, 6, 9),
+        teamAIds: [], // Empty active lineup
+        teamBIds: [], // Empty active lineup
+        teamARosterIds: rosterA,
+        teamBRosterIds: rosterB,
+        scoreA: 21,
+        scoreB: 15,
+        isExternalOpponent: false,
+      ),
+    );
+
+    final winners = rosterA.map((id) => playersBox.get(id)!).toList();
+    final losers = rosterB.map((id) => playersBox.get(id)!).toList();
+
+    expect(winners.every((player) => player.wins == 1), isTrue);
+    expect(winners.every((player) => player.rating > AppConstants.initialRating), isTrue);
+    expect(losers.every((player) => player.losses == 1), isTrue);
+    expect(losers.every((player) => player.rating < AppConstants.initialRating), isTrue);
+  });
 }
