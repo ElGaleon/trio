@@ -5,8 +5,9 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:trio/adapters/player_adapter.dart';
-import 'package:trio/model/player.dart';
+import 'package:trio/src/features/players/data/player_adapter.dart';
+import 'package:trio/src/features/players/domain/player_line_preference.dart';
+import 'package:trio/src/features/players/domain/player_role.dart';
 
 void main() {
   test('reads legacy string values for line and role', () {

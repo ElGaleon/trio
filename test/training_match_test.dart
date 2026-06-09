@@ -2,14 +2,15 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:trio/adapters/player_adapter.dart';
-import 'package:trio/adapters/scrimmage_match_adapter.dart';
-import 'package:trio/app_constants.dart';
-import 'package:trio/model/app_settings.dart';
-import 'package:trio/model/player.dart';
-import 'package:trio/model/scrimmage_match.dart';
-import 'package:trio/repositories/elo_repository.dart';
-import 'package:trio/service/live_stats_service.dart';
+import 'package:trio/src/features/players/data/player_adapter.dart';
+import 'package:trio/src/features/matches/data/scrimmage_match_adapter.dart';
+import 'package:trio/src/constants/app_constants.dart';
+import 'package:trio/src/features/settings/domain/app_settings.dart';
+import 'package:trio/src/features/players/domain/player.dart';
+import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:trio/src/features/matches/domain/match_stat_type.dart';
+import 'package:trio/src/features/matches/data/elo_repository.dart';
+import 'package:trio/src/features/live_stats/application/live_stats_service.dart';
 
 void main() {
   late Directory tempDir;

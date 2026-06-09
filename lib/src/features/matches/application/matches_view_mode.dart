@@ -1,0 +1,1 @@
+enum MatchesViewMode { list, calendar }
