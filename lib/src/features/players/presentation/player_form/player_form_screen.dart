@@ -4,15 +4,15 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
-import 'package:trio/src/common_widgets/sport_button.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_button.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/players/domain/player_role.dart';
 import 'package:trio/src/features/players/application/player_form_provider.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class PlayerFormScreen extends ConsumerStatefulWidget {
   const PlayerFormScreen({super.key, this.player, this.playerId});
@@ -152,9 +152,9 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: notifier.toggleIsExternal,
-                      child: DecoratedBox(
-                        decoration: sportGlassDecoration(radius: 18),
-                        child: Padding(
+                      child: GlassDecoration(
+              radius: 18,
+              child: Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
                             vertical: 12,

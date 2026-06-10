@@ -13,7 +13,7 @@ import 'src/features/matches/domain/scrimmage_match.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  _initHive();
+  await _initHive();
   runApp(const ProviderScope(child: TrioApp()));
 }
 

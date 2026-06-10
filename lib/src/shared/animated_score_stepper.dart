@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:trio/src/extensions/theme_extension.dart';
 
 class AnimatedScoreStepper extends StatelessWidget {
   const AnimatedScoreStepper({
@@ -27,9 +28,7 @@ class AnimatedScoreStepper extends StatelessWidget {
           children: [
             Text(
               label,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+              style: context.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             FittedBox(
               fit: BoxFit.scaleDown,

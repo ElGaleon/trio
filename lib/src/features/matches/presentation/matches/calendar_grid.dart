@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'calendar_day_cell.dart';
 import 'calendar_utils.dart';
@@ -26,9 +26,9 @@ class CalendarGrid extends StatelessWidget {
       matchesByDay.putIfAbsent(match.createdAt.day, () => []).add(match);
     }
     final days = CalendarUtils.calendarDays(month);
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 28),
-      child: Padding(
+    return GlassDecoration(
+              radius: 28,
+              child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           spacing: 8,

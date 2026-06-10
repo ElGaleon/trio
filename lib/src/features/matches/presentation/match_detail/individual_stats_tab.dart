@@ -5,9 +5,9 @@ import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/final_stats_summary.dart';
 import 'package:trio/src/features/matches/domain/individual_stat_line.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class StatPill extends StatelessWidget {
   const StatPill({super.key, required this.label, required this.value});
@@ -141,9 +141,9 @@ class GroupedStatsBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 24),
-      child: Padding(
+    return GlassDecoration(
+              radius: 24,
+              child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
           spacing: 10,
@@ -322,9 +322,9 @@ class IndividualStatsTab extends StatelessWidget {
                 StatPill(label: item.name, value: '${item.value} pt'),
           ],
         ),
-        DecoratedBox(
-          decoration: sportGlassDecoration(radius: 28),
-          child: Padding(
+        GlassDecoration(
+              radius: 28,
+              child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
               spacing: 12,

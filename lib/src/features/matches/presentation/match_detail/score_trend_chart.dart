@@ -6,7 +6,7 @@ import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class ScoreTrendChart extends ConsumerStatefulWidget {
   const ScoreTrendChart({super.key, required this.match});
@@ -42,9 +42,9 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
     final players = ref.watch(rankedPlayersProvider);
     final playersById = {for (final p in players) p.id: p};
 
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 28),
-      child: Padding(
+    return GlassDecoration(
+              radius: 28,
+              child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 16,

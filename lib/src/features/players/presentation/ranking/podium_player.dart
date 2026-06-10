@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
 import 'rank_badge.dart';
 import 'rating_pill.dart';
 

@@ -6,7 +6,7 @@ import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/final_stats_summary.dart';
 import 'package:trio/src/features/matches/application/match_detail_provider.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/features/matches/domain/match_detail_sub_tab.dart';
 
 class FotMobStatRow extends StatelessWidget {
@@ -178,9 +178,9 @@ class GroupedMatchStats extends ConsumerWidget {
     final opponentOLineConversion = opponentOLineStarts.isEmpty ? 0.0 : opponentOLineGoals / opponentOLineStarts.length;
     final opponentDLineConversion = opponentDLineStarts.isEmpty ? 0.0 : opponentDLineGoals / opponentDLineStarts.length;
 
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 28),
-      child: Padding(
+    return GlassDecoration(
+              radius: 28,
+              child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 14,

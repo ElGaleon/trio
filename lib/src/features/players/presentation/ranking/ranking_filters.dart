@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/players/domain/player_role.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
 
 class RankingFilters extends StatelessWidget {
   const RankingFilters({

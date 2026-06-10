@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'countdown_banner.dart';
@@ -32,35 +32,50 @@ class LiveScoreHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return DecoratedBox(
-      decoration: sportGlassDecoration(),
+    return GlassDecoration(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
-          spacing: 10,
+          spacing: 6,
           children: [
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    '${match.teamAName}\n${_format(matchRemaining)}',
+                    match.teamAName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: textTheme.titleMedium?.copyWith(
                       color: AppColors.white,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
-                Text(
-                  '${match.scoreA} - ${match.scoreB}',
-                  style: textTheme.displaySmall?.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w900,
-                  ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${match.scoreA} - ${match.scoreB}',
+                      style: textTheme.headlineMedium?.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      _format(matchRemaining),
+                      style: textTheme.titleSmall?.copyWith(
+                        color: AppColors.sportMutedText,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
                 Expanded(
                   child: Text(
                     match.teamBName,
                     textAlign: TextAlign.end,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: textTheme.titleMedium?.copyWith(
                       color: AppColors.white,
                       fontWeight: FontWeight.w900,
@@ -89,7 +104,7 @@ class LiveScoreHeader extends StatelessWidget {
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 child: SizedBox(
                   width: double.infinity,
                   child: Text(

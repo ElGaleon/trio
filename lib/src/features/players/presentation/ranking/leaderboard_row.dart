@@ -3,10 +3,10 @@ import 'package:forui/forui.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
 import 'rank_badge.dart';
 import 'rating_pill.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class LeaderboardRow extends StatelessWidget {
   const LeaderboardRow({
@@ -30,9 +30,8 @@ class LeaderboardRow extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: DecoratedBox(
-          decoration: sportGlassDecoration(),
-          child: Padding(
+        child: GlassDecoration(
+              child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
             child: Row(
               spacing: 12,

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/common_widgets/sport_button.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_button.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/settings/application/settings_provider.dart';
@@ -44,7 +43,7 @@ class CustomStatsSettingsSection extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SettingsSectionTitle(
-              icon: FIcons.sliders,
+              icon: FIcons.settings,
               title: 'Statistiche personalizzate & Preferite',
               textTheme: textTheme,
             ),

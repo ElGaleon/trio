@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/common_widgets/animated_score_stepper.dart';
+import 'package:trio/src/shared/animated_score_stepper.dart';
 import 'summary_row.dart';
 
 class ScoreStep extends StatelessWidget {

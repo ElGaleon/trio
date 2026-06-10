@@ -4,9 +4,8 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trio/src/features/matches/application/match_provider.dart';
 
-import 'package:trio/src/common_widgets/app_empty_state.dart';
-import 'package:trio/src/common_widgets/app_header.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/app_empty_state.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/routing/app_router.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
@@ -85,6 +84,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
       initialData: DateTime.now(),
       builder: (context, snapshot) {
         final now = snapshot.data ?? DateTime.now();
+        final textTheme = Theme.of(context).textTheme;
         final playersById = {
           for (final player in ref.watch(rankedPlayersProvider))
             player.id: player,
@@ -201,7 +201,12 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
           final listPlayers = activeIds
               .map((id) => playersById[id])
               .nonNulls
-              .toList();
+              .toList()
+            ..sort((a, b) {
+              final roleCompare = a.role.index.compareTo(b.role.index);
+              if (roleCompare != 0) return roleCompare;
+              return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+            });
 
           return ListView(
             padding: EdgeInsets.zero,
@@ -210,13 +215,15 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                   (player) => PlayerStatRow(
                     player: player,
                     enabledStatTypes: match.enabledStatTypes,
+                    enabledCustomStatIds: match.enabledCustomStatIds,
                     oursOnOffense: playerOnOffense,
                     hasDisc: player.id == discHolderId,
                     noDiscHolder: playerOnOffense && discHolderId == null,
-                    onEvent: (type) async {
+                    onEvent: (type, customStatId) async {
                       final res = await service.record(
                         match,
                         type: type,
+                        customStatId: customStatId,
                         player: player,
                         playersById: playersById,
                         repository: repository,
@@ -264,12 +271,41 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                 child: Column(
                   spacing: 8,
                   children: [
-                    AppHeader(
-                      title: 'Match',
-                      subtitle: 'vs ${match.teamBName}',
-                      showBackButton: true,
-                      onBack: () => context.go(AppRoutes.matches),
-                      actions: [
+                    Row(
+                      spacing: 8,
+                      children: [
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => context.go(AppRoutes.matches),
+                          child: SizedBox.square(
+                            dimension: 38,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: AppColors.white.withValues(alpha: 0.08),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.white.withValues(alpha: 0.14),
+                                ),
+                              ),
+                              child: const Icon(
+                                FIcons.chevronLeft,
+                                color: AppColors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            'Match vs ${match.teamBName}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.titleMedium?.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
                         RoundHeaderButton(
                           icon: FIcons.info,
                           onTap: () => LegendModalBottomSheet.show(context, match),

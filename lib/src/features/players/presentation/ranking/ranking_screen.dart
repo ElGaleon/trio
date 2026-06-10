@@ -10,8 +10,8 @@ import 'package:trio/src/features/players/presentation/ranking/leaderboard_showc
 import 'package:trio/src/features/players/presentation/ranking/line_average_summary.dart';
 import 'package:trio/src/features/players/presentation/ranking/ranking_filters.dart';
 import 'package:trio/src/features/players/presentation/ranking/ranking_summary.dart';
-import 'package:trio/src/common_widgets/app_empty_state.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/app_empty_state.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 

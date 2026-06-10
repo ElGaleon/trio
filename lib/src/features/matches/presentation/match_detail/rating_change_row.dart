@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class RatingChangeRow extends StatelessWidget {
   const RatingChangeRow({
@@ -26,9 +26,9 @@ class RatingChangeRow extends StatelessWidget {
     final sign = delta > 0 ? '+' : '';
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: DecoratedBox(
-        decoration: sportGlassDecoration(radius: 24),
-        child: Padding(
+      child: GlassDecoration(
+              radius: 24,
+              child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
           child: Row(
             spacing: 12,

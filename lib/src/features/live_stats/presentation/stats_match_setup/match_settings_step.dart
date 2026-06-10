@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'setting_stepper.dart';
 import 'toggle_setting.dart';
 
@@ -75,9 +75,8 @@ class MatchSettingsStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: sportGlassDecoration(),
-      child: Padding(
+    return GlassDecoration(
+              child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 12,

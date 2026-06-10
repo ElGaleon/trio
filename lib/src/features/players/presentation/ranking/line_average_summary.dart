@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class LineAverageSummary extends StatelessWidget {
   const LineAverageSummary({super.key, required this.players});
@@ -51,9 +51,8 @@ class AverageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Expanded(
-      child: DecoratedBox(
-        decoration: sportGlassDecoration(),
-        child: Padding(
+      child: GlassDecoration(
+              child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
             spacing: 8,

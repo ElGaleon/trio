@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/extensions/theme_extension.dart';
 import 'package:trio/src/theme/app_colors.dart';
 

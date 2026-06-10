@@ -8,12 +8,12 @@ import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/final_stats_summary.dart';
 import 'package:trio/src/features/matches/domain/individual_stat_line.dart';
 import 'package:trio/src/features/matches/application/match_detail_provider.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'grouped_match_stats.dart';
 import 'individual_stats_tab.dart';
 import 'timeline_tab.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/features/matches/domain/match_detail_tab.dart';
 
 class StatsTabButton extends StatelessWidget {
@@ -277,9 +277,9 @@ class BestPlayerCard extends StatelessWidget {
     final rows = IndividualStatLine.from(match, playersById);
     final bestRow = rows.isEmpty ? null : rows.first;
     final player = bestRow?.player;
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 28),
-      child: Padding(
+    return GlassDecoration(
+              radius: 28,
+              child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 16,
@@ -351,9 +351,9 @@ class MiniTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 28),
-      child: Padding(
+    return GlassDecoration(
+              radius: 28,
+              child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 12,
@@ -415,9 +415,9 @@ class FactsTab extends StatelessWidget {
     return Column(
       spacing: 12,
       children: [
-        DecoratedBox(
-          decoration: sportGlassDecoration(radius: 28),
-          child: Padding(
+        GlassDecoration(
+              radius: 28,
+              child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [

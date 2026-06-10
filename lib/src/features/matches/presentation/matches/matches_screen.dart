@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:trio/src/common_widgets/app_empty_state.dart';
-import 'package:trio/src/common_widgets/decorated_panel.dart';
-import 'package:trio/src/common_widgets/match_card.dart';
-import 'package:trio/src/common_widgets/sport_button.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/app_empty_state.dart';
+import 'package:trio/src/shared/decorated_panel.dart';
+import 'package:trio/src/shared/match_card.dart';
+import 'package:trio/src/shared/sport_button.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/constants/app_constants.dart';
 import 'package:trio/src/routing/app_router.dart';
 import 'package:trio/src/theme/app_colors.dart';

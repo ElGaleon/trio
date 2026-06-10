@@ -3,9 +3,9 @@ import 'package:forui/forui.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
 import 'info_pill.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class PlayerHero extends StatelessWidget {
   const PlayerHero({super.key, required this.player});
@@ -17,16 +17,14 @@ class PlayerHero extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Hero(
       tag: 'player-${player.id}',
-      child: DecoratedBox(
-        decoration: sportGlassDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.white.withValues(alpha: 0.16),
-              AppColors.white.withValues(alpha: 0.045),
-            ],
-          ),
+      child: GlassDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.white.withValues(alpha: 0.16),
+            AppColors.white.withValues(alpha: 0.045),
+          ],
         ),
         child: Padding(
           padding: const EdgeInsets.all(18),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'podium_player.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class LeaderboardShowcase extends StatelessWidget {
   const LeaderboardShowcase({
@@ -25,16 +25,14 @@ class LeaderboardShowcase extends StatelessWidget {
       >= 3 => [players[1], players[0], players[2]],
       _ => players,
     };
-    return DecoratedBox(
-      decoration: sportGlassDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.white.withValues(alpha: 0.16),
-            AppColors.white.withValues(alpha: 0.045),
-          ],
-        ),
+    return GlassDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppColors.white.withValues(alpha: 0.16),
+          AppColors.white.withValues(alpha: 0.045),
+        ],
       ),
       child: Stack(
         children: [

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/matches/presentation/matches/calendar_utils.dart';
 import 'package:trio/src/features/matches/presentation/matches/calendar_nav_button.dart';
@@ -17,9 +17,9 @@ class CalendarHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 24),
-      child: Padding(
+    return GlassDecoration(
+              radius: 24,
+              child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Row(
           children: [

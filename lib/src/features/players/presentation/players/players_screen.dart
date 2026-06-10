@@ -6,9 +6,9 @@ import 'package:trio/src/routing/app_router.dart';
 import 'package:trio/src/features/players/presentation/players/player_card.dart';
 import 'package:trio/src/features/players/presentation/players/player_filters.dart';
 import 'package:trio/src/features/players/presentation/players/player_toolbar.dart';
-import 'package:trio/src/common_widgets/app_empty_state.dart';
-import 'package:trio/src/common_widgets/sport_button.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/app_empty_state.dart';
+import 'package:trio/src/shared/sport_button.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 
 class PlayersScreen extends ConsumerStatefulWidget {

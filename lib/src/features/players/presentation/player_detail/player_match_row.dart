@@ -4,7 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class PlayerMatchRow extends StatelessWidget {
   const PlayerMatchRow({
@@ -37,9 +37,9 @@ class PlayerMatchRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: DecoratedBox(
-        decoration: sportGlassDecoration(radius: 24),
-        child: Padding(
+      child: GlassDecoration(
+              radius: 24,
+              child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
             spacing: 12,

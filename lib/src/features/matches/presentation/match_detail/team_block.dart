@@ -4,8 +4,8 @@ import 'package:forui/forui.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/players/presentation/player_detail/info_pill.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class TeamBlock extends StatelessWidget {
   const TeamBlock({
@@ -22,9 +22,8 @@ class TeamBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return DecoratedBox(
-      decoration: sportGlassDecoration(),
-      child: Padding(
+    return GlassDecoration(
+              child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
         child: Column(
           spacing: 10,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/common_widgets/decorated_panel.dart';
-import 'package:trio/src/common_widgets/sport_button.dart';
+import 'package:trio/src/shared/decorated_panel.dart';
+import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'injury_substitution_draft.dart';

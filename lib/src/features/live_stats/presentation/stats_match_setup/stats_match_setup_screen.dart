@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/routing/app_router.dart';
 import 'package:trio/src/features/matches/presentation/match_form/form_nav_button.dart';
 import 'package:trio/src/features/players/domain/player.dart';
@@ -348,10 +348,6 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
         b.linePreference == preferred ? 0 : 1,
       );
       if (byLine != 0) return byLine;
-      final bySelected = (selectedIds.contains(b.id) ? 1 : 0).compareTo(
-        selectedIds.contains(a.id) ? 1 : 0,
-      );
-      if (bySelected != 0) return bySelected;
       return a.name.compareTo(b.name);
     });
     return sorted;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
-import 'package:trio/src/common_widgets/sport_player_avatar.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_player_avatar.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
@@ -47,9 +47,8 @@ class _RosterPickerState extends State<RosterPicker> {
         ? PlayerLinePreference.defense.label
         : PlayerLinePreference.offense.label;
 
-    return DecoratedBox(
-      decoration: sportGlassDecoration(),
-      child: Padding(
+    return GlassDecoration(
+              child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
         child: Column(
           spacing: 12,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/common_widgets/match_card.dart';
+import 'package:trio/src/shared/match_card.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 

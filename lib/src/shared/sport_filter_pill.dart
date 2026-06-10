@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trio/src/extensions/theme_extension.dart';
 import 'package:trio/src/theme/app_colors.dart';
 
 class SportFilterPill extends StatelessWidget {
@@ -38,12 +39,12 @@ class SportFilterPill extends StatelessWidget {
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          spacing: 6,
+          spacing: 4,
           children: [
-            if (icon != null) Icon(icon, color: AppColors.white, size: 14),
+            if (icon != null) Icon(icon, color: AppColors.white, size: 16),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: context.textTheme.bodySmall?.copyWith(
                 color: AppColors.white,
                 fontWeight: FontWeight.w900,
               ),

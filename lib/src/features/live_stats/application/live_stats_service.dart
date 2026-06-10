@@ -3,6 +3,7 @@ import 'package:trio/src/features/matches/domain/match_stat_event.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/players/domain/player.dart';
+import 'package:trio/src/features/settings/domain/custom_stat.dart';
 import 'record_event_result.dart';
 
 class LiveStatsService {
@@ -64,6 +65,7 @@ class LiveStatsService {
   Future<RecordEventResult> record(
     ScrimmageMatch match, {
     required MatchStatType type,
+    String? customStatId,
     Player? player,
     required Map<String, Player> playersById,
     required EloRepository repository,
@@ -91,6 +93,19 @@ class LiveStatsService {
             : match.teamARosterIds.length > match.teamSize);
     final shouldClearB = match.matchType != 'Allenamento' &&
         (!match.isExternalOpponent && match.teamBRosterIds.length > match.teamSize);
+
+    bool isCustomError = false;
+    double? customWeight;
+    String? customLabel;
+    if (type == MatchStatType.custom && customStatId != null) {
+      final customStat = repository.settings.customStats.firstWhere(
+        (s) => s.id == customStatId,
+        orElse: () => CustomStat(id: '', label: '', abbreviation: '', isError: false, weight: 0.0),
+      );
+      isCustomError = customStat.isError;
+      customWeight = customStat.weight;
+      customLabel = customStat.label;
+    }
 
     if (type == MatchStatType.goal) {
       scoreA += 1;
@@ -126,7 +141,7 @@ class LiveStatsService {
     } else if (type == MatchStatType.opponentError) {
       oursOnOffense = true;
       discHolderId = null;
-    } else if (type.isError) {
+    } else if (type.isError || isCustomError) {
       oursOnOffense = !isPlayerTeamA;
       discHolderId = null;
     }
@@ -134,6 +149,7 @@ class LiveStatsService {
     final event = MatchStatEvent(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       type: type,
+      customStatId: customStatId,
       createdAt: DateTime.now(),
       pointNumber: point,
       scoreA: scoreA,
@@ -142,14 +158,15 @@ class LiveStatsService {
       playerId: player?.id,
       discHolderId: discHolderId,
       lineupIds: match.isExternalOpponent ? activeLineupA : [...activeLineupA, ...activeLineupB],
-      statValue: player == null
-          ? null
-          : repository.settings.statWeightFor(type),
+      statValue: type == MatchStatType.custom
+          ? customWeight
+          : (player == null ? null : repository.settings.statWeightFor(type)),
       description: _descriptionFor(
         match: match,
         type: type,
         player: player,
         previousHolder: previousHolder,
+        customLabel: customLabel,
       ),
     );
 
@@ -367,7 +384,11 @@ class LiveStatsService {
     ScrimmageMatch? match,
     Player? player,
     Player? previousHolder,
+    String? customLabel,
   }) {
+    if (type == MatchStatType.custom && customLabel != null) {
+      return player == null ? customLabel : '${player.name} · $customLabel';
+    }
     final isTraining = match != null && !match.isExternalOpponent;
     if (type == MatchStatType.pass || type == MatchStatType.huck) {
       final receiver = player?.name ?? 'ricevitore';

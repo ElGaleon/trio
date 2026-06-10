@@ -8,8 +8,8 @@ import 'package:trio/src/features/matches/presentation/match_form/presence_step.
 import 'package:trio/src/features/matches/presentation/match_form/score_step.dart';
 import 'package:trio/src/features/matches/presentation/match_form/setup_step.dart';
 import 'package:trio/src/features/matches/presentation/match_form/step_header.dart';
-import 'package:trio/src/common_widgets/sport_button.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/sport_button.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
@@ -18,7 +18,7 @@ import 'package:trio/src/features/matches/application/matches_providers.dart';
 import 'package:trio/src/features/matches/application/recent_match_team.dart';
 import 'package:trio/src/features/matches/domain/match_form_state.dart';
 import 'package:trio/src/features/matches/application/match_form_provider.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class MatchFormScreen extends ConsumerStatefulWidget {
   const MatchFormScreen({super.key, this.match, this.matchId});
@@ -111,9 +111,9 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
               padding: const EdgeInsets.only(
                 top: 4,
               ), // Adjust spacing: 14 + 4 = 18 total
-              child: DecoratedBox(
-                decoration: sportGlassDecoration(radius: 22),
-                child: Padding(
+              child: GlassDecoration(
+              radius: 22,
+              child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     spacing: 12,

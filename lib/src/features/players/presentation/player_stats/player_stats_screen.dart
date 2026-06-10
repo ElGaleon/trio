@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/common_widgets/app_empty_state.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/app_empty_state.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/players/domain/player_role.dart';
 import 'package:trio/src/features/players/application/player_stats_provider.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/features/players/domain/group_stats.dart';
 import 'package:trio/src/features/players/domain/player_stats_card_data.dart';
 
@@ -140,9 +140,9 @@ class _GroupStatsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 28),
-      child: Padding(
+    return GlassDecoration(
+              radius: 28,
+              child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 14,
@@ -193,9 +193,9 @@ class _TopPlayersPanel extends ConsumerWidget {
     final sorted = [...cards]
       ..sort((a, b) => b.impactScore.compareTo(a.impactScore));
 
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 28),
-      child: Padding(
+    return GlassDecoration(
+              radius: 28,
+              child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 12,
@@ -226,9 +226,9 @@ class _IndividualStatsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 28),
-      child: Padding(
+    return GlassDecoration(
+              radius: 28,
+              child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 14,

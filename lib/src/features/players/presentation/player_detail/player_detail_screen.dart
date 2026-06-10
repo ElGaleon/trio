@@ -9,16 +9,16 @@ import 'package:trio/src/features/players/presentation/player_detail/player_hero
 import 'package:trio/src/features/players/presentation/player_detail/player_match_row.dart';
 import 'package:trio/src/features/players/presentation/player_detail/stat_box.dart';
 import 'package:trio/src/features/players/presentation/ranking/rating_trend_chart.dart';
-import 'package:trio/src/common_widgets/app_empty_state.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
-import 'package:trio/src/common_widgets/sport_button.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
+import 'package:trio/src/shared/app_empty_state.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_button.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 import 'package:trio/src/features/players/application/player_stats_provider.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/features/players/domain/player_stats_card_data.dart';
 
 class PlayerDetailScreen extends ConsumerWidget {
@@ -309,9 +309,8 @@ class _PlayerStatsSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: sportGlassDecoration(),
-      child: Padding(
+    return GlassDecoration(
+              child: Padding(
         padding: const EdgeInsets.all(12),
         child: GridView.count(
           crossAxisCount: 2,

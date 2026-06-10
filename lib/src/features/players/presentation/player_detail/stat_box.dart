@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class StatBox extends StatelessWidget {
   const StatBox({
@@ -19,9 +19,9 @@ class StatBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Expanded(
-      child: DecoratedBox(
-        decoration: sportGlassDecoration(radius: 22),
-        child: Padding(
+      child: GlassDecoration(
+              radius: 22,
+              child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
             spacing: 8,

@@ -5,8 +5,8 @@ import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/match_stat_event.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_screen_shell.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_screen_shell.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class TimelineSeparator extends StatelessWidget {
   final MatchStatEvent event;
@@ -278,9 +278,9 @@ class TimelineTab extends StatelessWidget {
         .toList()
         .reversed
         .toList();
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 28),
-      child: Padding(
+    return GlassDecoration(
+              radius: 28,
+              child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 14,

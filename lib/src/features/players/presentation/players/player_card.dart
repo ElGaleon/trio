@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/card_actions_menu.dart';
-import 'package:trio/src/common_widgets/sport_avatar_pill.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/card_actions_menu.dart';
+import 'package:trio/src/shared/sport_avatar_pill.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class PlayerCard extends StatelessWidget {
   const PlayerCard({
@@ -34,9 +34,8 @@ class PlayerCard extends StatelessWidget {
       },
       child: GestureDetector(
         onTap: onTap,
-        child: DecoratedBox(
-          decoration: sportGlassDecoration(),
-          child: Padding(
+        child: GlassDecoration(
+              child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               spacing: 14,

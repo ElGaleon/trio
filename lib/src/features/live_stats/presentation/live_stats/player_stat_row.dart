@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/players/domain/player.dart';
+import 'package:trio/src/features/players/application/player_providers.dart';
+import 'package:trio/src/features/settings/domain/custom_stat.dart';
 import 'stat_button.dart';
 
-class PlayerStatRow extends StatelessWidget {
+class PlayerStatRow extends ConsumerWidget {
   const PlayerStatRow({
     super.key,
     required this.player,
     required this.enabledStatTypes,
+    required this.enabledCustomStatIds,
     required this.oursOnOffense,
     required this.hasDisc,
     required this.noDiscHolder,
@@ -17,13 +21,16 @@ class PlayerStatRow extends StatelessWidget {
 
   final Player player;
   final List<MatchStatType> enabledStatTypes;
+  final List<String> enabledCustomStatIds;
   final bool oursOnOffense;
   final bool hasDisc;
   final bool noDiscHolder;
-  final ValueChanged<MatchStatType> onEvent;
+  final void Function(MatchStatType type, String? customStatId) onEvent;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingsProvider);
+    final customStats = settings.customStats;
     final textTheme = Theme.of(context).textTheme;
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -86,7 +93,7 @@ class PlayerStatRow extends StatelessWidget {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final actions = _visibleActions();
+                  final actions = _visibleActions(customStats);
                   final useFullLabels = _fullLabelsFit(
                     actions,
                     constraints.maxWidth,
@@ -108,12 +115,12 @@ class PlayerStatRow extends StatelessWidget {
     );
   }
 
-  List<({String short, String full, MatchStatType type, bool destructive})>
-  _visibleActions() {
+  List<({String short, String full, MatchStatType type, String? customStatId, bool destructive})>
+  _visibleActions(List<CustomStat> customStats) {
     final enabled = enabledStatTypes.toSet();
-    final actions = oursOnOffense
+    final builtInActions = oursOnOffense
         ? hasDisc
-              ? [
+              ? const [
                   (
                     short: 'TE',
                     full: 'Throw error',
@@ -128,7 +135,7 @@ class PlayerStatRow extends StatelessWidget {
                   ),
                 ]
               : noDiscHolder
-              ? [
+              ? const [
                   (
                     short: 'Catch',
                     full: 'Catch',
@@ -142,7 +149,7 @@ class PlayerStatRow extends StatelessWidget {
                     destructive: true,
                   ),
                 ]
-              : [
+              : const [
                   (
                     short: 'Pass',
                     full: 'Passaggio',
@@ -162,7 +169,7 @@ class PlayerStatRow extends StatelessWidget {
                     destructive: true,
                   ),
                 ]
-        : [
+        : const [
             (
               short: 'Stall',
               full: 'Stall out',
@@ -201,13 +208,59 @@ class PlayerStatRow extends StatelessWidget {
             ),
           ];
 
-    return actions
-        .where((action) => enabled.contains(action.type))
-        .toList(growable: false);
+    final List<({String short, String full, MatchStatType type, String? customStatId, bool destructive})> visible = [];
+
+    for (final action in builtInActions) {
+      if (enabled.contains(action.type)) {
+        visible.add((
+          short: action.short,
+          full: action.full,
+          type: action.type,
+          customStatId: null,
+          destructive: action.destructive,
+        ));
+      }
+    }
+
+    for (final stat in customStats) {
+      if (enabledCustomStatIds.contains(stat.id)) {
+        if (oursOnOffense) {
+          if (hasDisc && stat.isError) {
+            visible.add((
+              short: stat.abbreviation,
+              full: stat.label,
+              type: MatchStatType.custom,
+              customStatId: stat.id,
+              destructive: true,
+            ));
+          } else if (!hasDisc && !stat.isError) {
+            visible.add((
+              short: stat.abbreviation,
+              full: stat.label,
+              type: MatchStatType.custom,
+              customStatId: stat.id,
+              destructive: false,
+            ));
+          }
+        } else {
+          if (!stat.isError) {
+            visible.add((
+              short: stat.abbreviation,
+              full: stat.label,
+              type: MatchStatType.custom,
+              customStatId: stat.id,
+              destructive: false,
+            ));
+          }
+        }
+      }
+    }
+
+    return visible;
   }
 
   bool _fullLabelsFit(
-    List<({String short, String full, MatchStatType type, bool destructive})>
+    List<({String short, String full, MatchStatType type, String? customStatId, bool destructive})>
     actions,
     double maxWidth,
   ) {
@@ -220,7 +273,7 @@ class PlayerStatRow extends StatelessWidget {
   }
 
   List<Widget> _buttons(
-    List<({String short, String full, MatchStatType type, bool destructive})>
+    List<({String short, String full, MatchStatType type, String? customStatId, bool destructive})>
     visibleActions,
     bool useFullLabels,
   ) {
@@ -241,7 +294,7 @@ class PlayerStatRow extends StatelessWidget {
         StatButton(
           label: useFullLabels ? action.full : action.short,
           destructive: action.destructive,
-          onTap: () => onEvent(action.type),
+          onTap: () => onEvent(action.type, action.customStatId),
         ),
     ];
   }

@@ -5,7 +5,7 @@ import 'package:trio/src/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'goal_timeline_row.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class GoalTimelineCard extends StatelessWidget {
   const GoalTimelineCard({super.key, required this.match});
@@ -24,9 +24,9 @@ class GoalTimelineCard extends StatelessWidget {
     if (goals.isEmpty) return const SizedBox.shrink();
 
     final textTheme = Theme.of(context).textTheme;
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 28),
-      child: Padding(
+    return GlassDecoration(
+              radius: 28,
+              child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
         child: Column(
           spacing: 12,

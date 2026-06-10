@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class PreMatchBlock extends StatelessWidget {
   const PreMatchBlock({
@@ -61,9 +61,9 @@ class MetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Expanded(
-      child: DecoratedBox(
-        decoration: sportGlassDecoration(radius: 22),
-        child: Padding(
+      child: GlassDecoration(
+              radius: 22,
+              child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
             spacing: 6,
@@ -108,9 +108,9 @@ class MetricRow extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: DecoratedBox(
-        decoration: sportGlassDecoration(radius: 20),
-        child: Padding(
+      child: GlassDecoration(
+              radius: 20,
+              child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           child: Row(
             children: [

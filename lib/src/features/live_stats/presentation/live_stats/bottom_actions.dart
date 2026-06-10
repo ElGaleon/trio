@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/common_widgets/sport_glass_decoration_helper.dart';
+import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/theme/app_colors.dart';
 import 'general_action_button.dart';
 import 'square_action_button.dart';
@@ -40,9 +40,9 @@ class BottomActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: sportGlassDecoration(radius: 24),
-      child: Padding(
+    return GlassDecoration(
+              radius: 24,
+              child: Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
           spacing: 8,
