@@ -39,6 +39,8 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Seleziona una foto profilo per il giocatore.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Scatta una foto profilo per il giocatore.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

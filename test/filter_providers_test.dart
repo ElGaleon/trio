@@ -1,9 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trio/model/player.dart';
-import 'package:trio/model/scrimmage_match.dart';
-import 'package:trio/providers/elo_providers.dart';
-import 'package:trio/providers/player_stats_provider.dart';
+import 'package:trio/src/features/players/domain/player.dart';
+import 'package:trio/src/features/players/domain/player_line_preference.dart';
+import 'package:trio/src/features/players/domain/player_role.dart';
+import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:trio/src/features/matches/domain/match_stat_type.dart';
+import 'package:trio/src/features/matches/domain/match_stat_event.dart';
+import 'package:trio/src/features/players/application/player_providers.dart';
+import 'package:trio/src/features/matches/application/matches_providers.dart';
+import 'package:trio/src/features/players/application/player_stats_provider.dart';
 
 void main() {
   test('filters players by search, role and line with Riverpod', () {

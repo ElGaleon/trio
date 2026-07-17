@@ -1,55 +1,49 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:trio/app_constants.dart';
-import 'package:trio/model/app_settings.dart';
-import 'package:trio/model/player.dart';
-import 'package:trio/model/scrimmage_match.dart';
-import 'package:trio/repositories/elo_repository.dart';
-import 'package:trio/providers/elo_providers.dart';
-import 'package:trio/service/live_stats_service.dart';
+import 'package:hive/hive.dart';
+import 'package:trio/src/features/players/data/player_adapter.dart';
+import 'package:trio/src/features/matches/data/scrimmage_match_adapter.dart';
+import 'package:trio/src/constants/app_constants.dart';
+import 'package:trio/src/features/settings/domain/app_settings.dart';
+import 'package:trio/src/features/players/domain/player.dart';
+import 'package:trio/src/features/players/domain/player_line_preference.dart';
+import 'package:trio/src/features/players/domain/player_role.dart';
+import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:trio/src/features/matches/domain/match_stat_type.dart';
+import 'package:trio/src/features/matches/data/elo_repository.dart';
+import 'package:trio/src/features/live_stats/application/live_stats_service.dart';
 
 void main() {
-  late FakeFirebaseFirestore firestore;
+  late Directory tempDir;
+  late Box<Player> playersBox;
+  late Box<ScrimmageMatch> matchesBox;
 
   setUp(() async {
-    firestore = FakeFirebaseFirestore();
+    tempDir = await Directory.systemTemp.createTemp('trio_elo_test_');
+    Hive.init(tempDir.path);
+    if (!Hive.isAdapterRegistered(AppConstants.playerTypeId)) {
+      Hive.registerAdapter(PlayerAdapter());
+    }
+    if (!Hive.isAdapterRegistered(AppConstants.matchTypeId)) {
+      Hive.registerAdapter(ScrimmageMatchAdapter());
+    }
+    playersBox = await Hive.openBox<Player>('players_test');
+    matchesBox = await Hive.openBox<ScrimmageMatch>('matches_test');
   });
 
-  Future<RecalculatedData> getRecalculated(AppSettings settings) async {
-    final playersSnap = await firestore.collection('players').get();
-    final rawPlayers = playersSnap.docs.map((doc) => Player.fromMap(doc.data())).toList();
-
-    final matchesSnap = await firestore.collection('matches').get();
-    final rawMatches = matchesSnap.docs.map((doc) => ScrimmageMatch.fromMap(doc.data())).toList();
-
-    return recalculateRatingsInMemory(
-      rawPlayers: rawPlayers,
-      rawMatches: rawMatches,
-      settings: settings,
-    );
-  }
+  tearDown(() async {
+    await Hive.close();
+    await tempDir.delete(recursive: true);
+  });
 
   test('updates ELO after a 3vs3 scrimmage', () async {
-    final settings = AppSettings();
-    var recalculated = RecalculatedData([], []);
-    var repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
+    final repository = EloRepository(playersBox, matchesBox, AppSettings());
     for (final name in ['A', 'B', 'C', 'D', 'E', 'F']) {
       await repository.addPlayer(name);
     }
 
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
-    final players = recalculated.players..sort((a, b) => b.rating.compareTo(a.rating));
+    final players = repository.rankedPlayers;
     await repository.upsertMatch(
       ScrimmageMatch(
         id: 'match-1',
@@ -61,11 +55,9 @@ void main() {
       ),
     );
 
-    recalculated = await getRecalculated(settings);
-
-    final winners = recalculated.players.where((player) => player.wins == 1);
-    final losers = recalculated.players.where((player) => player.losses == 1);
-    final savedMatch = recalculated.matches.firstWhere((m) => m.id == 'match-1');
+    final winners = playersBox.values.where((player) => player.wins == 1);
+    final losers = playersBox.values.where((player) => player.losses == 1);
+    final savedMatch = matchesBox.get('match-1')!;
 
     expect(winners, hasLength(3));
     expect(losers, hasLength(3));
@@ -82,26 +74,11 @@ void main() {
   });
 
   test('recalculates ratings when a match is edited', () async {
-    final settings = AppSettings();
-    var recalculated = RecalculatedData([], []);
-    var repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
+    final repository = EloRepository(playersBox, matchesBox, AppSettings());
     for (final name in ['A', 'B', 'C', 'D', 'E', 'F']) {
       await repository.addPlayer(name);
     }
-
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
-    final players = recalculated.players..sort((a, b) => b.rating.compareTo(a.rating));
+    final players = repository.rankedPlayers;
     final teamA = players.take(3).map((player) => player.id).toList();
     final teamB = players.skip(3).take(3).map((player) => player.id).toList();
 
@@ -115,14 +92,6 @@ void main() {
         scoreB: 18,
       ),
     );
-
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
     await repository.upsertMatch(
       ScrimmageMatch(
         id: 'match-1',
@@ -134,33 +103,16 @@ void main() {
       ),
     );
 
-    recalculated = await getRecalculated(settings);
-
-    expect(teamB.every((id) => recalculated.players.firstWhere((p) => p.id == id).wins == 1), isTrue);
-    expect(teamA.every((id) => recalculated.players.firstWhere((p) => p.id == id).losses == 1), isTrue);
+    expect(teamB.every((id) => playersBox.get(id)!.wins == 1), isTrue);
+    expect(teamA.every((id) => playersBox.get(id)!.losses == 1), isTrue);
   });
 
   test('builds rating history for a player', () async {
-    final settings = AppSettings();
-    var recalculated = RecalculatedData([], []);
-    var repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
+    final repository = EloRepository(playersBox, matchesBox, AppSettings());
     for (final name in ['A', 'B', 'C', 'D', 'E', 'F']) {
       await repository.addPlayer(name);
     }
-
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
-    final players = recalculated.players..sort((a, b) => b.rating.compareTo(a.rating));
+    final players = repository.rankedPlayers;
     final trackedPlayerId = players.first.id;
     final teamA = players.take(3).map((player) => player.id).toList();
     final teamB = players.skip(3).take(3).map((player) => player.id).toList();
@@ -175,14 +127,6 @@ void main() {
         scoreB: 18,
       ),
     );
-
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
     await repository.upsertMatch(
       ScrimmageMatch(
         id: 'match-2',
@@ -192,13 +136,6 @@ void main() {
         scoreA: 16,
         scoreB: 21,
       ),
-    );
-
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
     );
 
     final history = repository.ratingHistoryForPlayer(trackedPlayerId);
@@ -212,26 +149,16 @@ void main() {
   });
 
   test('uses configurable initial rating and ELO coefficient', () async {
-    final settings = AppSettings(initialRating: 1200, eloKFactor: 64);
-    var recalculated = RecalculatedData([], []);
-    var repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
+    final repository = EloRepository(
+      playersBox,
+      matchesBox,
+      AppSettings(initialRating: 1200, eloKFactor: 64),
     );
-
     for (final name in ['A', 'B', 'C', 'D', 'E', 'F']) {
       await repository.addPlayer(name);
     }
 
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
-    final players = recalculated.players..sort((a, b) => b.rating.compareTo(a.rating));
+    final players = repository.rankedPlayers;
     await repository.upsertMatch(
       ScrimmageMatch(
         id: 'match-1',
@@ -243,22 +170,13 @@ void main() {
       ),
     );
 
-    recalculated = await getRecalculated(settings);
-
-    final winner = recalculated.players.firstWhere((player) => player.wins == 1);
+    final winner = playersBox.values.firstWhere((player) => player.wins == 1);
 
     expect(winner.rating, 1232);
   });
 
   test('updates ELO for variable team sizes', () async {
-    final settings = AppSettings();
-    var recalculated = RecalculatedData([], []);
-    var repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
+    final repository = EloRepository(playersBox, matchesBox, AppSettings());
     for (final name in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']) {
       await repository.addPlayerWithLine(
         name,
@@ -267,14 +185,7 @@ void main() {
       );
     }
 
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
-    final players = recalculated.players..sort((a, b) => b.rating.compareTo(a.rating));
+    final players = repository.rankedPlayers;
     await repository.upsertMatch(
       ScrimmageMatch(
         id: 'match-4v4',
@@ -287,10 +198,8 @@ void main() {
       ),
     );
 
-    recalculated = await getRecalculated(settings);
-
-    final winners = recalculated.players.where((player) => player.wins == 1);
-    final savedMatch = recalculated.matches.firstWhere((m) => m.id == 'match-4v4');
+    final winners = playersBox.values.where((player) => player.wins == 1);
+    final savedMatch = matchesBox.get('match-4v4')!;
 
     expect(winners, hasLength(4));
     expect(savedMatch.teamSize, 4);
@@ -298,26 +207,11 @@ void main() {
   });
 
   test('updates ELO when a match ends in a draw', () async {
-    final settings = AppSettings();
-    var recalculated = RecalculatedData([], []);
-    var repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
+    final repository = EloRepository(playersBox, matchesBox, AppSettings());
     for (final name in ['A', 'B', 'C', 'D', 'E', 'F']) {
       await repository.addPlayer(name);
     }
-
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
-    final players = recalculated.players..sort((a, b) => b.rating.compareTo(a.rating));
+    final players = repository.rankedPlayers;
     final teamA = players.take(3).map((player) => player.id).toList();
     final teamB = players.skip(3).take(3).map((player) => player.id).toList();
 
@@ -332,13 +226,6 @@ void main() {
       ),
     );
 
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
     await repository.upsertMatch(
       ScrimmageMatch(
         id: 'draw-match',
@@ -350,9 +237,7 @@ void main() {
       ),
     );
 
-    recalculated = await getRecalculated(settings);
-
-    final savedMatch = recalculated.matches.firstWhere((m) => m.id == 'draw-match');
+    final savedMatch = matchesBox.get('draw-match')!;
 
     expect(savedMatch.isDraw, isTrue);
     expect(
@@ -368,22 +253,15 @@ void main() {
       isTrue,
     );
     expect(
-      recalculated.players.every((player) => player.matchesPlayed == 2),
+      playersBox.values.every((player) => player.matchesPlayed == 2),
       isTrue,
     );
-    expect(teamA.every((id) => recalculated.players.firstWhere((p) => p.id == id).wins == 1), isTrue);
-    expect(teamB.every((id) => recalculated.players.firstWhere((p) => p.id == id).losses == 1), isTrue);
+    expect(teamA.every((id) => playersBox.get(id)!.wins == 1), isTrue);
+    expect(teamB.every((id) => playersBox.get(id)!.losses == 1), isTrue);
   });
 
   test('allows more present players than the on-field format', () async {
-    final settings = AppSettings();
-    var recalculated = RecalculatedData([], []);
-    var repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
+    final repository = EloRepository(playersBox, matchesBox, AppSettings());
     for (final name in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']) {
       await repository.addPlayerWithLine(
         name,
@@ -392,14 +270,7 @@ void main() {
       );
     }
 
-    recalculated = await getRecalculated(settings);
-    repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
-
-    final players = recalculated.players..sort((a, b) => b.rating.compareTo(a.rating));
+    final players = repository.rankedPlayers;
     await repository.upsertMatch(
       ScrimmageMatch(
         id: 'match-3v3-with-subs',
@@ -413,10 +284,8 @@ void main() {
       ),
     );
 
-    recalculated = await getRecalculated(settings);
-
-    final savedMatch = recalculated.matches.firstWhere((m) => m.id == 'match-3v3-with-subs');
-    final winners = recalculated.players.where((player) => player.wins == 1);
+    final savedMatch = matchesBox.get('match-3v3-with-subs')!;
+    final winners = playersBox.values.where((player) => player.wins == 1);
 
     expect(savedMatch.teamSize, 3);
     expect(savedMatch.offenseVsDefense, isTrue);
@@ -425,13 +294,7 @@ void main() {
   });
 
   test('stores player role and line preference', () async {
-    final settings = AppSettings();
-    var recalculated = RecalculatedData([], []);
-    var repository = EloRepository(
-      matches: recalculated.matches,
-      settings: settings,
-      firestore: firestore,
-    );
+    final repository = EloRepository(playersBox, matchesBox, AppSettings());
 
     await repository.addPlayerWithLine(
       'Handler A',
@@ -439,9 +302,7 @@ void main() {
       PlayerRole.handler,
     );
 
-    recalculated = await getRecalculated(settings);
-
-    final player = recalculated.players.single;
+    final player = playersBox.values.single;
 
     expect(player.role, PlayerRole.handler);
     expect(player.linePreference, PlayerLinePreference.offense);
@@ -450,26 +311,15 @@ void main() {
   test(
     'stores stat weight on each event without rewriting old stats',
     () async {
-      final settings1 = AppSettings(statWeights: {MatchStatType.pass: 1.5});
-      var recalculated = RecalculatedData([], []);
-      var repository1 = EloRepository(
-        matches: recalculated.matches,
-        settings: settings1,
-        firestore: firestore,
+      final firstRepository = EloRepository(
+        playersBox,
+        matchesBox,
+        AppSettings(statWeights: {MatchStatType.pass: 1.5}),
       );
-
       for (final name in ['A', 'B', 'C', 'D', 'E', 'F']) {
-        await repository1.addPlayer(name);
+        await firstRepository.addPlayer(name);
       }
-
-      recalculated = await getRecalculated(settings1);
-      repository1 = EloRepository(
-        matches: recalculated.matches,
-        settings: settings1,
-        firestore: firestore,
-      );
-
-      final players = recalculated.players..sort((a, b) => b.rating.compareTo(a.rating));
+      final players = firstRepository.rankedPlayers;
       final match = ScrimmageMatch(
         id: 'stats-history',
         createdAt: DateTime(2026, 6, 5),
@@ -478,50 +328,84 @@ void main() {
         scoreA: 0,
         scoreB: 0,
       );
-      await repository1.upsertMatch(match);
+      await firstRepository.upsertMatch(match);
 
-      recalculated = await getRecalculated(settings1);
-      repository1 = EloRepository(
-        matches: recalculated.matches,
-        settings: settings1,
-        firestore: firestore,
-      );
-
-      final playersById = {for (final player in recalculated.players) player.id: player};
+      final playersById = {for (final player in players) player.id: player};
       await LiveStatsService.instance.record(
-        recalculated.matches.firstWhere((m) => m.id == 'stats-history'),
+        match,
         type: MatchStatType.pass,
         player: players.first,
         playersById: playersById,
-        repository: repository1,
+        repository: firstRepository,
       );
 
-      final settings2 = AppSettings(statWeights: {MatchStatType.pass: 4.0});
-      recalculated = await getRecalculated(settings2);
-      final repository2 = EloRepository(
-        matches: recalculated.matches,
-        settings: settings2,
-        firestore: firestore,
+      final secondRepository = EloRepository(
+        playersBox,
+        matchesBox,
+        AppSettings(statWeights: {MatchStatType.pass: 4}),
       );
-
-      final savedMatch = recalculated.matches.firstWhere((m) => m.id == 'stats-history');
+      final savedMatch = matchesBox.get('stats-history')!;
       await LiveStatsService.instance.record(
         savedMatch,
         type: MatchStatType.pass,
         player: players[1],
         playersById: playersById,
-        repository: repository2,
+        repository: secondRepository,
       );
 
-      recalculated = await getRecalculated(settings2);
-
-      final statValues = recalculated.matches
-          .firstWhere((m) => m.id == 'stats-history')
+      final statValues = matchesBox
+          .get('stats-history')!
           .statEvents
           .map((event) => event.statValue)
           .toList();
 
-      expect(statValues, [1.5, 4.0]);
+      expect(statValues, [1.5, 4]);
+    },
+  );
+
+  test(
+    'recalculates ELO using teamARosterIds and teamBRosterIds in scrimmage',
+    () async {
+      final repository = EloRepository(playersBox, matchesBox, AppSettings());
+      for (final name in ['A', 'B', 'C', 'D', 'E', 'F']) {
+        await repository.addPlayer(name);
+      }
+
+      final players = repository.rankedPlayers;
+      final rosterA = players.take(3).map((player) => player.id).toList();
+      final rosterB = players
+          .skip(3)
+          .take(3)
+          .map((player) => player.id)
+          .toList();
+
+      await repository.upsertMatch(
+        ScrimmageMatch(
+          id: 'scrimmage-rosters-1',
+          createdAt: DateTime(2026, 6, 9),
+          teamAIds: [], // Empty active lineup
+          teamBIds: [], // Empty active lineup
+          teamARosterIds: rosterA,
+          teamBRosterIds: rosterB,
+          scoreA: 21,
+          scoreB: 15,
+          isExternalOpponent: false,
+        ),
+      );
+
+      final winners = rosterA.map((id) => playersBox.get(id)!).toList();
+      final losers = rosterB.map((id) => playersBox.get(id)!).toList();
+
+      expect(winners.every((player) => player.wins == 1), isTrue);
+      expect(
+        winners.every((player) => player.rating > AppConstants.initialRating),
+        isTrue,
+      );
+      expect(losers.every((player) => player.losses == 1), isTrue);
+      expect(
+        losers.every((player) => player.rating < AppConstants.initialRating),
+        isTrue,
+      );
     },
   );
 }
