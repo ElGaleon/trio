@@ -41,10 +41,7 @@ class EmptyState extends StatelessWidget {
               ),
             ),
             if (action != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: action!,
-              ),
+              Padding(padding: const EdgeInsets.only(top: 8), child: action!),
           ],
         ),
       ),

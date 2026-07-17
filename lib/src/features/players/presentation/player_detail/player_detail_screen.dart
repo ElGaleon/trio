@@ -310,7 +310,7 @@ class _PlayerStatsSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassDecoration(
-              child: Padding(
+      child: Padding(
         padding: const EdgeInsets.all(12),
         child: GridView.count(
           crossAxisCount: 2,

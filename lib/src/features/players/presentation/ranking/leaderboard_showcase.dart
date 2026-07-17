@@ -59,7 +59,8 @@ class LeaderboardShowcase extends StatelessWidget {
                     child: PodiumPlayer(
                       player: player,
                       rank: rankByPlayerId[player.id],
-                      featured: players.isNotEmpty && player.id == players.first.id,
+                      featured:
+                          players.isNotEmpty && player.id == players.first.id,
                       allAtInitialRating: allAtInitialRating,
                       onTap: () => onPlayerTap(player),
                     ),

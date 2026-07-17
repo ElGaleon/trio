@@ -23,7 +23,7 @@ class StatsSelectionStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return GlassDecoration(
-              child: Padding(
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 14,

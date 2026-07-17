@@ -37,11 +37,11 @@ class MatchStatEvent {
 
   bool get isGoal => type == MatchStatType.goal;
   bool get isError => type.isError;
-  bool get isCompletedPass => type == MatchStatType.pass || type == MatchStatType.huck;
+  bool get isCompletedPass =>
+      type == MatchStatType.pass || type == MatchStatType.huck;
   bool get isThrowError => type == MatchStatType.throwError;
   bool get isCatchError => type == MatchStatType.catchError;
   bool get isAttemptedPass => isCompletedPass || isThrowError || isCatchError;
-
 
   Map<String, dynamic> toMap() {
     return {

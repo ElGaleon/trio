@@ -141,8 +141,8 @@ class _GroupStatsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassDecoration(
-              radius: 28,
-              child: Padding(
+      radius: 28,
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 14,
@@ -194,8 +194,8 @@ class _TopPlayersPanel extends ConsumerWidget {
       ..sort((a, b) => b.impactScore.compareTo(a.impactScore));
 
     return GlassDecoration(
-              radius: 28,
-              child: Padding(
+      radius: 28,
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 12,
@@ -227,8 +227,8 @@ class _IndividualStatsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassDecoration(
-              radius: 28,
-              child: Padding(
+      radius: 28,
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 14,

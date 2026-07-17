@@ -22,10 +22,15 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
 
   @override
   Widget build(BuildContext context) {
-    final goalEvents = widget.match.statEvents
-        .where((e) => e.type == MatchStatType.goal || e.type == MatchStatType.opponentGoal)
-        .toList()
-      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    final goalEvents =
+        widget.match.statEvents
+            .where(
+              (e) =>
+                  e.type == MatchStatType.goal ||
+                  e.type == MatchStatType.opponentGoal,
+            )
+            .toList()
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
     final scoresA = [0.0];
     final scoresB = [0.0];
@@ -43,8 +48,8 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
     final playersById = {for (final p in players) p.id: p};
 
     return GlassDecoration(
-              radius: 28,
-              child: Padding(
+      radius: 28,
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 16,
@@ -63,10 +68,16 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                     ),
                   ),
                 ),
-                LegendItem(color: AppColors.violet, label: widget.match.teamAName),
+                LegendItem(
+                  color: AppColors.violet,
+                  label: widget.match.teamAName,
+                ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
-                  child: LegendItem(color: AppColors.danger, label: widget.match.teamBName),
+                  child: LegendItem(
+                    color: AppColors.danger,
+                    label: widget.match.teamBName,
+                  ),
                 ),
               ],
             ),
@@ -79,12 +90,15 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                   builder: (context, constraints) {
                     final chartWidth = constraints.maxWidth;
                     final totalPoints = scoresA.length - 1;
-                    final segmentWidth = totalPoints == 0 ? chartWidth : chartWidth / totalPoints;
+                    final segmentWidth = totalPoints == 0
+                        ? chartWidth
+                        : chartWidth / totalPoints;
 
                     return GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTapDown: (details) {
-                        final tappedIndex = (details.localPosition.dx / segmentWidth).round();
+                        final tappedIndex =
+                            (details.localPosition.dx / segmentWidth).round();
                         setState(() {
                           _selectedIndex = tappedIndex.clamp(0, totalPoints);
                         });
@@ -106,29 +120,50 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
             if (selectedIndex > 0 && selectedIndex - 1 < goalEvents.length) ...[
               (() {
                 final event = goalEvents[selectedIndex - 1];
-                final player = event.playerId == null ? null : playersById[event.playerId];
-                final elapsed = event.createdAt.difference(widget.match.createdAt);
+                final player = event.playerId == null
+                    ? null
+                    : playersById[event.playerId];
+                final elapsed = event.createdAt.difference(
+                  widget.match.createdAt,
+                );
                 final min = elapsed.inMinutes;
                 final sec = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
-                final scorerName = player?.name ?? (event.type == MatchStatType.goal ? widget.match.teamAName : widget.match.teamBName);
+                final scorerName =
+                    player?.name ??
+                    (event.type == MatchStatType.goal
+                        ? widget.match.teamAName
+                        : widget.match.teamBName);
                 final isOurGoal = event.type == MatchStatType.goal;
 
                 return DecoratedBox(
                   decoration: BoxDecoration(
                     color: AppColors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.white.withValues(alpha: 0.08)),
+                    border: Border.all(
+                      color: AppColors.white.withValues(alpha: 0.08),
+                    ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     child: Row(
                       spacing: 12,
                       children: [
                         DecoratedBox(
                           decoration: BoxDecoration(
-                            color: (isOurGoal ? AppColors.violet : AppColors.danger).withValues(alpha: 0.15),
+                            color:
+                                (isOurGoal
+                                        ? AppColors.violet
+                                        : AppColors.danger)
+                                    .withValues(alpha: 0.15),
                             shape: BoxShape.circle,
-                            border: Border.all(color: isOurGoal ? AppColors.violet : AppColors.danger),
+                            border: Border.all(
+                              color: isOurGoal
+                                  ? AppColors.violet
+                                  : AppColors.danger,
+                            ),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(8),
@@ -145,18 +180,22 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                             spacing: 3,
                             children: [
                               Text(
-                                isOurGoal ? 'Meta di $scorerName' : 'Meta avversaria',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.white,
-                                  fontWeight: FontWeight.w900,
-                                ),
+                                isOurGoal
+                                    ? 'Meta di $scorerName'
+                                    : 'Meta avversaria',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: AppColors.white,
+                                      fontWeight: FontWeight.w900,
+                                    ),
                               ),
                               Text(
                                 'Punteggio: ${event.scoreA} - ${event.scoreB} · Tempo: $min\'$sec"',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.sportMutedText,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: AppColors.sportMutedText,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                               ),
                             ],
                           ),
@@ -171,10 +210,15 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                 decoration: BoxDecoration(
                   color: AppColors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.white.withValues(alpha: 0.08)),
+                  border: Border.all(
+                    color: AppColors.white.withValues(alpha: 0.08),
+                  ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   child: Row(
                     spacing: 12,
                     children: [
@@ -182,7 +226,9 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                         decoration: BoxDecoration(
                           color: AppColors.white.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
+                          border: Border.all(
+                            color: AppColors.white.withValues(alpha: 0.2),
+                          ),
                         ),
                         child: const Padding(
                           padding: EdgeInsets.all(8),
@@ -200,17 +246,19 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                           children: [
                             Text(
                               'Inizio della partita',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.white,
-                                fontWeight: FontWeight.w900,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.w900,
+                                  ),
                             ),
                             Text(
                               'Punteggio di partenza: 0 - 0',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.sportMutedText,
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.sportMutedText,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                             ),
                           ],
                         ),
@@ -219,7 +267,7 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                   ),
                 ),
               ),
-            ]
+            ],
           ],
         ),
       ),
@@ -242,10 +290,7 @@ class LegendItem extends StatelessWidget {
           width: 8,
           height: 8,
           child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
         ),
         Text(
@@ -313,8 +358,12 @@ class ScoreTrendPainter extends CustomPainter {
       }
     }
 
-    if (selectedIndex != null && selectedIndex! >= 0 && selectedIndex! < scoresA.length) {
-      final x = totalPoints == 0 ? 0.0 : size.width * (selectedIndex! / totalPoints);
+    if (selectedIndex != null &&
+        selectedIndex! >= 0 &&
+        selectedIndex! < scoresA.length) {
+      final x = totalPoints == 0
+          ? 0.0
+          : size.width * (selectedIndex! / totalPoints);
       final linePaint = Paint()
         ..color = AppColors.white.withValues(alpha: 0.15)
         ..style = PaintingStyle.stroke
@@ -324,7 +373,8 @@ class ScoreTrendPainter extends CustomPainter {
       final dotPaint = Paint()..style = PaintingStyle.fill;
 
       // Highlight A
-      final yA = size.height - (size.height * (scoresA[selectedIndex!] / maxScore));
+      final yA =
+          size.height - (size.height * (scoresA[selectedIndex!] / maxScore));
       dotPaint.color = AppColors.violet.withValues(alpha: 0.4);
       canvas.drawCircle(Offset(x, yA), 8, dotPaint);
       dotPaint.color = AppColors.violet;
@@ -333,7 +383,8 @@ class ScoreTrendPainter extends CustomPainter {
       canvas.drawCircle(Offset(x, yA), 2.5, dotPaint);
 
       // Highlight B
-      final yB = size.height - (size.height * (scoresB[selectedIndex!] / maxScore));
+      final yB =
+          size.height - (size.height * (scoresB[selectedIndex!] / maxScore));
       dotPaint.color = AppColors.danger.withValues(alpha: 0.4);
       canvas.drawCircle(Offset(x, yB), 8, dotPaint);
       dotPaint.color = AppColors.danger;
@@ -343,7 +394,12 @@ class ScoreTrendPainter extends CustomPainter {
     }
   }
 
-  void _drawLine(Canvas canvas, List<Offset> points, Color color, double animProgress) {
+  void _drawLine(
+    Canvas canvas,
+    List<Offset> points,
+    Color color,
+    double animProgress,
+  ) {
     if (points.isEmpty) return;
     final path = Path()..moveTo(points.first.dx, points.first.dy);
     for (final point in points.skip(1)) {

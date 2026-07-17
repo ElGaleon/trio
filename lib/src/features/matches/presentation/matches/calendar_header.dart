@@ -10,7 +10,11 @@ import 'package:trio/src/features/matches/presentation/matches/calendar_nav_butt
 import 'package:trio/src/features/matches/application/matches_providers.dart';
 
 class CalendarHeader extends ConsumerWidget {
-  const CalendarHeader({super.key, required this.month, required this.expanded});
+  const CalendarHeader({
+    super.key,
+    required this.month,
+    required this.expanded,
+  });
 
   final DateTime month;
   final bool expanded;
@@ -18,8 +22,8 @@ class CalendarHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GlassDecoration(
-              radius: 24,
-              child: Padding(
+      radius: 24,
+      child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Row(
           children: [

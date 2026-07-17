@@ -28,7 +28,9 @@ class AnimatedScoreStepper extends StatelessWidget {
           children: [
             Text(
               label,
-              style: context.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+              style: context.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
             FittedBox(
               fit: BoxFit.scaleDown,

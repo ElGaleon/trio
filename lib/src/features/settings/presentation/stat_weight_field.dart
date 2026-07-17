@@ -22,9 +22,9 @@ class StatWeightField extends StatelessWidget {
           child: Text(
             type.label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
         SizedBox(

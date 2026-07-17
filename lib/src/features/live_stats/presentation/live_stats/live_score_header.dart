@@ -93,7 +93,10 @@ class LiveScoreHeader extends StatelessWidget {
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: onHalfTime,
-                child: const CountdownBanner(label: 'HALF TIME', value: 'START'),
+                child: const CountdownBanner(
+                  label: 'HALF TIME',
+                  value: 'START',
+                ),
               ),
             DecoratedBox(
               decoration: BoxDecoration(
@@ -104,7 +107,10 @@ class LiveScoreHeader extends StatelessWidget {
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   child: Text(

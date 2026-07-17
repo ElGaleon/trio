@@ -53,6 +53,7 @@ class MatchScoreHeaderDelegate extends SliverPersistentHeaderDelegate {
                 HeaderIconButton(
                   size: 44 - (6 * progress),
                   icon: FIcons.chevronLeft,
+                  tooltip: 'Indietro',
                   onTap: () {
                     if (context.canPop()) {
                       context.pop();
@@ -71,6 +72,7 @@ class MatchScoreHeaderDelegate extends SliverPersistentHeaderDelegate {
                 HeaderIconButton(
                   size: 44 - (6 * progress),
                   icon: FIcons.star,
+                  tooltip: 'Preferito',
                   onTap: () {},
                 ),
               ],

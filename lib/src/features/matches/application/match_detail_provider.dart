@@ -17,9 +17,10 @@ class MatchDetailTabNotifier extends Notifier<MatchDetailTab> {
   }
 }
 
-final matchDetailTabProvider = NotifierProvider.autoDispose.family<MatchDetailTabNotifier, MatchDetailTab, String>(
-  MatchDetailTabNotifier.new,
-);
+final matchDetailTabProvider = NotifierProvider.autoDispose
+    .family<MatchDetailTabNotifier, MatchDetailTab, String>(
+      MatchDetailTabNotifier.new,
+    );
 
 class MatchDetailSubTabNotifier extends Notifier<MatchDetailSubTab> {
   final String matchId;
@@ -35,6 +36,7 @@ class MatchDetailSubTabNotifier extends Notifier<MatchDetailSubTab> {
   }
 }
 
-final matchDetailSubTabProvider = NotifierProvider.autoDispose.family<MatchDetailSubTabNotifier, MatchDetailSubTab, String>(
-  MatchDetailSubTabNotifier.new,
-);
+final matchDetailSubTabProvider = NotifierProvider.autoDispose
+    .family<MatchDetailSubTabNotifier, MatchDetailSubTab, String>(
+      MatchDetailSubTabNotifier.new,
+    );

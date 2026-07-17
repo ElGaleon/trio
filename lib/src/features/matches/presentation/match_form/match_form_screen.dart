@@ -112,8 +112,8 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
                 top: 4,
               ), // Adjust spacing: 14 + 4 = 18 total
               child: GlassDecoration(
-              radius: 22,
-              child: Padding(
+                radius: 22,
+                child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     spacing: 12,

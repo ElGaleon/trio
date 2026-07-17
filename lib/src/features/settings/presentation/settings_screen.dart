@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
@@ -77,12 +78,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final state = ref.watch(settingsFormProvider);
     final notifier = ref.read(settingsFormProvider.notifier);
     final textTheme = Theme.of(context).textTheme;
+    final saveButton = SportFloatingActionButton(
+      label: 'Salva',
+      icon: FIcons.save,
+      onPressed: () => _save(context, notifier),
+    );
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SportScreenShell(
         title: 'Settings',
         subtitle: 'Theme and ELO',
+        headerActions: [if (kIsWeb) saveButton],
         child: Column(
           spacing: 12,
           children: [
@@ -167,23 +174,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     for (final entry in _statWeightControllers.entries)
-                      StatWeightField(
-                        type: entry.key,
-                        controller: entry.value,
-                      ),
+                      StatWeightField(type: entry.key, controller: entry.value),
                   ],
                 ),
               ),
             ),
             const CustomStatsSettingsSection(),
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: SportFloatingActionButton(
-                label: 'Salva',
-                icon: FIcons.save,
-                onPressed: () => _save(context, notifier),
+            if (!kIsWeb)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: saveButton,
               ),
-            ),
           ],
         ),
       ),

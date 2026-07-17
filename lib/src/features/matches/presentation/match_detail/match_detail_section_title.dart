@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:trio/src/theme/app_colors.dart';
 
 class MatchDetailSectionTitle extends StatelessWidget {
-  const MatchDetailSectionTitle({super.key, required this.icon, required this.title});
+  const MatchDetailSectionTitle({
+    super.key,
+    required this.icon,
+    required this.title,
+  });
 
   final IconData icon;
   final String title;

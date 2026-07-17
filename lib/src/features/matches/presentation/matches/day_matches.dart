@@ -29,7 +29,8 @@ class DayMatches extends StatelessWidget {
       return SportEmptyState(
         icon: FIcons.calendarX,
         title: 'Nessun match',
-        message: 'Non ci sono partite il ${CalendarUtils.dayLabel(selectedDay!)}.',
+        message:
+            'Non ci sono partite il ${CalendarUtils.dayLabel(selectedDay!)}.',
       );
     }
     return Column(

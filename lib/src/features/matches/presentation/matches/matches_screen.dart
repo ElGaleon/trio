@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:trio/src/shared/app_empty_state.dart';
 import 'package:trio/src/shared/decorated_panel.dart';
 import 'package:trio/src/shared/match_card.dart';
+import 'package:trio/src/shared/responsive_layout.dart';
 import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/constants/app_constants.dart';
@@ -91,8 +92,8 @@ class MatchesScreen extends ConsumerWidget {
                               message:
                                   'Non ci sono partite nel periodo selezionato.',
                             )
-                          : Column(
-                              spacing: 12,
+                          : ResponsiveGrid(
+                              minTileWidth: 360,
                               children: filteredMatches.map((match) {
                                 return MatchCard(
                                   match: match,
@@ -179,7 +180,8 @@ class MatchesScreen extends ConsumerWidget {
                     PopupOption(
                       icon: FIcons.users,
                       title: 'Partita di Allenamento (Stats)',
-                      subtitle: 'Traccia statistiche in tempo reale per partitella interna',
+                      subtitle:
+                          'Traccia statistiche in tempo reale per partitella interna',
                       onTap: () {
                         Navigator.pop(context);
                         context.go('${AppRoutes.newStatsMatch}?type=training');

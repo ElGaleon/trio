@@ -21,9 +21,7 @@ class MiniIconButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.violet),
           ),
-          child: Center(
-            child: Icon(icon, color: AppColors.white, size: 15),
-          ),
+          child: Center(child: Icon(icon, color: AppColors.white, size: 15)),
         ),
       ),
     );

@@ -67,12 +67,12 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final stateOfRouter = GoRouterState.of(context);
-      final isTraining = stateOfRouter.uri.queryParameters['type'] == 'training';
+      final isTraining =
+          stateOfRouter.uri.queryParameters['type'] == 'training';
       final allPlayers = ref.read(rankedPlayersProvider);
-      ref.read(statsMatchSetupProvider.notifier).initializeForMatch(
-        isTraining: isTraining,
-        allPlayers: allPlayers,
-      );
+      ref
+          .read(statsMatchSetupProvider.notifier)
+          .initializeForMatch(isTraining: isTraining, allPlayers: allPlayers);
       final newState = ref.read(statsMatchSetupProvider);
       _teamController.text = newState.teamName;
       _opponentController.text = newState.opponentName;
@@ -93,10 +93,20 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
       if (state.isAttackVsDefense) {
         return [SetupStep.settings, SetupStep.stats];
       } else {
-        return [SetupStep.settings, SetupStep.rosterA, SetupStep.rosterB, SetupStep.stats];
+        return [
+          SetupStep.settings,
+          SetupStep.rosterA,
+          SetupStep.rosterB,
+          SetupStep.stats,
+        ];
       }
     } else {
-      return [SetupStep.settings, SetupStep.rosterA, SetupStep.stats, SetupStep.lineup];
+      return [
+        SetupStep.settings,
+        SetupStep.rosterA,
+        SetupStep.stats,
+        SetupStep.lineup,
+      ];
     }
   }
 
@@ -139,7 +149,10 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
         title: 'Stats match',
         subtitle: switch (activeStep) {
           SetupStep.settings => 'Informazioni generali',
-          SetupStep.rosterA => state.isTrainingMatch ? 'Roster ${state.teamName}' : 'Presenti alla partita',
+          SetupStep.rosterA =>
+            state.isTrainingMatch
+                ? 'Roster ${state.teamName}'
+                : 'Presenti alla partita',
           SetupStep.rosterB => 'Roster ${state.opponentName}',
           SetupStep.stats => 'Statistiche da tracciare',
           SetupStep.lineup => 'Selezione linea',
@@ -181,28 +194,39 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
                 onInternalScrimmageToggle: notifier.toggleInternalScrimmage,
                 isTrainingMatch: state.isTrainingMatch,
                 isAttackVsDefense: state.isAttackVsDefense,
-                onAttackVsDefenseToggle: () => notifier.toggleAttackVsDefense(players),
+                onAttackVsDefenseToggle: () =>
+                    notifier.toggleAttackVsDefense(players),
               )
             else if (activeStep == SetupStep.rosterA)
               RosterPicker(
-                title: state.isTrainingMatch ? 'Roster ${state.teamName}' : 'Presenti',
+                title: state.isTrainingMatch
+                    ? 'Roster ${state.teamName}'
+                    : 'Presenti',
                 players: _sortedPlayers(
                   players,
                   state.startOnOffense,
-                  state.isTrainingMatch ? state.teamARosterIds : state.presentPlayerIds,
+                  state.isTrainingMatch
+                      ? state.teamARosterIds
+                      : state.presentPlayerIds,
                 ),
-                selectedIds: state.isTrainingMatch ? state.teamARosterIds : state.presentPlayerIds,
+                selectedIds: state.isTrainingMatch
+                    ? state.teamARosterIds
+                    : state.presentPlayerIds,
                 minimum: state.teamSize,
                 preferredLine: state.startOnOffense
                     ? PlayerLinePreference.offense
                     : PlayerLinePreference.defense,
-                onToggle: state.isTrainingMatch ? notifier.toggleTeamARoster : notifier.togglePresentPlayer,
+                onToggle: state.isTrainingMatch
+                    ? notifier.toggleTeamARoster
+                    : notifier.togglePresentPlayer,
               )
             else if (activeStep == SetupStep.rosterB)
               RosterPicker(
                 title: 'Roster ${state.opponentName}',
                 players: _sortedPlayers(
-                  players.where((p) => !state.teamARosterIds.contains(p.id)).toList(),
+                  players
+                      .where((p) => !state.teamARosterIds.contains(p.id))
+                      .toList(),
                   state.startOnOffense,
                   state.teamBRosterIds,
                 ),
@@ -270,7 +294,9 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
                   ),
                   Expanded(
                     child: FormNavButton(
-                      label: state.step == steps.length - 1 ? 'Start' : 'Avanti',
+                      label: state.step == steps.length - 1
+                          ? 'Start'
+                          : 'Avanti',
                       onPressed: () {
                         if (activeStep == SetupStep.rosterA) {
                           final count = state.isTrainingMatch

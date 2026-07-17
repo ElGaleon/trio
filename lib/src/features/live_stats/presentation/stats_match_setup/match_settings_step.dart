@@ -76,7 +76,7 @@ class MatchSettingsStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassDecoration(
-              child: Padding(
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 12,
@@ -151,9 +151,7 @@ class MatchSettingsStep extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(
-                top: 4,
-              ),
+              padding: const EdgeInsets.only(top: 4),
               child: Column(
                 children: [
                   if (!isTrainingMatch)

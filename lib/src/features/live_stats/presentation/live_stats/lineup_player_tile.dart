@@ -108,7 +108,9 @@ class LineupPlayerTile extends StatelessWidget {
               const SizedBox(width: 8),
               Icon(
                 selected ? FIcons.circleCheck : FIcons.circle,
-                color: selected ? AppColors.violetLight : AppColors.sportMutedText,
+                color: selected
+                    ? AppColors.violetLight
+                    : AppColors.sportMutedText,
                 size: 22,
               ),
             ],

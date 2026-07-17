@@ -30,15 +30,16 @@ class LineSelectionSheet {
     var activeTab = 'teamA';
 
     List<Player> getSortedTeamPlayers(List<String> rosterIds) {
-      final rosterPlayers = allPlayers.where((p) => rosterIds.contains(p.id)).toList();
-      return rosterPlayers
-        ..sort((a, b) {
-          final byLine = (a.linePreference == preferred ? 0 : 1).compareTo(
-            b.linePreference == preferred ? 0 : 1,
-          );
-          if (byLine != 0) return byLine;
-          return a.name.compareTo(b.name);
-        });
+      final rosterPlayers = allPlayers
+          .where((p) => rosterIds.contains(p.id))
+          .toList();
+      return rosterPlayers..sort((a, b) {
+        final byLine = (a.linePreference == preferred ? 0 : 1).compareTo(
+          b.linePreference == preferred ? 0 : 1,
+        );
+        if (byLine != 0) return byLine;
+        return a.name.compareTo(b.name);
+      });
     }
 
     final sortedPlayers = [...allPlayers]
@@ -64,7 +65,9 @@ class LineSelectionSheet {
             List<Player> visiblePlayers;
             Set<String> activeSelection;
             if (isScrimmage) {
-              final roster = activeTab == 'teamA' ? match.teamARosterIds : match.teamBRosterIds;
+              final roster = activeTab == 'teamA'
+                  ? match.teamARosterIds
+                  : match.teamBRosterIds;
               visiblePlayers = getSortedTeamPlayers(roster);
               activeSelection = activeTab == 'teamA' ? selectedA : selectedB;
             } else {
@@ -83,7 +86,8 @@ class LineSelectionSheet {
                 : PlayerLinePreference.offense.label;
 
             final canSubmit = isScrimmage
-                ? (selectedA.length == match.teamSize && selectedB.length == match.teamSize)
+                ? (selectedA.length == match.teamSize &&
+                      selectedB.length == match.teamSize)
                 : selectedA.length == match.teamSize;
 
             return SafeArea(
@@ -97,10 +101,11 @@ class LineSelectionSheet {
                       children: [
                         Text(
                           'Seleziona linea ${nextOnOffense ? 'attacco' : 'difesa'}',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.white,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.w900,
+                              ),
                         ),
                         if (isScrimmage) ...[
                           Row(
@@ -111,7 +116,8 @@ class LineSelectionSheet {
                                 selected: activeTab == 'teamA',
                                 count: selectedA.length,
                                 teamSize: match.teamSize,
-                                onTap: () => setSheetState(() => activeTab = 'teamA'),
+                                onTap: () =>
+                                    setSheetState(() => activeTab = 'teamA'),
                               ),
                               const SizedBox(width: 16),
                               TeamTabHeader(
@@ -119,17 +125,19 @@ class LineSelectionSheet {
                                 selected: activeTab == 'teamB',
                                 count: selectedB.length,
                                 teamSize: match.teamSize,
-                                onTap: () => setSheetState(() => activeTab = 'teamB'),
+                                onTap: () =>
+                                    setSheetState(() => activeTab = 'teamB'),
                               ),
                             ],
                           ),
                         ] else ...[
                           Text(
                             '${selectedA.length}/${match.teamSize} in campo',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.sportMutedText,
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: AppColors.sportMutedText,
+                                  fontWeight: FontWeight.w800,
+                                ),
                           ),
                         ],
                         Expanded(
@@ -140,7 +148,9 @@ class LineSelectionSheet {
                                   padding: const EdgeInsets.only(bottom: 8),
                                   child: SelectableLineupTile(
                                     player: player,
-                                    selected: activeSelection.contains(player.id),
+                                    selected: activeSelection.contains(
+                                      player.id,
+                                    ),
                                     pointsPlayed: getPointsPlayed(player.id),
                                     selectedIds: activeSelection,
                                     teamSize: match.teamSize,
@@ -156,7 +166,9 @@ class LineSelectionSheet {
                                 },
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
-                                    color: AppColors.white.withValues(alpha: 0.06),
+                                    color: AppColors.white.withValues(
+                                      alpha: 0.06,
+                                    ),
                                     borderRadius: BorderRadius.circular(18),
                                     border: Border.all(
                                       color: AppColors.white.withValues(
@@ -217,11 +229,17 @@ class LineSelectionSheet {
                                     const SizedBox(height: 8),
                                     for (final player in otherPlayers)
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 8),
+                                        padding: const EdgeInsets.only(
+                                          bottom: 8,
+                                        ),
                                         child: SelectableLineupTile(
                                           player: player,
-                                          selected: activeSelection.contains(player.id),
-                                          pointsPlayed: getPointsPlayed(player.id),
+                                          selected: activeSelection.contains(
+                                            player.id,
+                                          ),
+                                          pointsPlayed: getPointsPlayed(
+                                            player.id,
+                                          ),
                                           selectedIds: activeSelection,
                                           teamSize: match.teamSize,
                                           onChanged: setSheetState,
@@ -242,17 +260,17 @@ class LineSelectionSheet {
                           label: canSubmit
                               ? 'Start point'
                               : isScrimmage
-                                  ? 'Seleziona ${match.teamSize} per team'
-                                  : 'Seleziona ${match.teamSize}',
+                              ? 'Seleziona ${match.teamSize} per team'
+                              : 'Seleziona ${match.teamSize}',
                           icon: FIcons.play,
                           onPressed: canSubmit
                               ? () => Navigator.pop(
-                                    context,
-                                    LineupSelectionResult(
-                                      teamAIds: selectedA,
-                                      teamBIds: selectedB,
-                                    ),
-                                  )
+                                  context,
+                                  LineupSelectionResult(
+                                    teamAIds: selectedA,
+                                    teamBIds: selectedB,
+                                  ),
+                                )
                               : () {},
                         ),
                       ],

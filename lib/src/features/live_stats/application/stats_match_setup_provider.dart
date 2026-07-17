@@ -51,7 +51,10 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
     );
   }
 
-  void initializeForMatch({required bool isTraining, required List<Player> allPlayers}) {
+  void initializeForMatch({
+    required bool isTraining,
+    required List<Player> allPlayers,
+  }) {
     final settings = ref.read(appSettingsProvider);
     final favoriteStatNames = settings.favoriteStatNames;
     final enabledStatTypes = MatchStatType.values
@@ -160,15 +163,9 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
   void toggleInternalScrimmage() {
     state = state.copyWith(isInternalScrimmage: !state.isInternalScrimmage);
     if (state.isInternalScrimmage) {
-      state = state.copyWith(
-        teamName: 'Light',
-        opponentName: 'Dark',
-      );
+      state = state.copyWith(teamName: 'Light', opponentName: 'Dark');
     } else {
-      state = state.copyWith(
-        teamName: 'Noi',
-        opponentName: 'Avversari',
-      );
+      state = state.copyWith(teamName: 'Noi', opponentName: 'Avversari');
     }
   }
 
@@ -286,9 +283,7 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
       teamARosterIds: isInternal
           ? state.teamARosterIds.toList()
           : state.presentPlayerIds.toList(),
-      teamBRosterIds: isInternal
-          ? state.teamBRosterIds.toList()
-          : const [],
+      teamBRosterIds: isInternal ? state.teamBRosterIds.toList() : const [],
       enabledStatTypes: state.enabledStatTypes.toList(),
       enabledCustomStatIds: state.enabledCustomStatIds.toList(),
       statEvents: [

@@ -187,11 +187,7 @@ class MatchScoreHeroPanel extends StatelessWidget {
               spacing: 6,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  FIcons.calendarDays,
-                  size: 16,
-                  color: AppColors.violet,
-                ),
+                Icon(FIcons.calendarDays, size: 16, color: AppColors.violet),
                 Text(
                   _dateLabel(match.createdAt),
                   style: textTheme.bodySmall?.copyWith(
@@ -266,9 +262,7 @@ class MatchScoreHeroPanel extends StatelessWidget {
 
     return Material(
       color: AppColors.transparent,
-      child: framed
-          ? GlassDecoration(child: content)
-          : content,
+      child: framed ? GlassDecoration(child: content) : content,
     );
   }
 }

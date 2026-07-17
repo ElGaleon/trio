@@ -54,7 +54,7 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            
+
             // Subsection: List of Custom Stats
             Text(
               'Le tue statistiche personalizzate',
@@ -83,7 +83,10 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                       children: [
                         // Abbreviation badge
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.violet.withValues(alpha: 0.15),
                             border: Border.all(color: AppColors.violetLight),
@@ -134,9 +137,16 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                         ),
                         // Edit button
                         IconButton(
-                          icon: const Icon(FIcons.pencil, color: AppColors.white, size: 18),
+                          icon: const Icon(
+                            FIcons.pencil,
+                            color: AppColors.white,
+                            size: 18,
+                          ),
                           onPressed: () async {
-                            final result = await CustomStatEditDialog.show(context, initialStat: stat);
+                            final result = await CustomStatEditDialog.show(
+                              context,
+                              initialStat: stat,
+                            );
                             if (result != null) {
                               notifier.updateCustomStat(result);
                             }
@@ -144,14 +154,18 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                         ),
                         // Delete button
                         IconButton(
-                          icon: const Icon(FIcons.trash, color: AppColors.danger, size: 18),
+                          icon: const Icon(
+                            FIcons.trash,
+                            color: AppColors.danger,
+                            size: 18,
+                          ),
                           onPressed: () => notifier.removeCustomStat(stat.id),
                         ),
                       ],
                     ),
                 ],
               ),
-              
+
             // Button to Add Custom Stat
             Align(
               alignment: Alignment.centerLeft,
@@ -166,9 +180,9 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                 },
               ),
             ),
-            
+
             const Divider(color: AppColors.violet, height: 24),
-            
+
             // Subsection: Favorite Default Built-in Stats
             Column(
               spacing: 4,
@@ -190,7 +204,7 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                 ),
               ],
             ),
-            
+
             Wrap(
               spacing: 8,
               runSpacing: 8,

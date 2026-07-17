@@ -16,12 +16,12 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
     final fields = <int, dynamic>{
       for (var i = 0; i < fieldCount; i++) reader.readByte(): reader.read(),
     };
-    
+
     final customStatsRaw = fields[4] as List?;
     final customStats = customStatsRaw != null
         ? customStatsRaw.map((map) => CustomStat.fromMap(map as Map)).toList()
         : <CustomStat>[];
-        
+
     final favoriteStatNamesRaw = fields[5] as List?;
     final favoriteStatNames = favoriteStatNamesRaw?.cast<String>().toSet();
 

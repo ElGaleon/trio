@@ -23,7 +23,7 @@ class TeamBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return GlassDecoration(
-              child: Padding(
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
         child: Column(
           spacing: 10,

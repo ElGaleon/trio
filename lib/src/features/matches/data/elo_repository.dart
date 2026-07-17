@@ -161,8 +161,12 @@ class EloRepository {
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
     for (final match in orderedMatches) {
-      final rosterA = match.teamARosterIds.isNotEmpty ? match.teamARosterIds : match.teamAIds;
-      final rosterB = match.teamBRosterIds.isNotEmpty ? match.teamBRosterIds : match.teamBIds;
+      final rosterA = match.teamARosterIds.isNotEmpty
+          ? match.teamARosterIds
+          : match.teamAIds;
+      final rosterB = match.teamBRosterIds.isNotEmpty
+          ? match.teamBRosterIds
+          : match.teamBIds;
       final teamA = rosterA.map((id) => players[id]).nonNulls.toList();
       final teamB = rosterB.map((id) => players[id]).nonNulls.toList();
       if (teamA.isEmpty ||

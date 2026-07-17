@@ -178,7 +178,10 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
               .toList();
           final currentPlayersList = match.isExternalOpponent
               ? match.teamAIds.map((id) => playersById[id]).nonNulls.toList()
-              : [...match.teamAIds, ...match.teamBIds].map((id) => playersById[id]).nonNulls.toList();
+              : [
+                  ...match.teamAIds,
+                  ...match.teamBIds,
+                ].map((id) => playersById[id]).nonNulls.toList();
           final draft = await InjurySubstitutionSheet.show(
             context,
             currentPlayers: currentPlayersList,
@@ -198,15 +201,13 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
           required List<String> activeIds,
           required bool playerOnOffense,
         }) {
-          final listPlayers = activeIds
-              .map((id) => playersById[id])
-              .nonNulls
-              .toList()
-            ..sort((a, b) {
-              final roleCompare = a.role.index.compareTo(b.role.index);
-              if (roleCompare != 0) return roleCompare;
-              return a.name.toLowerCase().compareTo(b.name.toLowerCase());
-            });
+          final listPlayers =
+              activeIds.map((id) => playersById[id]).nonNulls.toList()
+                ..sort((a, b) {
+                  final roleCompare = a.role.index.compareTo(b.role.index);
+                  if (roleCompare != 0) return roleCompare;
+                  return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+                });
 
           return ListView(
             padding: EdgeInsets.zero,
@@ -232,9 +233,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                         await triggerFinishMatch();
                       } else if (res.scoredPoint && context.mounted) {
                         if (match.teamAIds.isEmpty) {
-                          await triggerShowLineSelection(
-                            res.oursOnOffense,
-                          );
+                          await triggerShowLineSelection(res.oursOnOffense);
                         }
                       }
                     },
@@ -244,7 +243,9 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
           );
         }
 
-        final defendingActiveIds = oursOnOffense ? match.teamBIds : match.teamAIds;
+        final defendingActiveIds = oursOnOffense
+            ? match.teamBIds
+            : match.teamAIds;
         final defendingPlayers = defendingActiveIds
             .map((id) => playersById[id])
             .nonNulls
@@ -284,7 +285,9 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                                 color: AppColors.white.withValues(alpha: 0.08),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: AppColors.white.withValues(alpha: 0.14),
+                                  color: AppColors.white.withValues(
+                                    alpha: 0.14,
+                                  ),
                                 ),
                               ),
                               child: const Icon(
@@ -308,7 +311,8 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                         ),
                         RoundHeaderButton(
                           icon: FIcons.info,
-                          onTap: () => LegendModalBottomSheet.show(context, match),
+                          onTap: () =>
+                              LegendModalBottomSheet.show(context, match),
                         ),
                         RoundHeaderButton(
                           icon: FIcons.save,
@@ -328,12 +332,12 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                       halfTimeDue: halfTimeDue,
                       onHalfTime: halfTimeDue
                           ? () => HalfTimePrompt.show(
-                                context,
-                                service,
-                                match,
-                                playersById,
-                                repository,
-                              )
+                              context,
+                              service,
+                              match,
+                              playersById,
+                              repository,
+                            )
                           : null,
                     ),
                     if (!match.isExternalOpponent && activePause == null)
@@ -391,28 +395,30 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                               ),
                             )
                           : match.isExternalOpponent
-                              ? buildPlayerList(
+                          ? buildPlayerList(
+                              activeIds: match.teamAIds,
+                              playerOnOffense: oursOnOffense,
+                            )
+                          : PageView(
+                              controller: _pageController,
+                              onPageChanged: (page) {
+                                setState(() {
+                                  _selectedTeamTab = page == 0
+                                      ? 'teamA'
+                                      : 'teamB';
+                                });
+                              },
+                              children: [
+                                buildPlayerList(
                                   activeIds: match.teamAIds,
                                   playerOnOffense: oursOnOffense,
-                                )
-                              : PageView(
-                                  controller: _pageController,
-                                  onPageChanged: (page) {
-                                    setState(() {
-                                      _selectedTeamTab = page == 0 ? 'teamA' : 'teamB';
-                                    });
-                                  },
-                                  children: [
-                                    buildPlayerList(
-                                      activeIds: match.teamAIds,
-                                      playerOnOffense: oursOnOffense,
-                                    ),
-                                    buildPlayerList(
-                                      activeIds: match.teamBIds,
-                                      playerOnOffense: !oursOnOffense,
-                                    ),
-                                  ],
                                 ),
+                                buildPlayerList(
+                                  activeIds: match.teamBIds,
+                                  playerOnOffense: !oursOnOffense,
+                                ),
+                              ],
+                            ),
                     ),
                     if (activePause == null)
                       BottomActions(
@@ -421,9 +427,15 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                           MatchStatType.opponentError,
                         ),
                         timeoutLabel: 'TIMEOUT',
-                        goalLabel: match.isExternalOpponent ? 'GOAL' : 'META ${match.teamAName.toUpperCase()}',
-                        opponentGoalLabel: match.isExternalOpponent ? 'META AVV' : 'META ${match.teamBName.toUpperCase()}',
-                        opponentErrorLabel: match.isExternalOpponent ? 'THROWAWAY' : 'PALLA PERSA ${match.teamBName.toUpperCase()}',
+                        goalLabel: match.isExternalOpponent
+                            ? 'GOAL'
+                            : 'META ${match.teamAName.toUpperCase()}',
+                        opponentGoalLabel: match.isExternalOpponent
+                            ? 'META AVV'
+                            : 'META ${match.teamBName.toUpperCase()}',
+                        opponentErrorLabel: match.isExternalOpponent
+                            ? 'THROWAWAY'
+                            : 'PALLA PERSA ${match.teamBName.toUpperCase()}',
                         onGoal: () => GoalRecordingHandler.confirmAndRecord(
                           context,
                           service: service,
@@ -434,16 +446,17 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                           onFinish: triggerFinishMatch,
                           onShowLineSelection: triggerShowLineSelection,
                         ),
-                        onOpponentGoal: () => GoalRecordingHandler.confirmAndRecord(
-                          context,
-                          service: service,
-                          match: match,
-                          type: MatchStatType.opponentGoal,
-                          playersById: playersById,
-                          repository: repository,
-                          onFinish: triggerFinishMatch,
-                          onShowLineSelection: triggerShowLineSelection,
-                        ),
+                        onOpponentGoal: () =>
+                            GoalRecordingHandler.confirmAndRecord(
+                              context,
+                              service: service,
+                              match: match,
+                              type: MatchStatType.opponentGoal,
+                              playersById: playersById,
+                              repository: repository,
+                              onFinish: triggerFinishMatch,
+                              onShowLineSelection: triggerShowLineSelection,
+                            ),
                         onOpponentError: () async {
                           final res = await service.record(
                             match,
@@ -456,7 +469,8 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                           }
                         },
                         onPull:
-                            (!oursOnOffense || !match.isExternalOpponent) && match.tracks(MatchStatType.pull)
+                            (!oursOnOffense || !match.isExternalOpponent) &&
+                                match.tracks(MatchStatType.pull)
                             ? () async {
                                 final draft = await PullSheet.show(
                                   context,

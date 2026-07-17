@@ -1,7 +1,1 @@
-enum SetupStep {
-  settings,
-  rosterA,
-  rosterB,
-  stats,
-  lineup,
-}
+enum SetupStep { settings, rosterA, rosterB, stats, lineup }

@@ -175,7 +175,7 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
   }
 }
 
-final playerFormProvider =
-    NotifierProvider.autoDispose.family<PlayerFormNotifier, PlayerFormState, String?>(
+final playerFormProvider = NotifierProvider.autoDispose
+    .family<PlayerFormNotifier, PlayerFormState, String?>(
       PlayerFormNotifier.new,
     );

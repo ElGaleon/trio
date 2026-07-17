@@ -76,7 +76,10 @@ class FotMobStatRow extends StatelessWidget {
                 curve: Curves.easeOutCubic,
                 builder: (context, animValue, child) {
                   final leftFlex = (animValue * 1000).round().clamp(1, 1000);
-                  final rightFlex = ((1 - animValue) * 1000).round().clamp(1, 1000);
+                  final rightFlex = ((1 - animValue) * 1000).round().clamp(
+                    1,
+                    1000,
+                  );
                   return isDual
                       ? Row(
                           children: [
@@ -106,9 +109,7 @@ class FotMobStatRow extends StatelessWidget {
                           children: [
                             Expanded(
                               flex: leftFlex,
-                              child: Container(
-                                color: AppColors.violet,
-                              ),
+                              child: Container(color: AppColors.violet),
                             ),
                             Expanded(
                               flex: rightFlex,
@@ -143,44 +144,87 @@ class GroupedMatchStats extends ConsumerWidget {
     final activeTab = ref.watch(matchDetailSubTabProvider(match.id));
     final summary = FinalStatsSummary.from(match, playersById);
     final events = match.statEvents;
-    final opponentGoals = events.where((e) => e.type == MatchStatType.opponentGoal).length;
+    final opponentGoals = events
+        .where((e) => e.type == MatchStatType.opponentGoal)
+        .length;
     final opponentErrors = events.where((e) => e.type.isError).length;
 
     final pointStarts = <int, bool>{};
     for (final event in events) {
       pointStarts.putIfAbsent(event.pointNumber, () => event.oursOnOffense);
     }
-    
-    final oLineStarts = pointStarts.entries.where((entry) => entry.value).map((entry) => entry.key).toSet();
-    final dLineStarts = pointStarts.entries.where((entry) => !entry.value).map((entry) => entry.key).toSet();
+
+    final oLineStarts = pointStarts.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toSet();
+    final dLineStarts = pointStarts.entries
+        .where((entry) => !entry.value)
+        .map((entry) => entry.key)
+        .toSet();
 
     final ourGoals = summary.goals;
-    final dLineGoals = events.where((e) => e.type == MatchStatType.goal && dLineStarts.contains(e.pointNumber)).length;
+    final dLineGoals = events
+        .where(
+          (e) =>
+              e.type == MatchStatType.goal &&
+              dLineStarts.contains(e.pointNumber),
+        )
+        .length;
 
     final opponentOLineStarts = dLineStarts;
     final opponentDLineStarts = oLineStarts;
 
-    final opponentGoalEvents = events.where((e) => e.type == MatchStatType.opponentGoal);
-    final opponentOLineGoals = opponentGoalEvents.where((event) => opponentOLineStarts.contains(event.pointNumber)).length;
-    final opponentDLineGoals = opponentGoalEvents.where((event) => opponentDLineStarts.contains(event.pointNumber)).length;
+    final opponentGoalEvents = events.where(
+      (e) => e.type == MatchStatType.opponentGoal,
+    );
+    final opponentOLineGoals = opponentGoalEvents
+        .where((event) => opponentOLineStarts.contains(event.pointNumber))
+        .length;
+    final opponentDLineGoals = opponentGoalEvents
+        .where((event) => opponentDLineStarts.contains(event.pointNumber))
+        .length;
 
     final ourTurnovers = summary.turnovers;
     final opponentTurnovers = opponentErrors;
-    
-    final completedPasses = events.where((e) => e.type == MatchStatType.pass || e.type == MatchStatType.huck).length;
-    final attemptedPasses = completedPasses + events.where((e) => e.type == MatchStatType.throwError || e.type == MatchStatType.catchError).length;
-    final passAccuracy = attemptedPasses == 0 ? 0.0 : completedPasses / attemptedPasses;
 
-    final playerDefensesTotal = events.where((e) => e.type == MatchStatType.defense || e.type == MatchStatType.block).length;
+    final completedPasses = events
+        .where(
+          (e) => e.type == MatchStatType.pass || e.type == MatchStatType.huck,
+        )
+        .length;
+    final attemptedPasses =
+        completedPasses +
+        events
+            .where(
+              (e) =>
+                  e.type == MatchStatType.throwError ||
+                  e.type == MatchStatType.catchError,
+            )
+            .length;
+    final passAccuracy = attemptedPasses == 0
+        ? 0.0
+        : completedPasses / attemptedPasses;
+
+    final playerDefensesTotal = events
+        .where(
+          (e) =>
+              e.type == MatchStatType.defense || e.type == MatchStatType.block,
+        )
+        .length;
 
     final totalPoints = ourGoals + opponentGoals;
 
-    final opponentOLineConversion = opponentOLineStarts.isEmpty ? 0.0 : opponentOLineGoals / opponentOLineStarts.length;
-    final opponentDLineConversion = opponentDLineStarts.isEmpty ? 0.0 : opponentDLineGoals / opponentDLineStarts.length;
+    final opponentOLineConversion = opponentOLineStarts.isEmpty
+        ? 0.0
+        : opponentOLineGoals / opponentOLineStarts.length;
+    final opponentDLineConversion = opponentDLineStarts.isEmpty
+        ? 0.0
+        : opponentDLineGoals / opponentDLineStarts.length;
 
     return GlassDecoration(
-              radius: 28,
-              child: Padding(
+      radius: 28,
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 14,
@@ -196,9 +240,24 @@ class GroupedMatchStats extends ConsumerWidget {
             Row(
               spacing: 8,
               children: [
-                _buildSubTabButton(context, ref, 'Generali', MatchDetailSubTab.generali),
-                _buildSubTabButton(context, ref, 'Attacco', MatchDetailSubTab.attacco),
-                _buildSubTabButton(context, ref, 'Difesa', MatchDetailSubTab.difesa),
+                _buildSubTabButton(
+                  context,
+                  ref,
+                  'Generali',
+                  MatchDetailSubTab.generali,
+                ),
+                _buildSubTabButton(
+                  context,
+                  ref,
+                  'Attacco',
+                  MatchDetailSubTab.attacco,
+                ),
+                _buildSubTabButton(
+                  context,
+                  ref,
+                  'Difesa',
+                  MatchDetailSubTab.difesa,
+                ),
               ],
             ),
             if (activeTab == MatchDetailSubTab.generali) ...[
@@ -212,13 +271,17 @@ class GroupedMatchStats extends ConsumerWidget {
                 label: 'Palle perse (Turnovers)',
                 leftValue: '$ourTurnovers',
                 rightValue: '$opponentTurnovers',
-                leftPercent: (ourTurnovers + opponentTurnovers) == 0 ? 0.5 : ourTurnovers / (ourTurnovers + opponentTurnovers),
+                leftPercent: (ourTurnovers + opponentTurnovers) == 0
+                    ? 0.5
+                    : ourTurnovers / (ourTurnovers + opponentTurnovers),
               ),
               FotMobStatRow(
                 label: 'Breaks (Mete in difesa)',
                 leftValue: '$dLineGoals',
                 rightValue: '$opponentDLineGoals',
-                leftPercent: (dLineGoals + opponentDLineGoals) == 0 ? 0.5 : dLineGoals / (dLineGoals + opponentDLineGoals),
+                leftPercent: (dLineGoals + opponentDLineGoals) == 0
+                    ? 0.5
+                    : dLineGoals / (dLineGoals + opponentDLineGoals),
               ),
               FotMobStatRow(
                 label: 'Punti Giocati',
@@ -243,9 +306,12 @@ class GroupedMatchStats extends ConsumerWidget {
                 label: 'O-Line Conversion',
                 leftValue: '${(summary.oLineEffectiveness * 100).round()}%',
                 rightValue: '${(opponentOLineConversion * 100).round()}%',
-                leftPercent: (summary.oLineEffectiveness + opponentOLineConversion) == 0
+                leftPercent:
+                    (summary.oLineEffectiveness + opponentOLineConversion) == 0
                     ? 0.5
-                    : summary.oLineEffectiveness / (summary.oLineEffectiveness + opponentOLineConversion),
+                    : summary.oLineEffectiveness /
+                          (summary.oLineEffectiveness +
+                              opponentOLineConversion),
               ),
               FotMobStatRow(
                 label: 'O-Line Efficiency (Clean goals)',
@@ -264,9 +330,13 @@ class GroupedMatchStats extends ConsumerWidget {
                 label: 'D-Line Conversion',
                 leftValue: '${(summary.dLineConversionRatio * 100).round()}%',
                 rightValue: '${(opponentDLineConversion * 100).round()}%',
-                leftPercent: (summary.dLineConversionRatio + opponentDLineConversion) == 0
+                leftPercent:
+                    (summary.dLineConversionRatio + opponentDLineConversion) ==
+                        0
                     ? 0.5
-                    : summary.dLineConversionRatio / (summary.dLineConversionRatio + opponentDLineConversion),
+                    : summary.dLineConversionRatio /
+                          (summary.dLineConversionRatio +
+                              opponentDLineConversion),
               ),
               FotMobStatRow(
                 label: 'D-Line Turnover Ratio',
@@ -292,7 +362,8 @@ class GroupedMatchStats extends ConsumerWidget {
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => ref.read(matchDetailSubTabProvider(match.id).notifier).setTab(tab),
+        onTap: () =>
+            ref.read(matchDetailSubTabProvider(match.id).notifier).setTab(tab),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 140),
           height: 32,

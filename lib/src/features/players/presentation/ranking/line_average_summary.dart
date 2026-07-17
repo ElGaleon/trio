@@ -52,7 +52,7 @@ class AverageCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Expanded(
       child: GlassDecoration(
-              child: Padding(
+        child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
             spacing: 8,

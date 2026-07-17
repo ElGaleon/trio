@@ -1,4 +1,3 @@
-
 class CalendarUtils {
   const CalendarUtils._();
 

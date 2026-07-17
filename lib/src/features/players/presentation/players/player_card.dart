@@ -35,7 +35,7 @@ class PlayerCard extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: GlassDecoration(
-              child: Padding(
+          child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               spacing: 14,

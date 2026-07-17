@@ -62,8 +62,8 @@ class MetricCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Expanded(
       child: GlassDecoration(
-              radius: 22,
-              child: Padding(
+        radius: 22,
+        child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
             spacing: 6,
@@ -109,8 +109,8 @@ class MetricRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: GlassDecoration(
-              radius: 20,
-              child: Padding(
+        radius: 20,
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           child: Row(
             children: [

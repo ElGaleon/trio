@@ -69,7 +69,11 @@ class PopupOption extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(FIcons.chevronRight, color: AppColors.sportMutedText, size: 16),
+              const Icon(
+                FIcons.chevronRight,
+                color: AppColors.sportMutedText,
+                size: 16,
+              ),
             ],
           ),
         ),

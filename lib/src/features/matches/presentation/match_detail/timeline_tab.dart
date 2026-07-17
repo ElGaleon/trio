@@ -279,8 +279,8 @@ class TimelineTab extends StatelessWidget {
         .reversed
         .toList();
     return GlassDecoration(
-              radius: 28,
-              child: Padding(
+      radius: 28,
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 14,

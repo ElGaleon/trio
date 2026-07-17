@@ -20,7 +20,9 @@ class StatsSetupStepHeader extends StatelessWidget {
         final completed = index < step;
         return Expanded(
           child: FBadge(
-            variant: active || completed ? FBadgeVariant.primary : FBadgeVariant.outline,
+            variant: active || completed
+                ? FBadgeVariant.primary
+                : FBadgeVariant.outline,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,

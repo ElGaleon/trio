@@ -25,8 +25,8 @@ class GoalTimelineCard extends StatelessWidget {
 
     final textTheme = Theme.of(context).textTheme;
     return GlassDecoration(
-              radius: 28,
-              child: Padding(
+      radius: 28,
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
         child: Column(
           spacing: 12,

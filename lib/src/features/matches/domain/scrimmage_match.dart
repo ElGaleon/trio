@@ -67,18 +67,17 @@ class ScrimmageMatch {
     List<String>? teamBRosterIds,
     List<String>? enabledCustomStatIds,
   }) : teamSize = teamSize ?? teamAIds.length,
-        teamAName = teamAName ?? (offenseVsDefense ? 'Attacco' : 'A'),
-        teamBName = teamBName ?? (offenseVsDefense ? 'Difesa' : 'B'),
-        initialRatings = initialRatings ?? {},
-        finalRatings = finalRatings ?? {},
-        presentPlayerIds =
-            presentPlayerIds ?? {...teamAIds, ...teamBIds}.toList(),
-        enabledStatTypes = enabledStatTypes ?? MatchStatType.defaultEnabled,
-        statEvents = statEvents ?? [],
-        teamARosterIds = teamARosterIds ?? [],
-        teamBRosterIds = teamBRosterIds ?? [],
-        enabledCustomStatIds = enabledCustomStatIds ?? [];
-
+       teamAName = teamAName ?? (offenseVsDefense ? 'Attacco' : 'A'),
+       teamBName = teamBName ?? (offenseVsDefense ? 'Difesa' : 'B'),
+       initialRatings = initialRatings ?? {},
+       finalRatings = finalRatings ?? {},
+       presentPlayerIds =
+           presentPlayerIds ?? {...teamAIds, ...teamBIds}.toList(),
+       enabledStatTypes = enabledStatTypes ?? MatchStatType.defaultEnabled,
+       statEvents = statEvents ?? [],
+       teamARosterIds = teamARosterIds ?? [],
+       teamBRosterIds = teamBRosterIds ?? [],
+       enabledCustomStatIds = enabledCustomStatIds ?? [];
 
   bool get isDraw => scoreA == scoreB;
 

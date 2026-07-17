@@ -106,7 +106,13 @@ class GoalRecordingHandler {
       return;
     }
     if (res.halfTimeDue) {
-      await HalfTimePrompt.show(context, service, match, playersById, repository);
+      await HalfTimePrompt.show(
+        context,
+        service,
+        match,
+        playersById,
+        repository,
+      );
     }
     if (!context.mounted) return;
     if (res.scoredPoint && context.mounted) {

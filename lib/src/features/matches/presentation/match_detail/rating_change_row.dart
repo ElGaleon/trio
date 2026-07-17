@@ -27,8 +27,8 @@ class RatingChangeRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassDecoration(
-              radius: 24,
-              child: Padding(
+        radius: 24,
+        child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
           child: Row(
             spacing: 12,
@@ -69,7 +69,10 @@ class RatingChangeRow extends StatelessWidget {
                   border: Border.all(color: color.withValues(alpha: 0.45)),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   child: Text(
                     '$sign${delta.round()}',
                     style: textTheme.bodySmall?.copyWith(

@@ -11,6 +11,7 @@ import 'package:trio/src/features/players/presentation/ranking/line_average_summ
 import 'package:trio/src/features/players/presentation/ranking/ranking_filters.dart';
 import 'package:trio/src/features/players/presentation/ranking/ranking_summary.dart';
 import 'package:trio/src/shared/app_empty_state.dart';
+import 'package:trio/src/shared/responsive_layout.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
@@ -55,9 +56,11 @@ class RankingScreen extends ConsumerWidget {
                   roleFilter: roleFilter,
                   lineFilter: lineFilter,
                   onRoleChanged: (value) =>
-                      ref.read(rankingRoleFilterProvider.notifier).state = value,
+                      ref.read(rankingRoleFilterProvider.notifier).state =
+                          value,
                   onLineChanged: (value) =>
-                      ref.read(rankingLineFilterProvider.notifier).state = value,
+                      ref.read(rankingLineFilterProvider.notifier).state =
+                          value,
                 ),
                 if (filteredPlayers.isEmpty)
                   const SportEmptyState(
@@ -73,12 +76,16 @@ class RankingScreen extends ConsumerWidget {
                     onPlayerTap: openPlayer,
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 8), // 8 spacing + 8 padding = 16 total
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                    ), // 8 spacing + 8 padding = 16 total
                     child: LineAverageSummary(players: players),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 10), // 8 spacing + 10 padding = 18 total
-                    child: Column(
+                    padding: const EdgeInsets.only(
+                      top: 10,
+                    ), // 8 spacing + 10 padding = 18 total
+                    child: ResponsiveGrid(
                       children: filteredPlayers
                           .skip(3)
                           .map(

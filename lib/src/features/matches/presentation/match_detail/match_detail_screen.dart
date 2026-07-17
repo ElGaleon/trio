@@ -62,16 +62,14 @@ class MatchDetailScreen extends ConsumerWidget {
     }
 
     final playersById = {for (final player in players) player.id: player};
-    final rosterA = currentMatch.teamARosterIds.isNotEmpty ? currentMatch.teamARosterIds : currentMatch.teamAIds;
-    final rosterB = currentMatch.teamBRosterIds.isNotEmpty ? currentMatch.teamBRosterIds : currentMatch.teamBIds;
-    final teamA = rosterA
-        .map((id) => playersById[id])
-        .nonNulls
-        .toList();
-    final teamB = rosterB
-        .map((id) => playersById[id])
-        .nonNulls
-        .toList();
+    final rosterA = currentMatch.teamARosterIds.isNotEmpty
+        ? currentMatch.teamARosterIds
+        : currentMatch.teamAIds;
+    final rosterB = currentMatch.teamBRosterIds.isNotEmpty
+        ? currentMatch.teamBRosterIds
+        : currentMatch.teamBIds;
+    final teamA = rosterA.map((id) => playersById[id]).nonNulls.toList();
+    final teamB = rosterB.map((id) => playersById[id]).nonNulls.toList();
     final preMatchRatingA = teamInitialRating(currentMatch, teamA);
     final preMatchRatingB = teamInitialRating(currentMatch, teamB);
     final winProbabilityA = expectedScore(preMatchRatingA, preMatchRatingB);

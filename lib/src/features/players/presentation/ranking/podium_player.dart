@@ -56,7 +56,9 @@ class PodiumPlayer extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 2), // Adjust spacing to get 10
+              padding: const EdgeInsets.only(
+                top: 2,
+              ), // Adjust spacing to get 10
               child: Text(
                 _shortName(player.name),
                 maxLines: 1,
@@ -68,10 +70,7 @@ class PodiumPlayer extends StatelessWidget {
                 ),
               ),
             ),
-            RatingPill(
-              rating: player.rating.round(),
-              emphasized: featured,
-            ),
+            RatingPill(rating: player.rating.round(), emphasized: featured),
           ],
         ),
       ),

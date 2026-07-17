@@ -153,8 +153,8 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
                       behavior: HitTestBehavior.opaque,
                       onTap: notifier.toggleIsExternal,
                       child: GlassDecoration(
-              radius: 18,
-              child: Padding(
+                        radius: 18,
+                        child: Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
                             vertical: 12,

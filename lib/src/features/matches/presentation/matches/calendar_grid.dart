@@ -27,8 +27,8 @@ class CalendarGrid extends StatelessWidget {
     }
     final days = CalendarUtils.calendarDays(month);
     return GlassDecoration(
-              radius: 28,
-              child: Padding(
+      radius: 28,
+      child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           spacing: 8,
@@ -53,7 +53,8 @@ class CalendarGrid extends StatelessWidget {
                 final inMonth = day.month == month.month;
                 final dayMatches = matchesByDay[day.day] ?? const [];
                 final selected =
-                    selectedDay != null && CalendarUtils.sameDay(day, selectedDay!);
+                    selectedDay != null &&
+                    CalendarUtils.sameDay(day, selectedDay!);
                 return CalendarDayCell(
                   day: day,
                   inMonth: inMonth,

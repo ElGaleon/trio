@@ -53,7 +53,7 @@ class MatchesCalendarView extends ConsumerWidget {
                   opacity: curved,
                   child: SizeTransition(
                     sizeFactor: curved,
-                    axisAlignment: -1,
+                    alignment: Alignment.topLeft,
                     child: child,
                   ),
                 );

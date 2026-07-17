@@ -20,8 +20,8 @@ class StatBox extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Expanded(
       child: GlassDecoration(
-              radius: 22,
-              child: Padding(
+        radius: 22,
+        child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
             spacing: 8,
@@ -29,7 +29,9 @@ class StatBox extends StatelessWidget {
             children: [
               Icon(icon, size: 18, color: AppColors.violet),
               Padding(
-                padding: const EdgeInsets.only(top: 2), // Adjust gap to match 10 (8 spacing + 2 padding)
+                padding: const EdgeInsets.only(
+                  top: 2,
+                ), // Adjust gap to match 10 (8 spacing + 2 padding)
                 child: Text(
                   label,
                   style: textTheme.bodySmall?.copyWith(

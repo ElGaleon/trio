@@ -49,16 +49,18 @@ class SettingsFormNotifier extends Notifier<SettingsFormState> {
 
   void updateCustomStat(CustomStat stat) {
     state = state.copyWith(
-      customStats:
-          state.customStats.map((s) => s.id == stat.id ? stat : s).toList(),
+      customStats: state.customStats
+          .map((s) => s.id == stat.id ? stat : s)
+          .toList(),
     );
   }
 
   void removeCustomStat(String id) {
     state = state.copyWith(
       customStats: state.customStats.where((s) => s.id != id).toList(),
-      favoriteStatNames:
-          state.favoriteStatNames.where((name) => name != id).toSet(),
+      favoriteStatNames: state.favoriteStatNames
+          .where((name) => name != id)
+          .toSet(),
     );
   }
 

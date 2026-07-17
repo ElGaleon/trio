@@ -48,7 +48,7 @@ class _RosterPickerState extends State<RosterPicker> {
         : PlayerLinePreference.offense.label;
 
     return GlassDecoration(
-              child: Padding(
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
         child: Column(
           spacing: 12,

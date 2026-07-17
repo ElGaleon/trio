@@ -7,6 +7,7 @@ import 'package:trio/src/features/players/presentation/players/player_card.dart'
 import 'package:trio/src/features/players/presentation/players/player_filters.dart';
 import 'package:trio/src/features/players/presentation/players/player_toolbar.dart';
 import 'package:trio/src/shared/app_empty_state.dart';
+import 'package:trio/src/shared/responsive_layout.dart';
 import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
@@ -55,11 +56,15 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
         onPressed: () => context.go(AppRoutes.newPlayer),
       ),
       child: players.isEmpty
-          ? const SportEmptyState(
-              icon: Icons.person_add_alt_1_outlined,
-              title: 'Nessun giocatore',
-              message: 'Crea il roster della squadra.',
-            )
+          ? Expanded(
+            child: Center(
+                child: const SportEmptyState(
+                  icon: Icons.person_add_alt_1_outlined,
+                  title: 'Nessun giocatore',
+                  message: 'Crea il roster della squadra.',
+                ),
+              ),
+          )
           : Column(
               spacing: 12,
               children: [
@@ -73,33 +78,42 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                   roleFilter: roleFilter,
                   lineFilter: lineFilter,
                   onSearchChanged: (value) =>
-                      ref.read(playersSearchQueryProvider.notifier).state = value,
+                      ref.read(playersSearchQueryProvider.notifier).state =
+                          value,
                   onRoleChanged: (value) =>
-                      ref.read(playersRoleFilterProvider.notifier).state = value,
+                      ref.read(playersRoleFilterProvider.notifier).state =
+                          value,
                   onLineChanged: (value) =>
-                      ref.read(playersLineFilterProvider.notifier).state = value,
+                      ref.read(playersLineFilterProvider.notifier).state =
+                          value,
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 2), // Adjust gap to match original 14 (12 spacing + 2 padding)
+                  padding: const EdgeInsets.only(
+                    top: 2,
+                  ), // Adjust gap to match original 14 (12 spacing + 2 padding)
                   child: filteredPlayers.isEmpty
                       ? const SportEmptyState(
                           icon: Icons.manage_search_outlined,
                           title: 'Nessun risultato',
                           message: 'Prova a modificare i filtri.',
                         )
-                      : Column(
-                          spacing: 12,
-                          children: filteredPlayers.map(
-                            (player) => PlayerCard(
-                              player: player,
-                              onTap: () => context.go(AppRoutes.playerDetail(player.id)),
-                              onEdit: () => context.go(
-                                AppRoutes.editPlayer(player.id),
-                                extra: player,
-                              ),
-                              onDelete: () => repository.deletePlayer(player.id),
-                            ),
-                          ).toList(),
+                      : ResponsiveGrid(
+                          children: filteredPlayers
+                              .map(
+                                (player) => PlayerCard(
+                                  player: player,
+                                  onTap: () => context.go(
+                                    AppRoutes.playerDetail(player.id),
+                                  ),
+                                  onEdit: () => context.go(
+                                    AppRoutes.editPlayer(player.id),
+                                    extra: player,
+                                  ),
+                                  onDelete: () =>
+                                      repository.deletePlayer(player.id),
+                                ),
+                              )
+                              .toList(),
                         ),
                 ),
               ],

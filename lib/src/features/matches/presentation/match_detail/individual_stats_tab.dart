@@ -85,7 +85,9 @@ class LeaderCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.violet.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.violet.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.violet.withValues(alpha: 0.3),
+                ),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(8),
@@ -134,7 +136,11 @@ class LeaderCard extends StatelessWidget {
 }
 
 class GroupedStatsBlock extends StatelessWidget {
-  const GroupedStatsBlock({super.key, required this.title, required this.children});
+  const GroupedStatsBlock({
+    super.key,
+    required this.title,
+    required this.children,
+  });
 
   final String title;
   final List<Widget> children;
@@ -142,8 +148,8 @@ class GroupedStatsBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassDecoration(
-              radius: 24,
-              child: Padding(
+      radius: 24,
+      child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
           spacing: 10,
@@ -218,7 +224,10 @@ class IndividualStatCard extends StatelessWidget {
                 border: Border.all(color: AppColors.violet),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 child: Text(
                   row.rating.toStringAsFixed(1),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -255,7 +264,12 @@ class IndividualStatsTab extends StatelessWidget {
     final defender = parseLeader(summary.bestDefender);
     final presence = parseLeader(summary.mostPlayed);
 
-    final hasLeaders = scorer != null || assistant != null || touches != null || defender != null || presence != null;
+    final hasLeaders =
+        scorer != null ||
+        assistant != null ||
+        touches != null ||
+        defender != null ||
+        presence != null;
 
     return Column(
       spacing: 12,
@@ -323,8 +337,8 @@ class IndividualStatsTab extends StatelessWidget {
           ],
         ),
         GlassDecoration(
-              radius: 28,
-              child: Padding(
+          radius: 28,
+          child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
               spacing: 12,

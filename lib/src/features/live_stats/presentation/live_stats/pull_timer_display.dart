@@ -3,7 +3,11 @@ import 'package:forui/forui.dart';
 import 'package:trio/src/theme/app_colors.dart';
 
 class PullTimerDisplay extends StatelessWidget {
-  const PullTimerDisplay({super.key, required this.elapsed, required this.running});
+  const PullTimerDisplay({
+    super.key,
+    required this.elapsed,
+    required this.running,
+  });
 
   final Duration elapsed;
   final bool running;
@@ -46,7 +50,9 @@ class PullTimerDisplay extends StatelessWidget {
             Text(
               running ? 'LIVE' : 'READY',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: running ? AppColors.violetLight : AppColors.sportMutedText,
+                color: running
+                    ? AppColors.violetLight
+                    : AppColors.sportMutedText,
                 fontWeight: FontWeight.w900,
               ),
             ),

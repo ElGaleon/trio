@@ -43,13 +43,12 @@ class SportEmptyState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: context.textTheme.bodyMedium?.copyWith(color: AppColors.sportMutedText),
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: AppColors.sportMutedText,
+              ),
             ),
             if (action != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: action!,
-              ),
+              Padding(padding: const EdgeInsets.only(top: 8), child: action!),
           ],
         ),
       ),

@@ -9,7 +9,10 @@ class CustomStatEditDialog extends StatefulWidget {
 
   const CustomStatEditDialog({super.key, this.initialStat});
 
-  static Future<CustomStat?> show(BuildContext context, {CustomStat? initialStat}) {
+  static Future<CustomStat?> show(
+    BuildContext context, {
+    CustomStat? initialStat,
+  }) {
     return showDialog<CustomStat>(
       context: context,
       barrierColor: AppColors.black.withValues(alpha: 0.60),
@@ -30,10 +33,16 @@ class _CustomStatEditDialogState extends State<CustomStatEditDialog> {
   @override
   void initState() {
     super.initState();
-    _labelController = TextEditingController(text: widget.initialStat?.label ?? '');
-    _abbreviationController = TextEditingController(text: widget.initialStat?.abbreviation ?? '');
+    _labelController = TextEditingController(
+      text: widget.initialStat?.label ?? '',
+    );
+    _abbreviationController = TextEditingController(
+      text: widget.initialStat?.abbreviation ?? '',
+    );
     _weightController = TextEditingController(
-      text: widget.initialStat != null ? widget.initialStat!.weight.toString() : '1.0',
+      text: widget.initialStat != null
+          ? widget.initialStat!.weight.toString()
+          : '1.0',
     );
     _isError = widget.initialStat?.isError ?? false;
   }
@@ -60,13 +69,17 @@ class _CustomStatEditDialogState extends State<CustomStatEditDialog> {
 
     if (abbreviation.isEmpty || abbreviation.length > 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Abbreviazione deve essere tra 1 e 3 caratteri.')),
+        const SnackBar(
+          content: Text('Abbreviazione deve essere tra 1 e 3 caratteri.'),
+        ),
       );
       return;
     }
 
     final result = CustomStat(
-      id: widget.initialStat?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
+      id:
+          widget.initialStat?.id ??
+          DateTime.now().microsecondsSinceEpoch.toString(),
       label: label,
       abbreviation: abbreviation,
       isError: _isError,
@@ -93,7 +106,9 @@ class _CustomStatEditDialogState extends State<CustomStatEditDialog> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    widget.initialStat == null ? 'Nuova Statistica' : 'Modifica Statistica',
+                    widget.initialStat == null
+                        ? 'Nuova Statistica'
+                        : 'Modifica Statistica',
                     style: textTheme.titleLarge?.copyWith(
                       color: AppColors.white,
                       fontWeight: FontWeight.w900,
@@ -116,7 +131,10 @@ class _CustomStatEditDialogState extends State<CustomStatEditDialog> {
                     control: FTextFieldControl.managed(
                       controller: _weightController,
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                      signed: true,
+                    ),
                     hint: 'Peso ELO / Impatto (es. 1.5 o -2.0)',
                   ),
                   GestureDetector(
@@ -136,7 +154,9 @@ class _CustomStatEditDialogState extends State<CustomStatEditDialog> {
                         ),
                         Icon(
                           _isError ? FIcons.toggleRight : FIcons.toggleLeft,
-                          color: _isError ? AppColors.violetLight : AppColors.sportMutedText,
+                          color: _isError
+                              ? AppColors.violetLight
+                              : AppColors.sportMutedText,
                           size: 28,
                         ),
                       ],
@@ -166,7 +186,10 @@ class _CustomStatEditDialogState extends State<CustomStatEditDialog> {
                           ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           child: Text(
                             'Salva',
                             style: textTheme.labelLarge?.copyWith(

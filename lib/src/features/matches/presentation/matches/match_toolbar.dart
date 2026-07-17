@@ -24,8 +24,8 @@ class MatchToolbar extends StatelessWidget {
           child: Text(
             canCreate
                 ? hasFilters
-                    ? '$filteredCount di $totalCount partite'
-                    : '$totalCount partite'
+                      ? '$filteredCount di $totalCount partite'
+                      : '$totalCount partite'
                 : 'Servono almeno 6 giocatori',
             style: textTheme.bodySmall?.copyWith(
               color: AppColors.sportMutedText,

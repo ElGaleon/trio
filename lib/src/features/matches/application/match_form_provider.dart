@@ -138,20 +138,12 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
       a.clear();
       a.addAll(ids);
       b.removeAll(ids);
-      state = state.copyWith(
-        teamAIds: a,
-        teamBIds: b,
-        teamAName: team.name,
-      );
+      state = state.copyWith(teamAIds: a, teamBIds: b, teamAName: team.name);
     } else {
       b.clear();
       b.addAll(ids);
       a.removeAll(ids);
-      state = state.copyWith(
-        teamAIds: a,
-        teamBIds: b,
-        teamBName: team.name,
-      );
+      state = state.copyWith(teamAIds: a, teamBIds: b, teamBName: team.name);
     }
   }
 
@@ -175,10 +167,14 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
       scoreB: state.scoreB,
       teamSize: state.teamSize,
       offenseVsDefense: state.offenseVsDefense,
-      teamAName: state.teamAName.trim().isEmpty ? (state.offenseVsDefense ? 'Attacco' : 'Squadra A') : state.teamAName,
-      teamBName: state.teamBName.trim().isEmpty ? (state.offenseVsDefense ? 'Difesa' : 'Squadra B') : state.teamBName,
+      teamAName: state.teamAName.trim().isEmpty
+          ? (state.offenseVsDefense ? 'Attacco' : 'Squadra A')
+          : state.teamAName,
+      teamBName: state.teamBName.trim().isEmpty
+          ? (state.offenseVsDefense ? 'Difesa' : 'Squadra B')
+          : state.teamBName,
     );
-    
+
     if (originalMatch != null) {
       savedMatch.statEvents = originalMatch.statEvents;
       savedMatch.division = originalMatch.division;
@@ -193,7 +189,7 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
       savedMatch.timeoutSeconds = originalMatch.timeoutSeconds;
       savedMatch.enabledStatTypes = originalMatch.enabledStatTypes;
     }
-    
+
     await repository.upsertMatch(savedMatch);
   }
 
@@ -214,7 +210,8 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
     ];
     final seed = DateTime.now().microsecondsSinceEpoch;
     final first = seed % names.length;
-    final second = (first + 3 + (seed ~/ 7) % (names.length - 1)) % names.length;
+    final second =
+        (first + 3 + (seed ~/ 7) % (names.length - 1)) % names.length;
     return (
       names[first],
       names[second == first ? (second + 1) % names.length : second],
@@ -222,6 +219,7 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
   }
 }
 
-final matchFormProvider = NotifierProvider.family<MatchFormNotifier, MatchFormState, String?>(
-  MatchFormNotifier.new,
-);
+final matchFormProvider =
+    NotifierProvider.family<MatchFormNotifier, MatchFormState, String?>(
+      MatchFormNotifier.new,
+    );

@@ -41,8 +41,8 @@ class BottomActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassDecoration(
-              radius: 24,
-              child: Padding(
+      radius: 24,
+      child: Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
           spacing: 8,

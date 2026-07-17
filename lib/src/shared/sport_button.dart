@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
@@ -67,6 +68,10 @@ class SportFloatingActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return SportActionButton(label: label, icon: icon, onPressed: onPressed);
+    }
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onPressed,
@@ -130,14 +135,12 @@ class SportBackButton extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.white.withValues(alpha: 0.08),
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
+              border: Border.all(
+                color: AppColors.white.withValues(alpha: 0.14),
+              ),
             ),
             child: const Center(
-              child: Icon(
-                FIcons.chevronLeft,
-                color: AppColors.white,
-                size: 22,
-              ),
+              child: Icon(FIcons.chevronLeft, color: AppColors.white, size: 22),
             ),
           ),
         ),

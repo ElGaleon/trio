@@ -31,7 +31,7 @@ class LeaderboardRow extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: GlassDecoration(
-              child: Padding(
+          child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
             child: Row(
               spacing: 12,

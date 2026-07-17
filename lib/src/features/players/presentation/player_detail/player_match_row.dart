@@ -38,8 +38,8 @@ class PlayerMatchRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassDecoration(
-              radius: 24,
-              child: Padding(
+        radius: 24,
+        child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
             spacing: 12,
@@ -54,7 +54,10 @@ class PlayerMatchRow extends StatelessWidget {
                     border: Border.all(color: color.withValues(alpha: 0.50)),
                   ),
                   child: Center(
-                    child: Icon(_resultIcon(match, isTeamA, delta), color: color),
+                    child: Icon(
+                      _resultIcon(match, isTeamA, delta),
+                      color: color,
+                    ),
                   ),
                 ),
               ),
@@ -85,7 +88,9 @@ class PlayerMatchRow extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 2), // Adjust spacing: 10 total (12 gap - 2 padding = 10)
+                padding: const EdgeInsets.only(
+                  left: 2,
+                ), // Adjust spacing: 10 total (12 gap - 2 padding = 10)
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.14),
@@ -93,7 +98,10 @@ class PlayerMatchRow extends StatelessWidget {
                     border: Border.all(color: color.withValues(alpha: 0.45)),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     child: Text(
                       '$sign${delta.round()}',
                       style: textTheme.bodySmall?.copyWith(

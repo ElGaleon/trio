@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:trio/src/routing/app_router.dart';
+import 'package:trio/src/shared/responsive_layout.dart';
 import 'package:trio/src/theme/app_colors.dart';
 
 const sportMutedText = AppColors.sportMutedText;
@@ -67,7 +69,34 @@ class _SportScreenShellState extends State<SportScreenShell> {
   Widget build(BuildContext context) {
     final safeTop = MediaQuery.paddingOf(context).top;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final floatingInset = widget.floatingActionButton == null ? 0.0 : 76.0;
+    final showFloatingInHeader = kIsWeb && widget.floatingActionButton != null;
+    final floatingActionButton = showFloatingInHeader
+        ? null
+        : widget.floatingActionButton;
+    final headerActions = [
+      ...?widget.headerActions,
+      if (showFloatingInHeader) widget.floatingActionButton!,
+    ];
+    final floatingInset = floatingActionButton == null ? 0.0 : 76.0;
+    final size = MediaQuery.sizeOf(context);
+    final horizontalPadding = size.width >= ResponsiveLayout.desktop
+        ? 32.0
+        : size.width >= ResponsiveLayout.tablet
+        ? 24.0
+        : 16.0;
+    final resolvedPadding = widget.padding.resolve(Directionality.of(context));
+    final contentPadding = resolvedPadding.copyWith(
+      left: horizontalPadding,
+      right: horizontalPadding,
+      bottom: resolvedPadding.bottom + floatingInset + keyboardInset + 24,
+    );
+    final contentWidth = size.width.clamp(
+      0.0,
+      ResponsiveLayout.contentMaxWidth,
+    );
+    final floatingRight =
+        ((size.width - contentWidth) / 2).clamp(0.0, double.infinity) +
+        horizontalPadding;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: AppColors.transparent,
@@ -120,26 +149,32 @@ class _SportScreenShellState extends State<SportScreenShell> {
                                 subtitle: widget.subtitle,
                                 progress: progress,
                                 showBackButton: widget.showBackButton,
-                                actions: widget.headerActions,
+                                actions: headerActions,
                               );
                             },
                           ),
                         ),
                         SliverPadding(
-                          padding: widget.padding.add(
-                            EdgeInsets.only(
-                              bottom: floatingInset + keyboardInset + 24,
+                          padding: contentPadding,
+                          sliver: SliverToBoxAdapter(
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: ResponsiveLayout.contentMaxWidth,
+                                ),
+                                child: widget.child,
+                              ),
                             ),
                           ),
-                          sliver: SliverToBoxAdapter(child: widget.child),
                         ),
                       ],
                     ),
-                    if (widget.floatingActionButton != null)
+                    if (floatingActionButton != null)
                       Positioned(
-                        right: 16,
+                        right: floatingRight,
                         bottom: 16 + keyboardInset,
-                        child: widget.floatingActionButton!,
+                        child: floatingActionButton,
                       ),
                   ],
                 ),
@@ -196,56 +231,64 @@ class SportHeaderContent extends StatelessWidget {
     final bottomPadding = 12 - (4 * progress);
     return DecoratedBox(
       decoration: pinnedHeaderDecoration(progress),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16, topPadding, 16, bottomPadding),
-        child: Row(
-          spacing: 10,
-          children: [
-            if (showBackButton)
-              HeaderIconButton(
-                size: actionSize,
-                icon: FIcons.chevronLeft,
-                onTap: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go(AppRoutes.matches);
-                  }
-                },
-              ),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.displaySmall?.copyWith(
-                      color: AppColors.white,
-                      fontSize: titleSize,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0,
-                    ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: ResponsiveLayout.contentMaxWidth + 64,
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, topPadding, 16, bottomPadding),
+            child: Row(
+              spacing: 10,
+              children: [
+                if (showBackButton)
+                  HeaderIconButton(
+                    size: actionSize,
+                    icon: FIcons.chevronLeft,
+                    tooltip: 'Indietro',
+                    onTap: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go(AppRoutes.matches);
+                      }
+                    },
                   ),
-                  Opacity(
-                    opacity: 1 - (progress * 0.75),
-                    child: Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: sportMutedText,
-                        fontWeight: FontWeight.w800,
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.displaySmall?.copyWith(
+                          color: AppColors.white,
+                          fontSize: titleSize,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0,
+                        ),
                       ),
-                    ),
+                      Opacity(
+                        opacity: 1 - (progress * 0.75),
+                        child: Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: sportMutedText,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                ...?actions,
+              ],
             ),
-            if (actions case final actions?) ...actions,
-          ],
+          ),
         ),
       ),
     );
@@ -296,6 +339,7 @@ class SportHeaderDelegate extends SliverPersistentHeaderDelegate {
               HeaderIconButton(
                 size: actionSize,
                 icon: FIcons.chevronLeft,
+                tooltip: 'Indietro',
                 onTap: () {
                   if (context.canPop()) {
                     context.pop();
@@ -349,6 +393,7 @@ class SportHeaderDelegate extends SliverPersistentHeaderDelegate {
             HeaderIconButton(
               size: actionSize,
               icon: Icons.settings_outlined,
+              tooltip: 'Impostazioni',
               onTap: () => context.go(AppRoutes.settings),
             ),
           ],
@@ -372,28 +417,44 @@ class HeaderIconButton extends StatelessWidget {
     super.key,
     required this.size,
     required this.icon,
+    required this.tooltip,
     required this.onTap,
   });
 
   final double size;
   final IconData icon;
+  final String tooltip;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: AppColors.white.withValues(alpha: 0.08),
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        button: true,
+        label: tooltip,
+        child: Material(
+          color: AppColors.transparent,
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppColors.white.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.white.withValues(alpha: 0.14),
+                  ),
+                ),
+                child: Center(
+                  child: Icon(icon, color: AppColors.white, size: 21),
+                ),
+              ),
+            ),
           ),
-          child: Center(child: Icon(icon, color: AppColors.white, size: 21)),
         ),
       ),
     );

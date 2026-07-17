@@ -30,10 +30,11 @@ class InjurySubstitutionSheet {
             b.role == injuredPlayer.role ? 0 : 1,
           );
           if (role != 0) return role;
-          final line = (a.linePreference == injuredPlayer.linePreference ? 0 : 1)
-              .compareTo(
-                b.linePreference == injuredPlayer.linePreference ? 0 : 1,
-              );
+          final line =
+              (a.linePreference == injuredPlayer.linePreference ? 0 : 1)
+                  .compareTo(
+                    b.linePreference == injuredPlayer.linePreference ? 0 : 1,
+                  );
           if (line != 0) return line;
         }
         return a.name.compareTo(b.name);
@@ -68,10 +69,11 @@ class InjurySubstitutionSheet {
                       children: [
                         Text(
                           'Cambio per infortunio',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.white,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.w900,
+                              ),
                         ),
                         SubstitutionSection(
                           title: 'Chi esce',

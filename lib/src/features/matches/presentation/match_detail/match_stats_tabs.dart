@@ -278,8 +278,8 @@ class BestPlayerCard extends StatelessWidget {
     final bestRow = rows.isEmpty ? null : rows.first;
     final player = bestRow?.player;
     return GlassDecoration(
-              radius: 28,
-              child: Padding(
+      radius: 28,
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 16,
@@ -352,8 +352,8 @@ class MiniTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassDecoration(
-              radius: 28,
-              child: Padding(
+      radius: 28,
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 12,
@@ -416,8 +416,8 @@ class FactsTab extends StatelessWidget {
       spacing: 12,
       children: [
         GlassDecoration(
-              radius: 28,
-              child: Padding(
+          radius: 28,
+          child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [

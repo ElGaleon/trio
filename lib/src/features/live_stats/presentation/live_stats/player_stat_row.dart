@@ -115,7 +115,15 @@ class PlayerStatRow extends ConsumerWidget {
     );
   }
 
-  List<({String short, String full, MatchStatType type, String? customStatId, bool destructive})>
+  List<
+    ({
+      String short,
+      String full,
+      MatchStatType type,
+      String? customStatId,
+      bool destructive,
+    })
+  >
   _visibleActions(List<CustomStat> customStats) {
     final enabled = enabledStatTypes.toSet();
     final builtInActions = oursOnOffense
@@ -208,7 +216,16 @@ class PlayerStatRow extends ConsumerWidget {
             ),
           ];
 
-    final List<({String short, String full, MatchStatType type, String? customStatId, bool destructive})> visible = [];
+    final List<
+      ({
+        String short,
+        String full,
+        MatchStatType type,
+        String? customStatId,
+        bool destructive,
+      })
+    >
+    visible = [];
 
     for (final action in builtInActions) {
       if (enabled.contains(action.type)) {
@@ -260,7 +277,15 @@ class PlayerStatRow extends ConsumerWidget {
   }
 
   bool _fullLabelsFit(
-    List<({String short, String full, MatchStatType type, String? customStatId, bool destructive})>
+    List<
+      ({
+        String short,
+        String full,
+        MatchStatType type,
+        String? customStatId,
+        bool destructive,
+      })
+    >
     actions,
     double maxWidth,
   ) {
@@ -273,7 +298,15 @@ class PlayerStatRow extends ConsumerWidget {
   }
 
   List<Widget> _buttons(
-    List<({String short, String full, MatchStatType type, String? customStatId, bool destructive})>
+    List<
+      ({
+        String short,
+        String full,
+        MatchStatType type,
+        String? customStatId,
+        bool destructive,
+      })
+    >
     visibleActions,
     bool useFullLabels,
   ) {
