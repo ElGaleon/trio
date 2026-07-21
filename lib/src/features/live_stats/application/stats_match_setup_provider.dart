@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:trio/src/features/auth/application/rbac_provider.dart';
+import 'package:trio/src/features/events/domain/team_event.dart';
 import 'package:trio/src/features/matches/domain/match_stat_event.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/live_stats/domain/stats_match_setup_state.dart';
@@ -54,6 +57,7 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
   void initializeForMatch({
     required bool isTraining,
     required List<Player> allPlayers,
+    TeamEvent? event,
   }) {
     final settings = ref.read(appSettingsProvider);
     final favoriteStatNames = settings.favoriteStatNames;
@@ -68,9 +72,9 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
     state = StatsMatchSetupState(
       step: 0,
       teamName: isTraining ? 'Chiari' : 'Noi',
-      opponentName: isTraining ? 'Scuri' : 'Avversari',
-      tournament: '',
-      location: '',
+      opponentName: isTraining ? 'Scuri' : event?.title ?? 'Avversari',
+      tournament: event?.title ?? '',
+      location: event?.location ?? '',
       division: 'Mixed',
       matchType: isTraining ? 'Allenamento' : 'Classic',
       teamSize: 7,
@@ -92,6 +96,7 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
       teamBRosterIds: {},
       isTrainingMatch: isTraining,
       isAttackVsDefense: false,
+      eventId: event?.id,
     );
   }
 
@@ -240,7 +245,11 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
   }
 
   Future<String> startMatch() async {
-    final repository = ref.read(eloRepositoryProvider);
+    if (!can(ref.read(currentRoleProvider), AppPermission.recordLiveStats)) {
+      return '';
+    }
+    final repository = ref.read(firestoreTrioRepositoryProvider);
+    if (repository == null) return '';
     final id = DateTime.now().microsecondsSinceEpoch.toString();
     final opponent = state.opponentName.trim().isEmpty
         ? (state.isInternalScrimmage ? 'Dark' : 'Avversari')
@@ -286,6 +295,8 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
       teamBRosterIds: isInternal ? state.teamBRosterIds.toList() : const [],
       enabledStatTypes: state.enabledStatTypes.toList(),
       enabledCustomStatIds: state.enabledCustomStatIds.toList(),
+      eventId: state.isTrainingMatch ? null : state.eventId,
+      trainingEventId: state.isTrainingMatch ? state.eventId : null,
       statEvents: [
         MatchStatEvent(
           id: '$id-start',
@@ -307,6 +318,9 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
     );
 
     await repository.upsertMatch(match);
+    if (state.eventId case final eventId?) {
+      await repository.linkMatchToEvent(eventId, id);
+    }
     return id;
   }
 }

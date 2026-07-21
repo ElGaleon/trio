@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:trio/src/constants/app_constants.dart';
+import 'package:trio/src/features/auth/application/rbac_provider.dart';
+import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/domain/match_form_state.dart';
+import 'matches_providers.dart';
 import 'recent_match_team.dart';
 
 class MatchFormNotifier extends Notifier<MatchFormState> {
@@ -162,7 +165,13 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
   }
 
   Future<void> save(String? matchId) async {
-    final repository = ref.read(eloRepositoryProvider);
+    final role = ref.read(currentRoleProvider);
+    final permission = matchId == null
+        ? AppPermission.createMatch
+        : AppPermission.editMatch;
+    if (!can(role, permission)) return;
+    final repository = ref.read(firestoreTrioRepositoryProvider);
+    if (repository == null) return;
     final matches = ref.read(matchesProvider);
     ScrimmageMatch? originalMatch;
     if (matchId != null) {
@@ -203,6 +212,9 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
       savedMatch.timeoutsPerTeamPerHalf = originalMatch.timeoutsPerTeamPerHalf;
       savedMatch.timeoutSeconds = originalMatch.timeoutSeconds;
       savedMatch.enabledStatTypes = originalMatch.enabledStatTypes;
+      savedMatch.enabledCustomStatIds = originalMatch.enabledCustomStatIds;
+      savedMatch.eventId = originalMatch.eventId;
+      savedMatch.trainingEventId = originalMatch.trainingEventId;
     }
 
     await repository.upsertMatch(savedMatch);

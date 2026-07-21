@@ -47,7 +47,7 @@ class MatchStatEvent {
     return {
       'id': id,
       'type': type.name,
-      'createdAt': createdAt,
+      'createdAt': createdAt.toUtc(),
       'pointNumber': pointNumber,
       'scoreA': scoreA,
       'scoreB': scoreB,
@@ -73,7 +73,7 @@ class MatchStatEvent {
         (type) => type.name == typeName,
         orElse: () => MatchStatType.pass,
       ),
-      createdAt: map['createdAt'] as DateTime? ?? DateTime.now(),
+      createdAt: _dateFrom(map['createdAt']) ?? DateTime.now(),
       pointNumber: map['pointNumber'] as int? ?? 1,
       scoreA: map['scoreA'] as int? ?? 0,
       scoreB: map['scoreB'] as int? ?? 0,
@@ -88,4 +88,16 @@ class MatchStatEvent {
       customStatId: map['customStatId'] as String?,
     );
   }
+}
+
+DateTime? _dateFrom(Object? value) {
+  if (value is DateTime) return value;
+  try {
+    final dynamic candidate = value;
+    final date = candidate?.toDate();
+    if (date is DateTime) return date;
+  } catch (_) {
+    return null;
+  }
+  return null;
 }

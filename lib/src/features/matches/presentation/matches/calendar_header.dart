@@ -59,9 +59,9 @@ class CalendarHeader extends ConsumerWidget {
             const SizedBox(width: 8),
             CalendarNavButton(
               icon: expanded ? FIcons.chevronUp : FIcons.chevronDown,
-              onTap: () =>
-                  ref.read(matchesCalendarExpandedProvider.notifier).state =
-                      !expanded,
+              onTap: () => ref
+                  .read(matchesCalendarExpandedProvider.notifier)
+                  .set(!expanded),
             ),
           ],
         ),
@@ -72,18 +72,17 @@ class CalendarHeader extends ConsumerWidget {
   void _move(WidgetRef ref, int direction) {
     if (expanded) {
       final nextMonth = DateTime(month.year, month.month + direction);
-      ref.read(matchesCalendarMonthProvider.notifier).state = nextMonth;
-      ref.read(matchesCalendarSelectedDayProvider.notifier).state = nextMonth;
+      ref.read(matchesCalendarMonthProvider.notifier).set(nextMonth);
+      ref.read(matchesCalendarSelectedDayProvider.notifier).set(nextMonth);
       return;
     }
 
     final current =
         ref.read(matchesCalendarSelectedDayProvider) ?? DateTime.now();
     final nextDay = current.add(Duration(days: direction * 7));
-    ref.read(matchesCalendarSelectedDayProvider.notifier).state = nextDay;
-    ref.read(matchesCalendarMonthProvider.notifier).state = DateTime(
-      nextDay.year,
-      nextDay.month,
-    );
+    ref.read(matchesCalendarSelectedDayProvider.notifier).set(nextDay);
+    ref
+        .read(matchesCalendarMonthProvider.notifier)
+        .set(DateTime(nextDay.year, nextDay.month));
   }
 }

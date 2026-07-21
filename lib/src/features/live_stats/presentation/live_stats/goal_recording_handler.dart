@@ -3,7 +3,8 @@ import 'package:forui/forui.dart';
 
 import 'package:trio/src/shared/decorated_panel.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/features/matches/data/elo_repository.dart';
+import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
+import 'package:trio/src/features/settings/domain/app_settings.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/players/domain/player.dart';
@@ -20,7 +21,8 @@ class GoalRecordingHandler {
     required ScrimmageMatch match,
     required MatchStatType type,
     required Map<String, Player> playersById,
-    required EloRepository repository,
+    required FirestoreTrioRepository repository,
+    required AppSettings settings,
     required Future<void> Function() onFinish,
     required Future<void> Function(bool nextOnOffense) onShowLineSelection,
   }) async {
@@ -99,6 +101,7 @@ class GoalRecordingHandler {
       type: type,
       playersById: playersById,
       repository: repository,
+      settings: settings,
     );
     if (!context.mounted) return;
     if (res.finished) {
@@ -112,6 +115,7 @@ class GoalRecordingHandler {
         match,
         playersById,
         repository,
+        settings,
       );
     }
     if (!context.mounted) return;

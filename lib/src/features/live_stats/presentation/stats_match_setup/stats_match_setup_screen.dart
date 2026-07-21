@@ -9,6 +9,7 @@ import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/live_stats/application/stats_match_setup_provider.dart';
 import 'package:trio/src/features/live_stats/domain/stats_match_setup_state.dart';
+import 'package:trio/src/features/events/application/events_providers.dart';
 import 'match_settings_step.dart';
 import 'point_start_selector.dart';
 import 'roster_picker.dart';
@@ -69,13 +70,26 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
       final stateOfRouter = GoRouterState.of(context);
       final isTraining =
           stateOfRouter.uri.queryParameters['type'] == 'training';
+      final eventId = stateOfRouter.uri.queryParameters['eventId'];
+      final event = eventId == null
+          ? null
+          : ref
+                .read(eventsProvider)
+                .where((event) => event.id == eventId)
+                .firstOrNull;
       final allPlayers = ref.read(rankedPlayersProvider);
       ref
           .read(statsMatchSetupProvider.notifier)
-          .initializeForMatch(isTraining: isTraining, allPlayers: allPlayers);
+          .initializeForMatch(
+            isTraining: isTraining,
+            allPlayers: allPlayers,
+            event: event,
+          );
       final newState = ref.read(statsMatchSetupProvider);
       _teamController.text = newState.teamName;
       _opponentController.text = newState.opponentName;
+      _tournamentController.text = newState.tournament;
+      _locationController.text = newState.location;
     });
   }
 

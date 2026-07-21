@@ -69,6 +69,7 @@ class _SportScreenShellState extends State<SportScreenShell> {
   Widget build(BuildContext context) {
     final safeTop = MediaQuery.paddingOf(context).top;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final size = MediaQuery.sizeOf(context);
     final showFloatingInHeader = kIsWeb && widget.floatingActionButton != null;
     final floatingActionButton = showFloatingInHeader
         ? null
@@ -78,7 +79,6 @@ class _SportScreenShellState extends State<SportScreenShell> {
       if (showFloatingInHeader) widget.floatingActionButton!,
     ];
     final floatingInset = floatingActionButton == null ? 0.0 : 76.0;
-    final size = MediaQuery.sizeOf(context);
     final horizontalPadding = size.width >= ResponsiveLayout.desktop
         ? 32.0
         : size.width >= ResponsiveLayout.tablet

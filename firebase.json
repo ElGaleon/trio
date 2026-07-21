@@ -1,1 +1,42 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"steasy-aa1ad","appId":"1:901319599088:android:09db03f1790f3446dd3335","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"steasy-aa1ad","appId":"1:901319599088:ios:45fff7afc9a90df4dd3335","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"steasy-aa1ad","appId":"1:901319599088:ios:45fff7afc9a90df4dd3335","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"steasy-aa1ad","configurations":{"android":"1:901319599088:android:09db03f1790f3446dd3335","ios":"1:901319599088:ios:45fff7afc9a90df4dd3335","macos":"1:901319599088:ios:45fff7afc9a90df4dd3335","web":"1:901319599088:web:5f120b7209fd4c3add3335","windows":"1:901319599088:web:e0b7fe3f435b7f2add3335"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "skrim-6c8b7",
+          "appId": "1:628524860787:android:ddd88db8aa63102c4cb106",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "skrim-6c8b7",
+          "appId": "1:628524860787:ios:eafb04add626a1104cb106",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "skrim-6c8b7",
+          "appId": "1:628524860787:ios:eafb04add626a1104cb106",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "skrim-6c8b7",
+          "configurations": {
+            "android": "1:628524860787:android:ddd88db8aa63102c4cb106",
+            "ios": "1:628524860787:ios:eafb04add626a1104cb106",
+            "web": "1:628524860787:web:d5facda05907bf934cb106"
+          }
+        }
+      }
+    }
+  }
+}

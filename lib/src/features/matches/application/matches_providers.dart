@@ -1,34 +1,34 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'matches_view_mode.dart';
 import 'recent_match_team.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:trio/src/shared/state_provider.dart';
 
 final matchesProvider = Provider<List<ScrimmageMatch>>((ref) {
-  ref.watch(hiveChangesProvider);
-  return ref.watch(eloRepositoryProvider).matches;
+  return ref.watch(firebaseMatchesProvider).value ?? const [];
 });
 
-final matchesStartDateFilterProvider = StateProvider<DateTime?>((ref) => null);
+final matchesStartDateFilterProvider = mutableProvider<DateTime?>(() => null);
 
-final matchesEndDateFilterProvider = StateProvider<DateTime?>((ref) => null);
+final matchesEndDateFilterProvider = mutableProvider<DateTime?>(() => null);
 
-final matchesViewModeProvider = StateProvider<MatchesViewMode>(
-  (ref) => MatchesViewMode.list,
+final matchesViewModeProvider = mutableProvider<MatchesViewMode>(
+  () => MatchesViewMode.list,
 );
 
-final matchesCalendarMonthProvider = StateProvider<DateTime>((ref) {
+final matchesCalendarMonthProvider = mutableProvider<DateTime>(() {
   final now = DateTime.now();
   return DateTime(now.year, now.month);
 });
 
-final matchesCalendarSelectedDayProvider = StateProvider<DateTime?>(
-  (ref) => DateTime.now(),
+final matchesCalendarSelectedDayProvider = mutableProvider<DateTime?>(
+  () => DateTime.now(),
 );
 
-final matchesCalendarExpandedProvider = StateProvider<bool>((ref) => false);
+final matchesCalendarExpandedProvider = mutableProvider<bool>(() => false);
 
 final filteredMatchesProvider = Provider<List<ScrimmageMatch>>((ref) {
   final startDate = ref.watch(matchesStartDateFilterProvider);

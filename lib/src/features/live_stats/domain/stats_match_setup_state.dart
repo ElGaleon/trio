@@ -27,6 +27,7 @@ class StatsMatchSetupState {
   final Set<String> teamBRosterIds;
   final bool isTrainingMatch;
   final bool isAttackVsDefense;
+  final String? eventId;
 
   StatsMatchSetupState({
     required this.step,
@@ -55,6 +56,7 @@ class StatsMatchSetupState {
     required this.teamBRosterIds,
     required this.isTrainingMatch,
     required this.isAttackVsDefense,
+    this.eventId,
   });
 
   StatsMatchSetupState copyWith({
@@ -84,6 +86,8 @@ class StatsMatchSetupState {
     Set<String>? teamBRosterIds,
     bool? isTrainingMatch,
     bool? isAttackVsDefense,
+    String? eventId,
+    bool clearEventId = false,
   }) {
     return StatsMatchSetupState(
       step: step ?? this.step,
@@ -113,6 +117,7 @@ class StatsMatchSetupState {
       teamBRosterIds: teamBRosterIds ?? this.teamBRosterIds,
       isTrainingMatch: isTrainingMatch ?? this.isTrainingMatch,
       isAttackVsDefense: isAttackVsDefense ?? this.isAttackVsDefense,
+      eventId: clearEventId ? null : (eventId ?? this.eventId),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
 import 'package:trio/src/features/matches/application/match_provider.dart';
 
 import 'package:trio/src/shared/app_empty_state.dart';
@@ -74,7 +75,21 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
     }
 
     final service = LiveStatsService.instance;
-    final repository = ref.read(eloRepositoryProvider);
+    final repository = ref.watch(firestoreTrioRepositoryProvider);
+    final settings = ref.watch(appSettingsProvider);
+    if (repository == null) {
+      return const Scaffold(
+        body: SportScreenShell(
+          title: 'Live stats',
+          subtitle: 'Firebase non pronto',
+          child: SportEmptyState(
+            icon: FIcons.cloudOff,
+            title: 'Firebase non disponibile',
+            message: 'Accedi di nuovo per registrare statistiche live.',
+          ),
+        ),
+      );
+    }
 
     return StreamBuilder<DateTime>(
       stream: Stream<DateTime>.periodic(
@@ -194,6 +209,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
             replacement: draft.replacement,
             oursOnOffense: oursOnOffense,
             repository: repository,
+            settings: settings,
           );
         }
 
@@ -228,6 +244,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                         player: player,
                         playersById: playersById,
                         repository: repository,
+                        settings: settings,
                       );
                       if (res.finished) {
                         await triggerFinishMatch();
@@ -337,6 +354,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                               match,
                               playersById,
                               repository,
+                              settings,
                             )
                           : null,
                     ),
@@ -443,6 +461,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                           type: MatchStatType.goal,
                           playersById: playersById,
                           repository: repository,
+                          settings: settings,
                           onFinish: triggerFinishMatch,
                           onShowLineSelection: triggerShowLineSelection,
                         ),
@@ -454,6 +473,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                               type: MatchStatType.opponentGoal,
                               playersById: playersById,
                               repository: repository,
+                              settings: settings,
                               onFinish: triggerFinishMatch,
                               onShowLineSelection: triggerShowLineSelection,
                             ),
@@ -463,6 +483,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                             type: MatchStatType.opponentError,
                             playersById: playersById,
                             repository: repository,
+                            settings: settings,
                           );
                           if (res.finished) {
                             await triggerFinishMatch();
@@ -483,6 +504,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                                   durationSeconds: draft.durationSeconds,
                                   inBounds: draft.inBounds,
                                   repository: repository,
+                                  settings: settings,
                                 );
                               }
                             : null,
@@ -492,6 +514,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                                 type: MatchStatType.timeout,
                                 playersById: playersById,
                                 repository: repository,
+                                settings: settings,
                               )
                             : null,
                         onInjury: triggerInjurySubstitution,

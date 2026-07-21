@@ -7,7 +7,6 @@ Gestisce tema, parametri Elo, pesi statistici, statistiche personalizzate e pref
 - `domain/AppSettings` contiene valori persistiti e default.
 - `domain/SettingsFormState` contiene stringhe e modifiche non ancora salvate.
 - `application/settings_provider.dart` valida, persiste e avvia il ricalcolo Elo.
-- `data/app_settings_adapter.dart` mantiene la compatibilità Hive.
 - `presentation/` contiene pagina, sezioni e dialog delle statistiche personalizzate.
 
 ## Invarianti
@@ -16,4 +15,4 @@ Gestisce tema, parametri Elo, pesi statistici, statistiche personalizzate e pref
 - Un cambio ai parametri Elo richiede il ricalcolo dei rating.
 - Gli ID delle statistiche personalizzate restano stabili durante la modifica.
 - La rimozione di una statistica deve rimuoverla anche dai preferiti.
-- Nuovi campi persistiti richiedono default e field index Hive mai riutilizzati.
+- Nuovi campi persistiti richiedono default e serializzazione Firestore.

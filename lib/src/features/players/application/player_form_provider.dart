@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:trio/src/features/auth/application/rbac_provider.dart';
+import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/players/domain/player_role.dart';
 import 'package:trio/src/features/players/domain/player_form_state.dart';
@@ -18,6 +20,9 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
     if (arg == null) {
       return PlayerFormState(
         name: '',
+        firstName: '',
+        lastName: '',
+        email: '',
         linePreference: null,
         role: PlayerRole.cutter,
         isExternal: false,
@@ -26,11 +31,16 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
       );
     }
 
-    final repository = ref.read(eloRepositoryProvider);
-    final player = repository.playersBox.get(arg);
+    final player = ref
+        .read(rankedPlayersProvider)
+        .where((player) => player.id == arg)
+        .firstOrNull;
     if (player == null) {
       return PlayerFormState(
         name: '',
+        firstName: '',
+        lastName: '',
+        email: '',
         linePreference: null,
         role: PlayerRole.cutter,
         isExternal: false,
@@ -41,6 +51,9 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
 
     return PlayerFormState(
       name: player.name,
+      firstName: player.firstName,
+      lastName: player.lastName,
+      email: player.email,
       linePreference: player.linePreference,
       role: player.role,
       isExternal: player.isExternal,
@@ -51,6 +64,18 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
 
   void updateName(String name) {
     state = state.copyWith(name: name);
+  }
+
+  void updateFirstName(String value) {
+    state = state.copyWith(firstName: value);
+  }
+
+  void updateLastName(String value) {
+    state = state.copyWith(lastName: value);
+  }
+
+  void updateEmail(String value) {
+    state = state.copyWith(email: value);
   }
 
   void updateJerseyNumber(String value) {
@@ -141,31 +166,53 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
     return path.substring(dot).toLowerCase();
   }
 
-  Future<void> save(String? playerId) async {
-    final repository = ref.read(eloRepositoryProvider);
+  Future<bool> save(String? playerId) async {
+    final role = ref.read(currentRoleProvider);
+    final permission = playerId == null
+        ? AppPermission.createPlayer
+        : AppPermission.editPlayer;
+    if (!can(role, permission)) return false;
+    final repository = ref.read(firestoreTrioRepositoryProvider);
+    if (repository == null) {
+      throw StateError(
+        'Seleziona o crea un workspace prima di salvare giocatori.',
+      );
+    }
     if (playerId == null) {
       await repository.addPlayerWithLine(
         state.name,
-        state.linePreference,
-        state.role,
-        state.profileImagePath,
-        state.isExternal,
-        _jerseyNumberOrNull(),
+        firstName: state.firstName,
+        lastName: state.lastName,
+        email: state.email,
+        linePreference: state.linePreference,
+        role: state.role,
+        profileImagePath: state.profileImagePath,
+        isExternal: state.isExternal,
+        jerseyNumber: _jerseyNumberOrNull(),
       );
-    } else {
-      final player = repository.playersBox.get(playerId);
-      if (player != null) {
-        await repository.savePlayer(
-          player,
-          name: state.name,
-          linePreference: state.linePreference,
-          role: state.role,
-          profileImagePath: state.profileImagePath,
-          isExternal: state.isExternal,
-          jerseyNumber: _jerseyNumberOrNull(),
-        );
-      }
+      return true;
     }
+
+    final player = ref
+        .read(rankedPlayersProvider)
+        .where((player) => player.id == playerId)
+        .firstOrNull;
+    if (player != null) {
+      await repository.savePlayer(
+        player,
+        name: state.name,
+        firstName: state.firstName,
+        lastName: state.lastName,
+        email: state.email,
+        linePreference: state.linePreference,
+        role: state.role,
+        profileImagePath: state.profileImagePath,
+        isExternal: state.isExternal,
+        jerseyNumber: _jerseyNumberOrNull(),
+      );
+      return true;
+    }
+    return false;
   }
 
   int? _jerseyNumberOrNull() {

@@ -6,11 +6,30 @@ import 'package:trio/src/features/players/domain/player_role.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/match_stat_event.dart';
+import 'package:trio/src/features/events/application/events_providers.dart';
+import 'package:trio/src/features/events/domain/team_event.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 import 'package:trio/src/features/matches/application/matches_providers.dart';
 import 'package:trio/src/features/players/application/player_stats_provider.dart';
 
 void main() {
+  test('expands weekly recurring events', () {
+    final events = expandRecurringEvents([
+      TeamEvent(
+        id: 'event-1',
+        title: 'Allenamento',
+        startAt: DateTime(2026, 7, 22, 19),
+        endAt: DateTime(2026, 7, 22, 21),
+        location: 'Campo',
+        recurrence: TeamEventRecurrence.weekly,
+        recurrenceEndsAt: DateTime(2026, 8, 5),
+      ),
+    ]);
+
+    expect(events.map((event) => event.startAt.day), containsAll([22, 29, 5]));
+    expect(events.every((event) => event.storageId == 'event-1'), isTrue);
+  });
+
   test('filters players by search, role and line with Riverpod', () {
     final players = [
       Player(
@@ -31,11 +50,11 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    container.read(playersSearchQueryProvider.notifier).state = 'ali';
-    container.read(playersRoleFilterProvider.notifier).state =
-        PlayerRole.handler;
-    container.read(playersLineFilterProvider.notifier).state =
-        PlayerLinePreference.offense;
+    container.read(playersSearchQueryProvider.notifier).set('ali');
+    container.read(playersRoleFilterProvider.notifier).set(PlayerRole.handler);
+    container
+        .read(playersLineFilterProvider.notifier)
+        .set(PlayerLinePreference.offense);
 
     final filtered = container.read(filteredPlayersProvider);
 
@@ -67,16 +86,12 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    container.read(matchesStartDateFilterProvider.notifier).state = DateTime(
-      2026,
-      5,
-      10,
-    );
-    container.read(matchesEndDateFilterProvider.notifier).state = DateTime(
-      2026,
-      5,
-      25,
-    );
+    container
+        .read(matchesStartDateFilterProvider.notifier)
+        .set(DateTime(2026, 5, 10));
+    container
+        .read(matchesEndDateFilterProvider.notifier)
+        .set(DateTime(2026, 5, 25));
 
     final filtered = container.read(filteredMatchesProvider);
 
@@ -168,12 +183,12 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    container.read(matchesCalendarMonthProvider.notifier).state = DateTime(
-      2026,
-      5,
-    );
-    container.read(matchesCalendarSelectedDayProvider.notifier).state =
-        DateTime(2026, 5, 20);
+    container
+        .read(matchesCalendarMonthProvider.notifier)
+        .set(DateTime(2026, 5));
+    container
+        .read(matchesCalendarSelectedDayProvider.notifier)
+        .set(DateTime(2026, 5, 20));
 
     expect(container.read(calendarMonthMatchesProvider).single.id, 'may');
     expect(container.read(selectedCalendarDayMatchesProvider).single.id, 'may');
@@ -238,7 +253,7 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    container.read(statsRoleFilterProvider.notifier).state = PlayerRole.handler;
+    container.read(statsRoleFilterProvider.notifier).set(PlayerRole.handler);
 
     final analytics = container.read(playerAnalyticsProvider);
 

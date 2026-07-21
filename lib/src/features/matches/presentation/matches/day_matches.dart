@@ -19,8 +19,8 @@ class DayMatches extends StatelessWidget {
 
   final DateTime? selectedDay;
   final List<ScrimmageMatch> matches;
-  final void Function(ScrimmageMatch match) onEdit;
-  final void Function(ScrimmageMatch match) onDelete;
+  final void Function(ScrimmageMatch match)? onEdit;
+  final void Function(ScrimmageMatch match)? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +51,8 @@ class DayMatches extends StatelessWidget {
           MatchCard(
             match: match,
             onTap: () => context.go(AppRoutes.matchDetail(match.id)),
-            onEdit: () => onEdit(match),
-            onDelete: () => onDelete(match),
+            onEdit: onEdit == null ? null : () => onEdit!(match),
+            onDelete: onDelete == null ? null : () => onDelete!(match),
           ),
       ],
     );

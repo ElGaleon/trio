@@ -1,4 +1,5 @@
-import 'package:trio/src/features/matches/data/elo_repository.dart';
+import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
+import 'package:trio/src/features/settings/domain/app_settings.dart';
 import 'package:trio/src/features/matches/domain/match_stat_event.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
@@ -68,7 +69,8 @@ class LiveStatsService {
     String? customStatId,
     Player? player,
     required Map<String, Player> playersById,
-    required EloRepository repository,
+    required FirestoreTrioRepository repository,
+    required AppSettings settings,
   }) async {
     final lastEvent = match.statEvents.isEmpty ? null : match.statEvents.last;
     var scoreA = match.scoreA;
@@ -105,7 +107,7 @@ class LiveStatsService {
     double? customWeight;
     String? customLabel;
     if (type == MatchStatType.custom && customStatId != null) {
-      final customStat = repository.settings.customStats.firstWhere(
+      final customStat = settings.customStats.firstWhere(
         (s) => s.id == customStatId,
         orElse: () => CustomStat(
           id: '',
@@ -175,7 +177,7 @@ class LiveStatsService {
           : [...activeLineupA, ...activeLineupB],
       statValue: type == MatchStatType.custom
           ? customWeight
-          : (player == null ? null : repository.settings.statWeightFor(type)),
+          : (player == null ? null : settings.statWeightFor(type)),
       description: _descriptionFor(
         match: match,
         type: type,
@@ -189,7 +191,7 @@ class LiveStatsService {
       ..scoreA = scoreA
       ..scoreB = scoreB
       ..statEvents = [...match.statEvents, event];
-    await repository.upsertMatch(match);
+    await repository.updateMatchTransaction(match.id, (_) => match);
 
     final finished = scoreA >= match.pointsLimit || scoreB >= match.pointsLimit;
     final halfTime = isHalfTimeDue(match, DateTime.now());
@@ -207,7 +209,8 @@ class LiveStatsService {
     required Player player,
     required int durationSeconds,
     required bool inBounds,
-    required EloRepository repository,
+    required FirestoreTrioRepository repository,
+    required AppSettings settings,
   }) async {
     final lastEvent = match.statEvents.isEmpty ? null : match.statEvents.last;
     final isPlayerTeamA = match.isExternalOpponent
@@ -230,13 +233,13 @@ class LiveStatsService {
           : [...match.teamAIds, ...match.teamBIds],
       pullDurationSeconds: durationSeconds,
       pullInBounds: inBounds,
-      statValue: repository.settings.statWeightFor(MatchStatType.pull),
+      statValue: settings.statWeightFor(MatchStatType.pull),
       description:
           '${player.name} · Pull ${durationSeconds}s · ${inBounds ? 'dentro' : 'fuori'}',
     );
 
     match.statEvents = [...match.statEvents, event];
-    await repository.upsertMatch(match);
+    await repository.updateMatchTransaction(match.id, (_) => match);
 
     return RecordEventResult(
       scoredPoint: false,
@@ -251,7 +254,7 @@ class LiveStatsService {
     String title,
     MatchStatType endType,
     bool nextOnOffense,
-    EloRepository repository,
+    FirestoreTrioRepository repository,
   ) async {
     final last = match.statEvents.lastOrNull;
     match.statEvents = [
@@ -271,12 +274,12 @@ class LiveStatsService {
         description: 'Fine ${title.toLowerCase()}',
       ),
     ];
-    await repository.upsertMatch(match);
+    await repository.updateMatchTransaction(match.id, (_) => match);
   }
 
   Future<void> finishMatch(
     ScrimmageMatch match,
-    EloRepository repository,
+    FirestoreTrioRepository repository,
   ) async {
     if (!match.statEvents.any(
       (event) => event.type == MatchStatType.matchEnd,
@@ -297,11 +300,14 @@ class LiveStatsService {
           description: 'Partita conclusa',
         ),
       ];
-      await repository.upsertMatch(match);
+      await repository.updateMatchTransaction(match.id, (_) => match);
     }
   }
 
-  Future<void> undo(ScrimmageMatch match, EloRepository repository) async {
+  Future<void> undo(
+    ScrimmageMatch match,
+    FirestoreTrioRepository repository,
+  ) async {
     if (match.statEvents.isEmpty) return;
     final events = [...match.statEvents]..removeLast();
     final last = events.isEmpty ? null : events.last;
@@ -323,7 +329,7 @@ class LiveStatsService {
       ..scoreA = last?.scoreA ?? 0
       ..scoreB = last?.scoreB ?? 0
       ..statEvents = events;
-    await repository.upsertMatch(match);
+    await repository.updateMatchTransaction(match.id, (_) => match);
   }
 
   Future<void> updateLineup(
@@ -331,7 +337,7 @@ class LiveStatsService {
     List<String> playerIdsA,
     List<String> playerIdsB,
     bool nextOnOffense,
-    EloRepository repository,
+    FirestoreTrioRepository repository,
   ) async {
     if (match.statEvents.isEmpty) return;
     final last = match.statEvents.last;
@@ -355,7 +361,7 @@ class LiveStatsService {
               'Linea ${nextOnOffense ? 'attacco' : 'difesa'} selezionata',
         ),
       ];
-    await repository.upsertMatch(match);
+    await repository.updateMatchTransaction(match.id, (_) => match);
   }
 
   Future<void> replaceInjuredPlayer(
@@ -363,7 +369,8 @@ class LiveStatsService {
     required Player injured,
     required Player replacement,
     required bool oursOnOffense,
-    required EloRepository repository,
+    required FirestoreTrioRepository repository,
+    required AppSettings settings,
   }) async {
     final last = match.statEvents.lastOrNull;
     final isInjuredTeamA = match.isExternalOpponent
@@ -409,7 +416,7 @@ class LiveStatsService {
         description: '${injured.name} infortunio · entra ${replacement.name}',
       ),
     ];
-    await repository.upsertMatch(match);
+    await repository.updateMatchTransaction(match.id, (_) => match);
   }
 
   String _descriptionFor({

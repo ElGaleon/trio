@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/players/domain/player_role.dart';
@@ -9,22 +8,23 @@ import 'package:trio/src/features/players/domain/player_analytics.dart';
 import 'package:trio/src/features/players/domain/player_detail_stats.dart';
 import 'player_providers.dart';
 import 'package:trio/src/features/matches/application/matches_providers.dart';
+import 'package:trio/src/shared/state_provider.dart';
 
-final statsSearchQueryProvider = StateProvider<String>((ref) => '');
+final statsSearchQueryProvider = mutableProvider<String>(() => '');
 
-final statsRoleFilterProvider = StateProvider<PlayerRole?>((ref) => null);
+final statsRoleFilterProvider = mutableProvider<PlayerRole?>(() => null);
 
-final statsLineFilterProvider = StateProvider<PlayerLinePreference?>(
-  (ref) => null,
+final statsLineFilterProvider = mutableProvider<PlayerLinePreference?>(
+  () => null,
 );
 
-final selectedStatsPlayerIdProvider = StateProvider<String?>((ref) => null);
+final selectedStatsPlayerIdProvider = mutableProvider<String?>(() => null);
 
 final playerDetailTournamentFilterProvider =
-    StateProvider.family<String?, String>((ref, playerId) => null);
+    mutableProviderFamily<String?, String>((playerId) => null);
 
-final playerDetailMatchFilterProvider = StateProvider.family<String?, String>(
-  (ref, playerId) => null,
+final playerDetailMatchFilterProvider = mutableProviderFamily<String?, String>(
+  (playerId) => null,
 );
 
 final playerAnalyticsProvider = Provider<PlayerAnalytics>((ref) {

@@ -44,7 +44,6 @@ class MatchDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(hiveChangesProvider);
     final players = ref.watch(rankedPlayersProvider);
     final currentMatch = ref.watch(matchDetailsProvider(matchId));
     if (currentMatch == null) {

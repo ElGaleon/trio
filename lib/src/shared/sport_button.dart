@@ -15,11 +15,12 @@ class SportActionButton extends StatelessWidget {
   });
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final IconData icon;
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onPressed != null;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onPressed,
@@ -27,9 +28,11 @@ class SportActionButton extends StatelessWidget {
         height: 36,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.violet.withValues(alpha: 0.24),
+            color: AppColors.violet.withValues(alpha: enabled ? 0.24 : 0.10),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: AppColors.violet),
+            border: Border.all(
+              color: AppColors.violet.withValues(alpha: enabled ? 1 : 0.36),
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 13),
@@ -37,11 +40,17 @@ class SportActionButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               spacing: 6,
               children: [
-                Icon(icon, color: AppColors.white, size: 16),
+                Icon(
+                  icon,
+                  color: AppColors.white.withValues(alpha: enabled ? 1 : 0.55),
+                  size: 16,
+                ),
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.white.withValues(
+                      alpha: enabled ? 1 : 0.55,
+                    ),
                     fontWeight: FontWeight.w900,
                   ),
                 ),

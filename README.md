@@ -1,18 +1,37 @@
-# trio
-An Elo-based ranking app for Ultimate Frisbee matches
+# TRIO
 
-A new Flutter project.
+App Flutter per gestire roster, partite di Ultimate Frisbee, ranking Elo e statistiche live collaborative.
 
-## Getting Started
+## Architettura
 
-This project is a starting point for a Flutter application.
+- Flutter + Riverpod per UI, stato e provider derivati.
+- Firebase Auth gestisce l'accesso email/password e Google.
+- Firestore persiste giocatori, partite, impostazioni e statistiche live.
+- Le statistiche live sono collaborative: più utenti autenticati possono aprire la stessa partita e vedere gli aggiornamenti in realtime.
+- La multi-tenancy è disattivata: tutti gli utenti autenticati lavorano sulle collection Firestore condivise.
+- `go_router` centralizza tutte le rotte in `lib/src/routing/app_router.dart`.
 
-A few resources to get you started if this is your first Flutter project:
+## Login
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Il flusso attivo è Firebase Auth -> app. Dopo credenziali valide l'utente entra direttamente nella ranking.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Firebase
+
+I file di configurazione sono generati da FlutterFire:
+
+- `lib/firebase_options.dart`
+- `android/app/google-services.json`
+- `ios/Runner/GoogleService-Info.plist`
+- `macos/Runner/GoogleService-Info.plist`
+
+## Verifica
+
+Per una modifica completa:
+
+```sh
+dart format lib test
+flutter analyze
+flutter test
+```
+
+Per modifiche locali, eseguire almeno `flutter analyze` e il test mirato.

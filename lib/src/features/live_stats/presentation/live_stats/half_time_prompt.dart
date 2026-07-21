@@ -3,7 +3,8 @@ import 'package:forui/forui.dart';
 
 import 'package:trio/src/shared/decorated_panel.dart';
 import 'package:trio/src/theme/app_colors.dart';
-import 'package:trio/src/features/matches/data/elo_repository.dart';
+import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
+import 'package:trio/src/features/settings/domain/app_settings.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/players/domain/player.dart';
@@ -18,7 +19,8 @@ class HalfTimePrompt {
     LiveStatsService service,
     ScrimmageMatch match,
     Map<String, Player> playersById,
-    EloRepository repository,
+    FirestoreTrioRepository repository,
+    AppSettings settings,
   ) async {
     if (service.hasHalfTimeEvent(match)) return;
     final start = await showModalBottomSheet<bool>(
@@ -88,6 +90,7 @@ class HalfTimePrompt {
       type: MatchStatType.halfTime,
       playersById: playersById,
       repository: repository,
+      settings: settings,
     );
   }
 }

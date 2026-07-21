@@ -18,8 +18,8 @@ class MatchCard extends StatelessWidget {
   });
 
   final ScrimmageMatch match;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
   final VoidCallback? onTap;
 
   @override

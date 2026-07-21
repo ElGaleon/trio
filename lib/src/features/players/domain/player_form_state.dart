@@ -3,6 +3,9 @@ import 'player_role.dart';
 
 class PlayerFormState {
   final String name;
+  final String firstName;
+  final String lastName;
+  final String email;
   final PlayerLinePreference? linePreference;
   final PlayerRole role;
   final bool isExternal;
@@ -11,6 +14,9 @@ class PlayerFormState {
 
   PlayerFormState({
     required this.name,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
     this.linePreference,
     required this.role,
     required this.isExternal,
@@ -20,6 +26,9 @@ class PlayerFormState {
 
   PlayerFormState copyWith({
     String? name,
+    String? firstName,
+    String? lastName,
+    String? email,
     PlayerLinePreference? linePreference,
     PlayerRole? role,
     bool? isExternal,
@@ -29,6 +38,9 @@ class PlayerFormState {
   }) {
     return PlayerFormState(
       name: name ?? this.name,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      email: email ?? this.email,
       linePreference: linePreference ?? this.linePreference,
       role: role ?? this.role,
       isExternal: isExternal ?? this.isExternal,

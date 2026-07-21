@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:trio/src/features/auth/application/rbac_provider.dart';
 import 'package:trio/src/routing/app_router.dart';
+import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
 import 'package:trio/src/features/players/presentation/players/player_card.dart';
 import 'package:trio/src/features/players/presentation/players/player_filters.dart';
 import 'package:trio/src/features/players/presentation/players/player_toolbar.dart';
@@ -38,11 +40,15 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final repository = ref.watch(eloRepositoryProvider);
+    final repository = ref.watch(firestoreTrioRepositoryProvider);
     final players = ref.watch(rankedPlayersProvider);
     final filteredPlayers = ref.watch(filteredPlayersProvider);
     final roleFilter = ref.watch(playersRoleFilterProvider);
     final lineFilter = ref.watch(playersLineFilterProvider);
+    final role = ref.watch(currentRoleProvider);
+    final canCreate = can(role, AppPermission.createPlayer);
+    final canEdit = can(role, AppPermission.editPlayer);
+    final canDelete = can(role, AppPermission.deletePlayer);
     final hasFilters =
         _searchController.text.isNotEmpty ||
         roleFilter != null ||
@@ -51,20 +57,20 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
     return SportScreenShell(
       title: 'Players',
       subtitle: 'Roster and roles',
-      floatingActionButton: SportFloatingActionButton(
-        label: 'Nuovo',
-        onPressed: () => context.go(AppRoutes.newPlayer),
-      ),
+      floatingActionButton: canCreate
+          ? SportFloatingActionButton(
+              label: 'Nuovo',
+              onPressed: () => context.go(AppRoutes.newPlayer),
+            )
+          : null,
       child: players.isEmpty
-          ? Expanded(
-            child: Center(
-                child: const SportEmptyState(
-                  icon: Icons.person_add_alt_1_outlined,
-                  title: 'Nessun giocatore',
-                  message: 'Crea il roster della squadra.',
-                ),
+          ? Center(
+              child: const SportEmptyState(
+                icon: Icons.person_add_alt_1_outlined,
+                title: 'Nessun giocatore',
+                message: 'Crea il roster della squadra.',
               ),
-          )
+            )
           : Column(
               spacing: 12,
               children: [
@@ -78,14 +84,11 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                   roleFilter: roleFilter,
                   lineFilter: lineFilter,
                   onSearchChanged: (value) =>
-                      ref.read(playersSearchQueryProvider.notifier).state =
-                          value,
+                      ref.read(playersSearchQueryProvider.notifier).set(value),
                   onRoleChanged: (value) =>
-                      ref.read(playersRoleFilterProvider.notifier).state =
-                          value,
+                      ref.read(playersRoleFilterProvider.notifier).set(value),
                   onLineChanged: (value) =>
-                      ref.read(playersLineFilterProvider.notifier).state =
-                          value,
+                      ref.read(playersLineFilterProvider.notifier).set(value),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(
@@ -105,12 +108,16 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                                   onTap: () => context.go(
                                     AppRoutes.playerDetail(player.id),
                                   ),
-                                  onEdit: () => context.go(
-                                    AppRoutes.editPlayer(player.id),
-                                    extra: player,
-                                  ),
-                                  onDelete: () =>
-                                      repository.deletePlayer(player.id),
+                                  onEdit: canEdit
+                                      ? () => context.go(
+                                          AppRoutes.editPlayer(player.id),
+                                          extra: player,
+                                        )
+                                      : null,
+                                  onDelete: canDelete
+                                      ? () =>
+                                            repository?.deletePlayer(player.id)
+                                      : null,
                                 ),
                               )
                               .toList(),

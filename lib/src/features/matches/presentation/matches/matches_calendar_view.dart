@@ -14,8 +14,8 @@ class MatchesCalendarView extends ConsumerWidget {
     required this.onDelete,
   });
 
-  final void Function(ScrimmageMatch match) onEdit;
-  final void Function(ScrimmageMatch match) onDelete;
+  final void Function(ScrimmageMatch match)? onEdit;
+  final void Function(ScrimmageMatch match)? onDelete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -86,10 +86,9 @@ class MatchesCalendarView extends ConsumerWidget {
   }
 
   void _selectDay(WidgetRef ref, DateTime day) {
-    ref.read(matchesCalendarSelectedDayProvider.notifier).state = day;
-    ref.read(matchesCalendarMonthProvider.notifier).state = DateTime(
-      day.year,
-      day.month,
-    );
+    ref.read(matchesCalendarSelectedDayProvider.notifier).set(day);
+    ref
+        .read(matchesCalendarMonthProvider.notifier)
+        .set(DateTime(day.year, day.month));
   }
 }

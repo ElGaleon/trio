@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:trio/src/constants/app_constants.dart';
+import 'package:trio/src/features/auth/application/rbac_provider.dart';
+import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 import 'package:trio/src/features/settings/domain/app_settings.dart';
@@ -75,6 +76,9 @@ class SettingsFormNotifier extends Notifier<SettingsFormState> {
   }
 
   Future<bool> save() async {
+    if (!can(ref.read(currentRoleProvider), AppPermission.editSettings)) {
+      return false;
+    }
     final eloKFactorVal = double.tryParse(state.eloKFactor.trim());
     final initialRatingVal = double.tryParse(state.initialRating.trim());
     final statWeights = <MatchStatType, double>{};
@@ -91,24 +95,19 @@ class SettingsFormNotifier extends Notifier<SettingsFormState> {
       return false;
     }
 
-    final settingsBox = ref.read(settingsBoxProvider);
-    await settingsBox.put(
-      AppConstants.settingsKey,
-      AppSettings(
-        themeModeIndex: state.themeModeIndex,
-        eloKFactor: eloKFactorVal,
-        initialRating: initialRatingVal,
-        statWeights: statWeights,
-        customStats: state.customStats,
-        favoriteStatNames: state.favoriteStatNames,
-      ),
+    final settings = AppSettings(
+      themeModeIndex: state.themeModeIndex,
+      eloKFactor: eloKFactorVal,
+      initialRating: initialRatingVal,
+      statWeights: statWeights,
+      customStats: state.customStats,
+      favoriteStatNames: state.favoriteStatNames,
     );
 
-    ref
-      ..invalidate(appSettingsProvider)
-      ..invalidate(eloRepositoryProvider);
-
-    await ref.read(eloRepositoryProvider).recalculateRatings();
+    final repository = ref.read(firestoreTrioRepositoryProvider);
+    if (repository == null) return false;
+    await repository.saveSettings(settings);
+    ref.invalidate(appSettingsProvider);
     return true;
   }
 }

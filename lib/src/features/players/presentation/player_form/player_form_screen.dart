@@ -26,13 +26,20 @@ class PlayerFormScreen extends ConsumerStatefulWidget {
 
 class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
   late final TextEditingController _nameController;
+  late final TextEditingController _firstNameController;
+  late final TextEditingController _lastNameController;
+  late final TextEditingController _emailController;
   late final TextEditingController _jerseyNumberController;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     final initialState = ref.read(playerFormProvider(widget.playerId));
     _nameController = TextEditingController(text: initialState.name);
+    _firstNameController = TextEditingController(text: initialState.firstName);
+    _lastNameController = TextEditingController(text: initialState.lastName);
+    _emailController = TextEditingController(text: initialState.email);
     _jerseyNumberController = TextEditingController(
       text: initialState.jerseyNumber,
     );
@@ -40,6 +47,21 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
       ref
           .read(playerFormProvider(widget.playerId).notifier)
           .updateName(_nameController.text);
+    });
+    _firstNameController.addListener(() {
+      ref
+          .read(playerFormProvider(widget.playerId).notifier)
+          .updateFirstName(_firstNameController.text);
+    });
+    _lastNameController.addListener(() {
+      ref
+          .read(playerFormProvider(widget.playerId).notifier)
+          .updateLastName(_lastNameController.text);
+    });
+    _emailController.addListener(() {
+      ref
+          .read(playerFormProvider(widget.playerId).notifier)
+          .updateEmail(_emailController.text);
     });
     _jerseyNumberController.addListener(() {
       ref
@@ -51,6 +73,9 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
     _jerseyNumberController.dispose();
     super.dispose();
   }
@@ -110,8 +135,29 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
                           controller: _nameController,
                         ),
                         textCapitalization: TextCapitalization.words,
-                        hint: 'Nome',
+                        hint: 'Nickname',
                       ),
+                    ),
+                    FTextFormField(
+                      control: FTextFieldControl.managed(
+                        controller: _firstNameController,
+                      ),
+                      textCapitalization: TextCapitalization.words,
+                      hint: 'Nome',
+                    ),
+                    FTextFormField(
+                      control: FTextFieldControl.managed(
+                        controller: _lastNameController,
+                      ),
+                      textCapitalization: TextCapitalization.words,
+                      hint: 'Cognome',
+                    ),
+                    FTextFormField(
+                      control: FTextFieldControl.managed(
+                        controller: _emailController,
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      hint: 'Email',
                     ),
                     FTextFormField(
                       control: FTextFieldControl.managed(
@@ -185,9 +231,11 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: SportActionButton(
-                        label: 'Salva',
+                        label: _isSaving ? 'Salvataggio...' : 'Salva',
                         icon: FIcons.check,
-                        onPressed: () => _save(context, notifier),
+                        onPressed: _isSaving
+                            ? null
+                            : () => _save(context, notifier),
                       ),
                     ),
                   ],
@@ -277,7 +325,12 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
   }
 
   Future<void> _save(BuildContext context, PlayerFormNotifier notifier) async {
-    if (_nameController.text.trim().isEmpty) return;
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Inserisci il nome del giocatore.')),
+      );
+      return;
+    }
     final jersey = _jerseyNumberController.text.trim();
     if (jersey.isNotEmpty && int.tryParse(jersey) == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -285,12 +338,32 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
       );
       return;
     }
-    await notifier.save(widget.playerId);
-    if (!context.mounted) return;
-    if (context.canPop()) {
-      context.pop();
-    } else {
-      context.go(AppRoutes.players);
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isSaving = true);
+    try {
+      final saved = await notifier.save(widget.playerId);
+      if (!context.mounted) return;
+      if (!saved) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Impossibile salvare il giocatore. Riprova.'),
+          ),
+        );
+        return;
+      }
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go(AppRoutes.players);
+      }
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Errore durante il salvataggio: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 

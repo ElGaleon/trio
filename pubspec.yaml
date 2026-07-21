@@ -34,8 +34,6 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   flutter_riverpod: ^3.3.1
   forui: ^0.21.3
   image_picker: ^1.2.2
@@ -46,7 +44,6 @@ dependencies:
   cloud_firestore: ^5.0.2
   firebase_auth: ^5.7.0
   google_sign_in: ^6.2.1
-
 dependency_overrides:
   # path_provider_foundation 2.6.0 uses native assets/FFI and can crash on iOS
   # simulator while loading objective_c.framework. 2.5.1 is the plugin rollback.

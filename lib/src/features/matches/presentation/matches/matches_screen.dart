@@ -10,8 +10,10 @@ import 'package:trio/src/shared/responsive_layout.dart';
 import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/constants/app_constants.dart';
+import 'package:trio/src/features/auth/application/rbac_provider.dart';
 import 'package:trio/src/routing/app_router.dart';
 import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
 import 'package:trio/src/features/matches/application/matches_providers.dart';
 import 'package:trio/src/features/matches/application/matches_view_mode.dart';
 import 'match_date_filters.dart';
@@ -26,14 +28,19 @@ class MatchesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final repository = ref.watch(eloRepositoryProvider);
+    final repository = ref.watch(firestoreTrioRepositoryProvider);
     final matches = ref.watch(matchesProvider);
     final filteredMatches = ref.watch(filteredMatchesProvider);
     final startDate = ref.watch(matchesStartDateFilterProvider);
     final endDate = ref.watch(matchesEndDateFilterProvider);
     final viewMode = ref.watch(matchesViewModeProvider);
     final players = ref.watch(rankedPlayersProvider);
-    final canCreate = players.length >= AppConstants.minTeamSize * 2;
+    final role = ref.watch(currentRoleProvider);
+    final canCreate =
+        can(role, AppPermission.createMatch) &&
+        players.length >= AppConstants.minTeamSize * 2;
+    final canEdit = can(role, AppPermission.editMatch);
+    final canDelete = can(role, AppPermission.deleteMatch);
     final hasFilters = startDate != null || endDate != null;
 
     return SportScreenShell(
@@ -43,13 +50,15 @@ class MatchesScreen extends ConsumerWidget {
         MatchesHeaderViewSwitch(
           selected: viewMode,
           onChanged: (mode) =>
-              ref.read(matchesViewModeProvider.notifier).state = mode,
+              ref.read(matchesViewModeProvider.notifier).set(mode),
         ),
       ],
-      floatingActionButton: SportFloatingActionButton(
-        label: 'Nuova',
-        onPressed: () => _openMatchForm(context, canCreate),
-      ),
+      floatingActionButton: can(role, AppPermission.createMatch)
+          ? SportFloatingActionButton(
+              label: 'Nuova',
+              onPressed: () => _openMatchForm(context, canCreate),
+            )
+          : null,
       child: matches.isEmpty
           ? const SportEmptyState(
               icon: Icons.scoreboard_outlined,
@@ -72,16 +81,12 @@ class MatchesScreen extends ConsumerWidget {
                     MatchDateFilters(
                       startDate: startDate,
                       endDate: endDate,
-                      onStartChanged: (value) =>
-                          ref
-                                  .read(matchesStartDateFilterProvider.notifier)
-                                  .state =
-                              value,
-                      onEndChanged: (value) =>
-                          ref
-                                  .read(matchesEndDateFilterProvider.notifier)
-                                  .state =
-                              value,
+                      onStartChanged: (value) => ref
+                          .read(matchesStartDateFilterProvider.notifier)
+                          .set(value),
+                      onEndChanged: (value) => ref
+                          .read(matchesEndDateFilterProvider.notifier)
+                          .set(value),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
@@ -100,23 +105,30 @@ class MatchesScreen extends ConsumerWidget {
                                   onTap: () => context.go(
                                     AppRoutes.matchDetail(match.id),
                                   ),
-                                  onEdit: () => context.go(
-                                    AppRoutes.editMatch(match.id),
-                                    extra: match,
-                                  ),
-                                  onDelete: () =>
-                                      repository.deleteMatch(match.id),
+                                  onEdit: canEdit
+                                      ? () => context.go(
+                                          AppRoutes.editMatch(match.id),
+                                          extra: match,
+                                        )
+                                      : null,
+                                  onDelete: canDelete
+                                      ? () => repository?.deleteMatch(match.id)
+                                      : null,
                                 );
                               }).toList(),
                             ),
                     ),
                   ] else
                     MatchesCalendarView(
-                      onEdit: (match) => context.go(
-                        AppRoutes.editMatch(match.id),
-                        extra: match,
-                      ),
-                      onDelete: (match) => repository.deleteMatch(match.id),
+                      onEdit: canEdit
+                          ? (match) => context.go(
+                              AppRoutes.editMatch(match.id),
+                              extra: match,
+                            )
+                          : null,
+                      onDelete: canDelete
+                          ? (match) => repository?.deleteMatch(match.id)
+                          : null,
                     ),
                 ],
               ),

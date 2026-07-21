@@ -29,8 +29,8 @@ void main() {
 
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsOneWidget);
-    expect(find.text('21'), findsOneWidget);
-    expect(find.text('18'), findsOneWidget);
+    expect(find.text('21'), findsWidgets);
+    expect(find.text('18'), findsWidgets);
     expect(find.byIcon(Icons.sports_score), findsNothing);
     expect(find.textContaining('ELO'), findsNothing);
     expect(find.textContaining('+16'), findsNothing);

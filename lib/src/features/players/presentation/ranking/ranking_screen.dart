@@ -46,6 +46,7 @@ class RankingScreen extends ConsumerWidget {
             )
           : Column(
               spacing: 8,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 RankingSummary(
                   totalCount: players.length,
@@ -56,11 +57,9 @@ class RankingScreen extends ConsumerWidget {
                   roleFilter: roleFilter,
                   lineFilter: lineFilter,
                   onRoleChanged: (value) =>
-                      ref.read(rankingRoleFilterProvider.notifier).state =
-                          value,
+                      ref.read(rankingRoleFilterProvider.notifier).set(value),
                   onLineChanged: (value) =>
-                      ref.read(rankingLineFilterProvider.notifier).state =
-                          value,
+                      ref.read(rankingLineFilterProvider.notifier).set(value),
                 ),
                 if (filteredPlayers.isEmpty)
                   const SportEmptyState(

@@ -84,13 +84,19 @@ class AppSettings {
 
   Map<String, dynamic> toGlobalMap() {
     return {
+      'themeModeIndex': themeModeIndex,
       'eloKFactor': eloKFactor,
       'initialRating': initialRating,
       'statWeights': statWeights.map((key, value) => MapEntry(key.name, value)),
+      'customStats': customStats.map((stat) => stat.toMap()).toList(),
+      'favoriteStatNames': favoriteStatNames.toList(),
     };
   }
 
-  static AppSettings fromGlobalMap(Map<dynamic, dynamic> map, {int themeModeIndex = 0}) {
+  static AppSettings fromGlobalMap(
+    Map<dynamic, dynamic> map, {
+    int themeModeIndex = 0,
+  }) {
     final rawWeights = map['statWeights'] as Map? ?? {};
     final statWeights = <MatchStatType, double>{};
     for (final key in MatchStatType.values) {
@@ -98,11 +104,23 @@ class AppSettings {
         statWeights[key] = (rawWeights[key.name] as num).toDouble();
       }
     }
+    final customStatsRaw = map['customStats'] as List? ?? [];
     return AppSettings(
-      themeModeIndex: themeModeIndex,
-      eloKFactor: (map['eloKFactor'] as num?)?.toDouble() ?? AppConstants.eloKFactor,
-      initialRating: (map['initialRating'] as num?)?.toDouble() ?? AppConstants.initialRating,
+      themeModeIndex:
+          (map['themeModeIndex'] as num?)?.toInt() ?? themeModeIndex,
+      eloKFactor:
+          (map['eloKFactor'] as num?)?.toDouble() ?? AppConstants.eloKFactor,
+      initialRating:
+          (map['initialRating'] as num?)?.toDouble() ??
+          AppConstants.initialRating,
       statWeights: statWeights,
+      customStats: customStatsRaw
+          .whereType<Map>()
+          .map(CustomStat.fromMap)
+          .toList(),
+      favoriteStatNames: (map['favoriteStatNames'] as List?)
+          ?.cast<String>()
+          .toSet(),
     );
   }
 }

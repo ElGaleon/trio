@@ -56,7 +56,7 @@ class _StatsFilters extends ConsumerWidget {
     final line = ref.watch(statsLineFilterProvider);
 
     return Column(
-      spacing: 10,
+      spacing: 8,
       children: [
         Material(
           color: AppColors.transparent,
@@ -70,7 +70,7 @@ class _StatsFilters extends ConsumerWidget {
             ),
             child: TextField(
               onChanged: (value) =>
-                  ref.read(statsSearchQueryProvider.notifier).state = value,
+                  ref.read(statsSearchQueryProvider.notifier).set(value),
               style: const TextStyle(
                 color: AppColors.white,
                 fontWeight: FontWeight.w800,
@@ -102,28 +102,28 @@ class _StatsFilters extends ConsumerWidget {
                 label: 'Tutti ruoli',
                 selected: role == null,
                 onPressed: () =>
-                    ref.read(statsRoleFilterProvider.notifier).state = null,
+                    ref.read(statsRoleFilterProvider.notifier).set(null),
               ),
               for (final value in PlayerRole.values)
                 SportFilterPill(
                   label: value.label,
                   selected: role == value,
                   onPressed: () =>
-                      ref.read(statsRoleFilterProvider.notifier).state = value,
+                      ref.read(statsRoleFilterProvider.notifier).set(value),
                 ),
               const SizedBox(width: 4),
               SportFilterPill(
                 label: 'Tutte linee',
                 selected: line == null,
                 onPressed: () =>
-                    ref.read(statsLineFilterProvider.notifier).state = null,
+                    ref.read(statsLineFilterProvider.notifier).set(null),
               ),
               for (final value in PlayerLinePreference.values)
                 SportFilterPill(
                   label: value.label,
                   selected: line == value,
                   onPressed: () =>
-                      ref.read(statsLineFilterProvider.notifier).state = value,
+                      ref.read(statsLineFilterProvider.notifier).set(value),
                 ),
             ],
           ),
@@ -208,9 +208,9 @@ class _TopPlayersPanel extends ConsumerWidget {
             for (final data in sorted.take(8))
               _PlayerAnalyticsRow(
                 data: data,
-                onTap: () =>
-                    ref.read(selectedStatsPlayerIdProvider.notifier).state =
-                        data.player.id,
+                onTap: () => ref
+                    .read(selectedStatsPlayerIdProvider.notifier)
+                    .set(data.player.id),
               ),
           ],
         ),

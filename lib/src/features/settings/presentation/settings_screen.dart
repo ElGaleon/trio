@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:trio/src/features/organizations/presentation/organization_switcher.dart';
+import 'package:trio/src/shared/responsive_layout.dart';
 import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
@@ -78,6 +80,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final state = ref.watch(settingsFormProvider);
     final notifier = ref.read(settingsFormProvider.notifier);
     final textTheme = Theme.of(context).textTheme;
+    final showMobileOrganizationSwitcher =
+        MediaQuery.sizeOf(context).width < ResponsiveLayout.tablet;
     final saveButton = SportFloatingActionButton(
       label: 'Salva',
       icon: FIcons.save,
@@ -93,6 +97,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Column(
           spacing: 12,
           children: [
+            if (showMobileOrganizationSwitcher)
+              GlassDecoration(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    spacing: 14,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SettingsSectionTitle(
+                        icon: Icons.business_outlined,
+                        title: 'Organizzazione',
+                        textTheme: textTheme,
+                      ),
+                      const OrganizationSwitcher(),
+                    ],
+                  ),
+                ),
+              ),
             GlassDecoration(
               child: Padding(
                 padding: const EdgeInsets.all(16),

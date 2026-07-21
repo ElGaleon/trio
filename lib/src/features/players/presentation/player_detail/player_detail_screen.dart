@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:trio/src/features/auth/application/rbac_provider.dart';
 import 'package:trio/src/routing/app_router.dart';
 import 'package:trio/src/features/players/presentation/player_detail/player_detail_section_title.dart';
 import 'package:trio/src/features/players/presentation/player_detail/player_hero.dart';
@@ -15,6 +16,7 @@ import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:trio/src/features/matches/application/matches_providers.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 import 'package:trio/src/features/players/application/player_stats_provider.dart';
 import 'package:trio/src/theme/app_colors.dart';
@@ -28,8 +30,6 @@ class PlayerDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(hiveChangesProvider);
-    final repository = ref.watch(eloRepositoryProvider);
     final players = ref.watch(rankedPlayersProvider);
     Player? player;
     for (final rankedPlayer in players) {
@@ -54,7 +54,10 @@ class PlayerDetailScreen extends ConsumerWidget {
     }
 
     final currentPlayer = player;
-    final matches = repository.matchesForPlayer(currentPlayer.id);
+    final matches = ref.watch(matchesProvider).where((match) {
+      return match.teamAIds.contains(currentPlayer.id) ||
+          match.teamBIds.contains(currentPlayer.id);
+    }).toList();
     final filteredStats = ref.watch(
       playerDetailStatsProvider(currentPlayer.id),
     );
@@ -64,10 +67,16 @@ class PlayerDetailScreen extends ConsumerWidget {
     final matchFilter = ref.watch(
       playerDetailMatchFilterProvider(currentPlayer.id),
     );
-    final history = repository.ratingHistoryForPlayer(currentPlayer.id);
+    final history = _ratingHistoryForPlayer(
+      currentPlayer.id,
+      matches,
+      ref.watch(appSettingsProvider).initialRating,
+    );
     final playersById = {
       for (final rankedPlayer in players) rankedPlayer.id: rankedPlayer,
     };
+    final role = ref.watch(currentRoleProvider);
+    final canEdit = can(role, AppPermission.editPlayer);
 
     return Scaffold(
       body: SportScreenShell(
@@ -78,17 +87,18 @@ class PlayerDetailScreen extends ConsumerWidget {
           spacing: 12,
           children: [
             PlayerHero(player: currentPlayer),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: SportActionButton(
-                label: 'Modifica',
-                icon: FIcons.pencil,
-                onPressed: () => context.go(
-                  AppRoutes.editPlayer(currentPlayer.id),
-                  extra: currentPlayer,
+            if (canEdit)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SportActionButton(
+                  label: 'Modifica',
+                  icon: FIcons.pencil,
+                  onPressed: () => context.go(
+                    AppRoutes.editPlayer(currentPlayer.id),
+                    extra: currentPlayer,
+                  ),
                 ),
               ),
-            ),
             Padding(
               padding: const EdgeInsets.only(
                 top: 2,
@@ -183,6 +193,23 @@ class PlayerDetailScreen extends ConsumerWidget {
       ),
     );
   }
+
+  List<double> _ratingHistoryForPlayer(
+    String playerId,
+    List<ScrimmageMatch> matches,
+    double initialRating,
+  ) {
+    final ordered = [...matches]
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    if (ordered.isEmpty) return [initialRating];
+    final history = <double>[
+      ordered.first.initialRatings[playerId] ?? initialRating,
+    ];
+    for (final match in ordered) {
+      history.add(match.finalRatings[playerId] ?? history.last);
+    }
+    return history;
+  }
 }
 
 class _PlayerStatsFilters extends ConsumerWidget {
@@ -222,19 +249,13 @@ class _PlayerStatsFilters extends ConsumerWidget {
                 selected: selectedTournament == null,
                 onPressed: () {
                   ref
-                          .read(
-                            playerDetailTournamentFilterProvider(
-                              playerId,
-                            ).notifier,
-                          )
-                          .state =
-                      null;
+                      .read(
+                        playerDetailTournamentFilterProvider(playerId).notifier,
+                      )
+                      .set(null);
                   ref
-                          .read(
-                            playerDetailMatchFilterProvider(playerId).notifier,
-                          )
-                          .state =
-                      null;
+                      .read(playerDetailMatchFilterProvider(playerId).notifier)
+                      .set(null);
                 },
               ),
               for (final tournament in tournaments)
@@ -243,21 +264,17 @@ class _PlayerStatsFilters extends ConsumerWidget {
                   selected: selectedTournament == tournament,
                   onPressed: () {
                     ref
-                            .read(
-                              playerDetailTournamentFilterProvider(
-                                playerId,
-                              ).notifier,
-                            )
-                            .state =
-                        tournament;
+                        .read(
+                          playerDetailTournamentFilterProvider(
+                            playerId,
+                          ).notifier,
+                        )
+                        .set(tournament);
                     ref
-                            .read(
-                              playerDetailMatchFilterProvider(
-                                playerId,
-                              ).notifier,
-                            )
-                            .state =
-                        null;
+                        .read(
+                          playerDetailMatchFilterProvider(playerId).notifier,
+                        )
+                        .set(null);
                   },
                 ),
             ],
@@ -272,27 +289,17 @@ class _PlayerStatsFilters extends ConsumerWidget {
               SportFilterPill(
                 label: 'Tutte partite',
                 selected: selectedMatchId == null,
-                onPressed: () =>
-                    ref
-                            .read(
-                              playerDetailMatchFilterProvider(
-                                playerId,
-                              ).notifier,
-                            )
-                            .state =
-                        null,
+                onPressed: () => ref
+                    .read(playerDetailMatchFilterProvider(playerId).notifier)
+                    .set(null),
               ),
               for (final match in visibleMatches)
                 SportFilterPill(
                   label: _matchFilterLabel(match),
                   selected: selectedMatchId == match.id,
-                  onPressed: () =>
-                      ref
-                          .read(
-                            playerDetailMatchFilterProvider(playerId).notifier,
-                          )
-                          .state = match
-                          .id,
+                  onPressed: () => ref
+                      .read(playerDetailMatchFilterProvider(playerId).notifier)
+                      .set(match.id),
                 ),
             ],
           ),

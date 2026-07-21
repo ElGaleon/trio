@@ -1,4 +1,11 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:trio/src/features/auth/application/rbac_provider.dart';
+import 'package:trio/src/features/events/presentation/events_screen.dart';
+import 'package:trio/screens/login_screen.dart';
 import 'package:trio/src/features/home/presentation/home_screen.dart';
 import 'package:trio/src/features/live_stats/presentation/live_stats/live_stats_screen.dart';
 import 'package:trio/src/features/live_stats/presentation/stats_match_setup/stats_match_setup_screen.dart';
@@ -18,10 +25,12 @@ class AppRoutes {
   const AppRoutes._();
 
   static const ranking = '/ranking';
+  static const login = '/login';
   static const matches = '/matches';
   static const players = '/players';
   static const stats = '/stats';
   static const settings = '/settings';
+  static const events = '/events';
 
   static const newMatch = '/matches/new';
   static const newStatsMatch = '/matches/new_stats';
@@ -34,122 +43,183 @@ class AppRoutes {
   static String editPlayer(String id) => '/players/$id/edit';
 }
 
-final appRouter = GoRouter(
-  initialLocation: AppRoutes.ranking,
-  routes: [
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) {
-        return HomeScreen(navigationShell: navigationShell);
-      },
-      branches: [
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.ranking,
-              builder: (context, state) => const RankingScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.matches,
-              builder: (context, state) => const MatchesScreen(),
-              routes: [
-                GoRoute(
-                  path: 'new',
-                  builder: (context, state) => const MatchFormScreen(),
-                ),
-                GoRoute(
-                  path: 'new_stats',
-                  builder: (context, state) => const StatsMatchSetupScreen(),
-                ),
-                GoRoute(
-                  path: ':matchId',
-                  builder: (context, state) {
-                    final matchId = state.pathParameters['matchId']!;
-                    return MatchDetailScreen(matchId: matchId);
-                  },
-                  routes: [
-                    GoRoute(
-                      path: 'edit',
-                      builder: (context, state) {
-                        final matchId = state.pathParameters['matchId']!;
-                        final extraMatch = state.extra is ScrimmageMatch
-                            ? state.extra as ScrimmageMatch
-                            : null;
-                        return MatchFormScreen(
-                          matchId: matchId,
-                          match: extraMatch,
-                        );
-                      },
-                    ),
-                    GoRoute(
-                      path: 'live',
-                      builder: (context, state) {
-                        final matchId = state.pathParameters['matchId']!;
-                        return LiveStatsScreen(matchId: matchId);
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.players,
-              builder: (context, state) => const PlayersScreen(),
-              routes: [
-                GoRoute(
-                  path: 'new',
-                  builder: (context, state) => const PlayerFormScreen(),
-                ),
-                GoRoute(
-                  path: ':playerId',
-                  builder: (context, state) {
-                    final playerId = state.pathParameters['playerId']!;
-                    return PlayerDetailScreen(playerId: playerId);
-                  },
-                  routes: [
-                    GoRoute(
-                      path: 'edit',
-                      builder: (context, state) {
-                        final playerId = state.pathParameters['playerId']!;
-                        final extraPlayer = state.extra is Player
-                            ? state.extra as Player
-                            : null;
-                        return PlayerFormScreen(
-                          playerId: playerId,
-                          player: extraPlayer,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.stats,
-              builder: (context, state) => const PlayerStatsScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.settings,
-              builder: (context, state) => const SettingsScreen(),
-            ),
-          ],
-        ),
-      ],
-    ),
-  ],
-);
+final appRouter = _createAppRouter();
+
+GoRouter _createAppRouter() {
+  final authNotifier = AuthRedirectNotifier(FirebaseAuth.instance);
+  return GoRouter(
+    initialLocation: AppRoutes.ranking,
+    refreshListenable: authNotifier,
+    redirect: (context, state) {
+      if (!authNotifier.initialized) return null;
+      final signedIn = authNotifier.user != null;
+      final loggingIn = state.matchedLocation == AppRoutes.login;
+      if (!signedIn) return loggingIn ? null : AppRoutes.login;
+      if (loggingIn) return AppRoutes.ranking;
+      final permission = permissionForLocation(state.uri.toString());
+      if (permission != null && !can(authNotifier.role, permission)) {
+        return AppRoutes.ranking;
+      }
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: AppRoutes.login,
+        builder: (context, state) => const LoginScreen(),
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return HomeScreen(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.ranking,
+                builder: (context, state) => const RankingScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.matches,
+                builder: (context, state) => const MatchesScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'new',
+                    builder: (context, state) => const MatchFormScreen(),
+                  ),
+                  GoRoute(
+                    path: 'new_stats',
+                    builder: (context, state) => const StatsMatchSetupScreen(),
+                  ),
+                  GoRoute(
+                    path: ':matchId',
+                    builder: (context, state) {
+                      final matchId = state.pathParameters['matchId']!;
+                      return MatchDetailScreen(matchId: matchId);
+                    },
+                    routes: [
+                      GoRoute(
+                        path: 'edit',
+                        builder: (context, state) {
+                          final matchId = state.pathParameters['matchId']!;
+                          final extraMatch = state.extra is ScrimmageMatch
+                              ? state.extra as ScrimmageMatch
+                              : null;
+                          return MatchFormScreen(
+                            matchId: matchId,
+                            match: extraMatch,
+                          );
+                        },
+                      ),
+                      GoRoute(
+                        path: 'live',
+                        builder: (context, state) {
+                          final matchId = state.pathParameters['matchId']!;
+                          return LiveStatsScreen(matchId: matchId);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.players,
+                builder: (context, state) => const PlayersScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'new',
+                    builder: (context, state) => const PlayerFormScreen(),
+                  ),
+                  GoRoute(
+                    path: ':playerId',
+                    builder: (context, state) {
+                      final playerId = state.pathParameters['playerId']!;
+                      return PlayerDetailScreen(playerId: playerId);
+                    },
+                    routes: [
+                      GoRoute(
+                        path: 'edit',
+                        builder: (context, state) {
+                          final playerId = state.pathParameters['playerId']!;
+                          final extraPlayer = state.extra is Player
+                              ? state.extra as Player
+                              : null;
+                          return PlayerFormScreen(
+                            playerId: playerId,
+                            player: extraPlayer,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.stats,
+                builder: (context, state) => const PlayerStatsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.settings,
+                builder: (context, state) => const SettingsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.events,
+                builder: (context, state) => const EventsScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+class AuthRedirectNotifier extends ChangeNotifier {
+  AuthRedirectNotifier(FirebaseAuth auth) {
+    _subscription = auth.idTokenChanges().listen((user) async {
+      _user = user;
+      if (user == null) {
+        _role = AppRole.member;
+      } else {
+        final token = await user.getIdTokenResult();
+        _role = appRoleFromClaims(token.claims ?? const {});
+      }
+      _initialized = true;
+      notifyListeners();
+    });
+  }
+
+  User? get user => _user;
+  AppRole get role => _role;
+  bool get initialized => _initialized;
+
+  User? _user;
+  AppRole _role = AppRole.member;
+  bool _initialized = false;
+  late final StreamSubscription<User?> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "901319599088",
-    "project_id": "steasy-aa1ad",
-    "storage_bucket": "steasy-aa1ad.firebasestorage.app"
+    "project_number": "628524860787",
+    "project_id": "skrim-6c8b7",
+    "storage_bucket": "skrim-6c8b7.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:901319599088:android:09db03f1790f3446dd3335",
+        "mobilesdk_app_id": "1:628524860787:android:ddd88db8aa63102c4cb106",
         "android_client_info": {
           "package_name": "com.example.trio"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC_q-Ry9IHfIRqWpIc3GnEY8SfbTKBS9Cs"
+          "current_key": "AIzaSyCfhIMOUb3tFu3ADZdtBTDIIjQxrIgTHUU"
         }
       ],
       "services": {
