@@ -8,13 +8,14 @@ import 'package:trio/src/features/settings/domain/app_settings.dart';
 import 'package:trio/src/features/settings/domain/settings_form_state.dart';
 
 import 'package:trio/src/features/settings/domain/custom_stat.dart';
+import 'theme_mode_provider.dart';
 
 class SettingsFormNotifier extends Notifier<SettingsFormState> {
   @override
   SettingsFormState build() {
     final settings = ref.read(appSettingsProvider);
     return SettingsFormState(
-      themeModeIndex: settings.themeModeIndex,
+      themeModeIndex: ref.read(themeModeIndexProvider),
       eloKFactor: settings.eloKFactor.round().toString(),
       initialRating: settings.initialRating.round().toString(),
       statWeights: {
@@ -27,6 +28,7 @@ class SettingsFormNotifier extends Notifier<SettingsFormState> {
   }
 
   void updateThemeMode(int index) {
+    ref.read(themeModeIndexProvider.notifier).set(index);
     state = state.copyWith(themeModeIndex: index);
   }
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class MiniIconButton extends StatelessWidget {
   const MiniIconButton({super.key, required this.icon, required this.onTap});
@@ -21,7 +21,13 @@ class MiniIconButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.violet),
           ),
-          child: Center(child: Icon(icon, color: AppColors.white, size: 15)),
+          child: Center(
+            child: Icon(
+              icon,
+              color: AppColors.sportForeground(context),
+              size: 15,
+            ),
+          ),
         ),
       ),
     );

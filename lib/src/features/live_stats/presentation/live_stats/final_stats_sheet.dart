@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/live_stats/domain/live_match_stats_summary.dart';
@@ -38,7 +38,7 @@ class FinalStatsSheet {
                   Text(
                     'Match stats',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),

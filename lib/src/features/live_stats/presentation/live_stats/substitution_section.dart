@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_role.dart';
 
@@ -29,7 +29,7 @@ class SubstitutionSection extends StatelessWidget {
         Text(
           title,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.sportMutedText,
+            color: AppColors.sportMutedForeground(context),
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -37,7 +37,7 @@ class SubstitutionSection extends StatelessWidget {
           Text(
             'Nessun giocatore disponibile',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.sportMutedText,
+              color: AppColors.sportMutedForeground(context),
               fontWeight: FontWeight.w800,
             ),
           )
@@ -87,7 +87,9 @@ class SubstitutionSection extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
-                                        color: AppColors.white,
+                                        color: AppColors.sportForeground(
+                                          context,
+                                        ),
                                         fontWeight: FontWeight.w900,
                                       ),
                                 ),
@@ -95,7 +97,9 @@ class SubstitutionSection extends StatelessWidget {
                                   '${player.role.label} · ${player.linePreference?.label ?? 'Nessuna'}',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
-                                        color: AppColors.sportMutedText,
+                                        color: AppColors.sportMutedForeground(
+                                          context,
+                                        ),
                                         fontWeight: FontWeight.w700,
                                       ),
                                 ),

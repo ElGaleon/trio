@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class StatToggleChip extends StatelessWidget {
   const StatToggleChip({
@@ -42,7 +42,7 @@ class StatToggleChip extends StatelessWidget {
             Text(
               code,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),

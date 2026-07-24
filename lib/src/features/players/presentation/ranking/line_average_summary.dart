@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class LineAverageSummary extends StatelessWidget {
@@ -61,14 +61,14 @@ class AverageCard extends StatelessWidget {
               Text(
                 label,
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.sportMutedText,
+                  color: AppColors.sportMutedForeground(context),
                   fontWeight: FontWeight.w700,
                 ),
               ),
               Text(
                 value == null ? '-' : value!.round().toString(),
                 style: textTheme.titleLarge?.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.sportForeground(context),
                   fontWeight: FontWeight.w900,
                 ),
               ),

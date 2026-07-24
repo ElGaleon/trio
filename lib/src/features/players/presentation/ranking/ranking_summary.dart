@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class RankingSummary extends StatelessWidget {
   const RankingSummary({
@@ -23,7 +23,7 @@ class RankingSummary extends StatelessWidget {
             ? '$filteredCount di $totalCount giocatori'
             : '$totalCount giocatori',
         style: textTheme.bodySmall?.copyWith(
-          color: AppColors.sportMutedText,
+          color: AppColors.sportMutedForeground(context),
           fontWeight: FontWeight.w700,
         ),
       ),

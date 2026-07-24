@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/sport_avatar_pill.dart';
 import 'rank_badge.dart';
 import 'rating_pill.dart';
@@ -41,7 +41,7 @@ class LeaderboardRow extends StatelessWidget {
                   child: Text(
                     '${rank ?? '-'}',
                     style: textTheme.bodyMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -57,7 +57,7 @@ class LeaderboardRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleSmall?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),

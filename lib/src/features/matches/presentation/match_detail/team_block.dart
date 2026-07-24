@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/players/presentation/player_detail/info_pill.dart';
 import 'package:trio/src/shared/sport_avatar_pill.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
@@ -36,7 +36,7 @@ class TeamBlock extends StatelessWidget {
                   child: Text(
                     title,
                     style: textTheme.titleMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -50,7 +50,7 @@ class TeamBlock extends StatelessWidget {
                 child: Text(
                   'Squadra esterna',
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -77,7 +77,7 @@ class TeamBlock extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: textTheme.titleSmall?.copyWith(
-                                color: AppColors.white,
+                                color: AppColors.sportForeground(context),
                                 fontWeight: FontWeight.w900,
                               ),
                             ),
@@ -88,7 +88,7 @@ class TeamBlock extends StatelessWidget {
                                 if (player.isExternal) 'Esterno',
                               ].join(' · '),
                               style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.sportMutedText,
+                                color: AppColors.sportMutedForeground(context),
                                 fontWeight: FontWeight.w700,
                               ),
                             ),

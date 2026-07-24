@@ -33,6 +33,7 @@ class TeamEvent {
     this.notes = '',
     this.type = TeamEventType.other,
     this.matchIds = const [],
+    this.presentPlayerIds = const [],
     this.recurrence = TeamEventRecurrence.none,
     this.recurrenceEndsAt,
     this.sourceEventId,
@@ -46,6 +47,7 @@ class TeamEvent {
   final String notes;
   final TeamEventType type;
   final List<String> matchIds;
+  final List<String> presentPlayerIds;
   final TeamEventRecurrence recurrence;
   final DateTime? recurrenceEndsAt;
   final String? sourceEventId;
@@ -61,6 +63,7 @@ class TeamEvent {
     String? notes,
     TeamEventType? type,
     List<String>? matchIds,
+    List<String>? presentPlayerIds,
     TeamEventRecurrence? recurrence,
     DateTime? recurrenceEndsAt,
     bool clearRecurrenceEndsAt = false,
@@ -75,6 +78,7 @@ class TeamEvent {
       notes: notes ?? this.notes,
       type: type ?? this.type,
       matchIds: matchIds ?? this.matchIds,
+      presentPlayerIds: presentPlayerIds ?? this.presentPlayerIds,
       recurrence: recurrence ?? this.recurrence,
       recurrenceEndsAt: clearRecurrenceEndsAt
           ? null
@@ -93,6 +97,7 @@ class TeamEvent {
       'notes': notes,
       'type': type.name,
       'matchIds': matchIds,
+      'presentPlayerIds': presentPlayerIds,
       'recurrence': recurrence.name,
       'recurrenceEndsAt': recurrenceEndsAt?.toUtc(),
     };
@@ -113,6 +118,9 @@ class TeamEvent {
         orElse: () => TeamEventType.other,
       ),
       matchIds: List<String>.from(map['matchIds'] as List? ?? []),
+      presentPlayerIds: List<String>.from(
+        map['presentPlayerIds'] as List? ?? [],
+      ),
       recurrence: TeamEventRecurrence.values.firstWhere(
         (recurrence) => recurrence.name == recurrenceName,
         orElse: () => TeamEventRecurrence.none,

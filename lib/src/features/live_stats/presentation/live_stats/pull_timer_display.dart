@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class PullTimerDisplay extends StatelessWidget {
   const PullTimerDisplay({
@@ -19,7 +19,7 @@ class PullTimerDisplay extends StatelessWidget {
     final tenths = ((elapsed.inMilliseconds % 1000) ~/ 100).toString();
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.07),
+        color: AppColors.sportForeground(context).withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: running
@@ -41,7 +41,7 @@ class PullTimerDisplay extends StatelessWidget {
               child: Text(
                 '$minutes:$seconds.$tenths',
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.sportForeground(context),
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0,
                 ),

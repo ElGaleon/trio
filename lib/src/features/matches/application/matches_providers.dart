@@ -31,8 +31,18 @@ final matchesCalendarSelectedDayProvider = mutableProvider<DateTime?>(
 final matchesCalendarExpandedProvider = mutableProvider<bool>(() => false);
 
 final filteredMatchesProvider = Provider<List<ScrimmageMatch>>((ref) {
-  final startDate = ref.watch(matchesStartDateFilterProvider);
-  final endDate = ref.watch(matchesEndDateFilterProvider);
+  return filterMatchesByDate(
+    ref.watch(matchesProvider),
+    ref.watch(matchesStartDateFilterProvider),
+    ref.watch(matchesEndDateFilterProvider),
+  );
+});
+
+List<ScrimmageMatch> filterMatchesByDate(
+  List<ScrimmageMatch> matches,
+  DateTime? startDate,
+  DateTime? endDate,
+) {
   final start = startDate == null
       ? null
       : DateTime(startDate.year, startDate.month, startDate.day);
@@ -40,13 +50,13 @@ final filteredMatchesProvider = Provider<List<ScrimmageMatch>>((ref) {
       ? null
       : DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59, 999);
 
-  return ref.watch(matchesProvider).where((match) {
+  return matches.where((match) {
     final createdAt = match.createdAt;
     final afterStart = start == null || !createdAt.isBefore(start);
     final beforeEnd = end == null || !createdAt.isAfter(end);
     return afterStart && beforeEnd;
   }).toList();
-});
+}
 
 final calendarMonthMatchesProvider = Provider<List<ScrimmageMatch>>((ref) {
   final month = ref.watch(matchesCalendarMonthProvider);

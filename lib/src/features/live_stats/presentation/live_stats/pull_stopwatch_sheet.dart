@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'general_action_button.dart';
 import 'pull_draft.dart';
@@ -92,7 +92,7 @@ class _PullStopwatchSheetState extends State<PullStopwatchSheet> {
                 Text(
                   'Cronometro pull',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -101,7 +101,7 @@ class _PullStopwatchSheetState extends State<PullStopwatchSheet> {
                       ? 'Ferma il cronometro scegliendo se il pull e rimasto dentro o e uscito.'
                       : 'Seleziona il tiratore e avvia il cronometro quando parte il pull.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w800,
                   ),
                 ),

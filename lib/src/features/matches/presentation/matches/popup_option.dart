@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class PopupOption extends StatelessWidget {
   final IconData icon;
@@ -25,9 +25,11 @@ class PopupOption extends StatelessWidget {
       onTap: onTap,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.white.withValues(alpha: 0.06),
+          color: AppColors.sportForeground(context).withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
+          border: Border.all(
+            color: AppColors.sportForeground(context).withValues(alpha: 0.12),
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -55,23 +57,23 @@ class PopupOption extends StatelessWidget {
                     Text(
                       title,
                       style: textTheme.titleSmall?.copyWith(
-                        color: AppColors.white,
+                        color: AppColors.sportForeground(context),
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                     Text(
                       subtitle,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.sportMutedText,
+                        color: AppColors.sportMutedForeground(context),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 FIcons.chevronRight,
-                color: AppColors.sportMutedText,
+                color: AppColors.sportMutedForeground(context),
                 size: 16,
               ),
             ],

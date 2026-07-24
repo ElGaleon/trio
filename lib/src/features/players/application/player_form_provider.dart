@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:trio/src/features/auth/application/rbac_provider.dart';
 import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:trio/src/features/organizations/application/organization_invite_service.dart';
+import 'package:trio/src/features/organizations/application/organization_providers.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/players/domain/player_role.dart';
 import 'package:trio/src/features/players/domain/player_form_state.dart';
@@ -179,7 +181,7 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
       );
     }
     if (playerId == null) {
-      await repository.addPlayerWithLine(
+      final savedPlayerId = await repository.addPlayerWithLine(
         state.name,
         firstName: state.firstName,
         lastName: state.lastName,
@@ -190,6 +192,7 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
         isExternal: state.isExternal,
         jerseyNumber: _jerseyNumberOrNull(),
       );
+      await _inviteByEmail(savedPlayerId, previousEmail: '');
       return true;
     }
 
@@ -210,9 +213,33 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
         isExternal: state.isExternal,
         jerseyNumber: _jerseyNumberOrNull(),
       );
+      await _inviteByEmail(player.id, previousEmail: player.email);
       return true;
     }
     return false;
+  }
+
+  Future<void> _inviteByEmail(
+    String playerId, {
+    required String previousEmail,
+  }) async {
+    final organizationId = ref.read(activeOrganizationIdProvider);
+    final email = state.email.trim();
+    if (organizationId == null || playerId.isEmpty) return;
+    if (email.toLowerCase() == previousEmail.trim().toLowerCase()) return;
+    final inviteService = ref.read(organizationInviteServiceProvider);
+    if (previousEmail.trim().isNotEmpty) {
+      await inviteService.revokeInvite(
+        organizationId: organizationId,
+        email: previousEmail,
+      );
+    }
+    if (email.isEmpty) return;
+    await inviteService.invitePlayer(
+      organizationId: organizationId,
+      playerId: playerId,
+      email: email,
+    );
   }
 
   int? _jerseyNumberOrNull() {

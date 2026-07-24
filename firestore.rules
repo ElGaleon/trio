@@ -18,8 +18,61 @@ service cloud.firestore {
         request.auth.uid in resource.data.members;
     }
 
+    function isOrgOwner(orgId) {
+      return signedIn() &&
+        get(
+          /databases/$(database)/documents/organizations/$(orgId)
+        ).data.ownerId == request.auth.uid;
+    }
+
+    function isOwnInvite() {
+      return signedIn() &&
+        request.auth.token.email is string &&
+        (request.auth.token.email == resource.data.email ||
+          (resource.data.authEmails is list &&
+            request.auth.token.email in resource.data.authEmails));
+    }
+
+    function inviteFor(orgId) {
+      return get(
+        /databases/$(database)/documents/organizations/$(orgId)/invites/$(request.auth.token.email)
+      );
+    }
+
+    function hasValidInvite(orgId) {
+      return signedIn() &&
+        request.auth.token.email is string &&
+        exists(
+          /databases/$(database)/documents/organizations/$(orgId)/invites/$(request.auth.token.email)
+        ) &&
+        inviteFor(orgId).data.email == request.auth.token.email &&
+        inviteFor(orgId).data.expiresAt > request.time;
+    }
+
+    function acceptsOwnInvite(orgId) {
+      return hasValidInvite(orgId) &&
+        !(request.auth.uid in resource.data.members) &&
+        request.auth.uid in request.resource.data.members &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['members', 'updatedAt']);
+    }
+
     match /users/{userId} {
       allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+
+    function isOwnInviteMailbox(inviteEmail) {
+      return signedIn() &&
+        request.auth.token.email is string &&
+        request.auth.token.email == inviteEmail;
+    }
+
+    match /userInvites/{inviteEmail}/items/{inviteId} {
+      allow read: if isOwnInviteMailbox(inviteEmail);
+      allow create, update: if
+        request.resource.data.organizationId == inviteId &&
+        isOrgOwner(inviteId);
+      allow delete: if isOwnInvite() || isOrgOwner(resource.data.organizationId);
     }
 
     match /organizations/{orgId} {
@@ -28,9 +81,16 @@ service cloud.firestore {
         request.resource.data.ownerId == request.auth.uid &&
         request.auth.uid in request.resource.data.members;
       allow update: if signedIn() &&
-        resource.data.ownerId == request.auth.uid;
+        (resource.data.ownerId == request.auth.uid ||
+          acceptsOwnInvite(orgId));
       allow delete: if signedIn() &&
         resource.data.ownerId == request.auth.uid;
+
+      match /invites/{email} {
+        allow read: if isMemberOf(orgId) || isOwnInvite();
+        allow create, update: if isOrgOwner(orgId);
+        allow delete: if isOrgOwner(orgId) || isOwnInvite();
+      }
 
       match /{document=**} {
         allow read, write: if isMemberOf(orgId);

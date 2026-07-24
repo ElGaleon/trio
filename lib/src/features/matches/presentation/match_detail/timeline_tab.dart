@@ -4,7 +4,7 @@ import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/match_stat_event.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
@@ -75,7 +75,9 @@ class TimelineSeparator extends StatelessWidget {
               height: 1,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.12),
+                  color: AppColors.sportForeground(
+                    context,
+                  ).withValues(alpha: 0.12),
                 ),
               ),
             ),
@@ -92,11 +94,15 @@ class TimelineSeparator extends StatelessWidget {
                 spacing: 8,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: AppColors.white, size: 14),
+                  Icon(
+                    icon,
+                    color: AppColors.sportForeground(context),
+                    size: 14,
+                  ),
                   Text(
                     '$label · ${event.scoreA} - ${event.scoreB} · $min\'$sec"',
                     style: textTheme.labelSmall?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -109,7 +115,9 @@ class TimelineSeparator extends StatelessWidget {
               height: 1,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.12),
+                  color: AppColors.sportForeground(
+                    context,
+                  ).withValues(alpha: 0.12),
                 ),
               ),
             ),
@@ -132,7 +140,7 @@ class TimeBadge extends StatelessWidget {
     final secStr = seconds.toString().padLeft(2, '0');
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.16),
+        color: AppColors.sportForeground(context).withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
@@ -140,7 +148,7 @@ class TimeBadge extends StatelessWidget {
         child: Text(
           "$minutes'$secStr\"",
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: AppColors.white,
+            color: AppColors.sportForeground(context),
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -187,7 +195,7 @@ class EventIcon extends StatelessWidget {
               MatchStatType.matchEnd => FIcons.trophy,
               _ => FIcons.activity,
             },
-            color: AppColors.white,
+            color: AppColors.sportForeground(context),
             size: 16,
           ),
         ),
@@ -216,9 +224,13 @@ class TimelineEventRow extends StatelessWidget {
     final duration = event.createdAt.difference(match.createdAt);
     final player = event.playerId == null ? null : playersById[event.playerId];
     final title = event.description ?? event.type.label;
-    final subtitle = player == null
+    final baseSubtitle = player == null
         ? 'Point #${event.pointNumber} · ${event.scoreA}-${event.scoreB}'
         : '${player.name} · Point #${event.pointNumber} · ${event.scoreA}-${event.scoreB}';
+    final author = event.createdByLabel?.trim();
+    final subtitle = author == null || author.isEmpty
+        ? baseSubtitle
+        : '$baseSubtitle · Inserito da $author';
     final content = Row(
       spacing: 10,
       children: [
@@ -235,7 +247,7 @@ class TimelineEventRow extends StatelessWidget {
                 title,
                 textAlign: ownSide ? TextAlign.start : TextAlign.end,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.sportForeground(context),
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -288,7 +300,7 @@ class TimelineTab extends StatelessWidget {
             Text(
               'Eventi',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),

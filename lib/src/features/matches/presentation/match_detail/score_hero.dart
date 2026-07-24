@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
@@ -56,7 +56,7 @@ class ScoreHero extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -96,7 +96,7 @@ class ScoreHero extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),

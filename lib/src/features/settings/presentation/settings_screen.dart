@@ -9,9 +9,10 @@ import 'package:trio/src/shared/responsive_layout.dart';
 import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/settings/application/settings_provider.dart';
+import 'package:trio/src/features/settings/application/theme_mode_provider.dart';
 import 'package:trio/src/features/settings/domain/app_settings.dart';
 import 'custom_stats_settings_section.dart';
 import 'settings_section_title.dart';
@@ -77,8 +78,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(settingsFormProvider);
     final notifier = ref.read(settingsFormProvider.notifier);
+    final themeModeIndex = ref.watch(themeModeIndexProvider);
     final textTheme = Theme.of(context).textTheme;
     final showMobileOrganizationSwitcher =
         MediaQuery.sizeOf(context).width < ResponsiveLayout.tablet;
@@ -128,10 +129,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       textTheme: textTheme,
                     ),
                     FSelect<int>(
+                      key: ValueKey(themeModeIndex),
                       items: const {'Sistema': 0, 'Chiaro': 1, 'Scuro': 2},
                       hint: 'Tema',
                       control: FSelectControl.managed(
-                        initial: state.themeModeIndex,
+                        initial: themeModeIndex,
                         onChange: (value) {
                           if (value != null) {
                             notifier.updateThemeMode(value);
@@ -191,7 +193,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Text(
                       'I nuovi valori valgono solo per le statistiche registrate dopo il salvataggio.',
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.sportMutedText,
+                        color: AppColors.sportMutedForeground(context),
                         fontWeight: FontWeight.w800,
                       ),
                     ),

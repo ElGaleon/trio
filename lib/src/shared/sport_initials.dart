@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class SportInitials extends StatelessWidget {
   const SportInitials({super.key, required this.initials});
@@ -12,7 +12,7 @@ class SportInitials extends StatelessWidget {
       child: Text(
         initials,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppColors.white,
+          color: AppColors.sportForeground(context),
           fontWeight: FontWeight.w900,
         ),
       ),

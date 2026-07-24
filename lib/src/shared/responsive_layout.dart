@@ -10,6 +10,9 @@ class ResponsiveLayout {
   static bool isWide(BuildContext context) =>
       MediaQuery.sizeOf(context).width >= tablet;
 
+  static bool isDesktop(BuildContext context) =>
+      MediaQuery.sizeOf(context).width >= desktop;
+
   static int columnsFor(double width, {double minTileWidth = 320}) {
     return (width / minTileWidth).floor().clamp(1, 3);
   }

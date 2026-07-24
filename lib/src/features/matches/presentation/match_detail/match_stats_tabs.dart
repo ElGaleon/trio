@@ -4,7 +4,7 @@ import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/match_stat_event.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/final_stats_summary.dart';
 import 'package:trio/src/features/matches/domain/individual_stat_line.dart';
 import 'package:trio/src/features/matches/application/match_detail_provider.dart';
@@ -161,7 +161,7 @@ class SplitBar extends StatelessWidget {
                 child: Text(
                   leftLabel,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -176,7 +176,7 @@ class SplitBar extends StatelessWidget {
                 child: Text(
                   rightLabel,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -208,7 +208,7 @@ class RoundMetric extends StatelessWidget {
           child: Text(
             value,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: AppColors.white,
+              color: AppColors.sportForeground(context),
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -242,7 +242,7 @@ class DualMetricRow extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -250,7 +250,7 @@ class DualMetricRow extends StatelessWidget {
           Text(
             right,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: AppColors.white,
+              color: AppColors.sportForeground(context),
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -287,7 +287,7 @@ class BestPlayerCard extends StatelessWidget {
             Text(
               "Miglior giocatore dell'incontro",
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -303,7 +303,7 @@ class BestPlayerCard extends StatelessWidget {
                   child: Text(
                     player?.name ?? '-',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -322,7 +322,7 @@ class BestPlayerCard extends StatelessWidget {
                     child: Text(
                       bestRow?.rating.toStringAsFixed(1) ?? '-',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.white,
+                        color: AppColors.sportForeground(context),
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -361,7 +361,7 @@ class MiniTimeline extends StatelessWidget {
             Text(
               'Eventi recenti',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -424,7 +424,7 @@ class FactsTab extends StatelessWidget {
                 Text(
                   'Statistiche top',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -432,7 +432,7 @@ class FactsTab extends StatelessWidget {
                 Text(
                   'Share mete',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w800,
                   ),
                 ),

@@ -7,7 +7,7 @@ import 'custom_stat.dart';
 
 class AppSettings {
   AppSettings({
-    this.themeModeIndex = 0,
+    this.themeModeIndex = 2,
     this.eloKFactor = AppConstants.eloKFactor,
     this.initialRating = AppConstants.initialRating,
     Map<MatchStatType, double>? statWeights,
@@ -57,11 +57,9 @@ class AppSettings {
   }
 
   ThemeMode get themeMode {
-    return switch (themeModeIndex) {
-      1 => ThemeMode.light,
-      2 => ThemeMode.dark,
-      _ => ThemeMode.system,
-    };
+    return themeModeIndex >= 0 && themeModeIndex < ThemeMode.values.length
+        ? ThemeMode.values[themeModeIndex]
+        : ThemeMode.system;
   }
 
   AppSettings copyWith({
@@ -84,7 +82,6 @@ class AppSettings {
 
   Map<String, dynamic> toGlobalMap() {
     return {
-      'themeModeIndex': themeModeIndex,
       'eloKFactor': eloKFactor,
       'initialRating': initialRating,
       'statWeights': statWeights.map((key, value) => MapEntry(key.name, value)),
@@ -95,7 +92,7 @@ class AppSettings {
 
   static AppSettings fromGlobalMap(
     Map<dynamic, dynamic> map, {
-    int themeModeIndex = 0,
+    int themeModeIndex = 2,
   }) {
     final rawWeights = map['statWeights'] as Map? ?? {};
     final statWeights = <MatchStatType, double>{};
@@ -106,8 +103,7 @@ class AppSettings {
     }
     final customStatsRaw = map['customStats'] as List? ?? [];
     return AppSettings(
-      themeModeIndex:
-          (map['themeModeIndex'] as num?)?.toInt() ?? themeModeIndex,
+      themeModeIndex: (map['themeModeIndex'] as int?) ?? themeModeIndex,
       eloKFactor:
           (map['eloKFactor'] as num?)?.toDouble() ?? AppConstants.eloKFactor,
       initialRating:

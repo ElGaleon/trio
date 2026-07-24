@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class DecoratedPanel extends StatelessWidget {
   final double radius;
@@ -9,17 +9,18 @@ class DecoratedPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
     return SizedBox(
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.sportHeaderDark,
+          color: AppColors.sportSurface(context),
           borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
+          border: Border.all(color: AppColors.sportBorder(context)),
           boxShadow: [
             BoxShadow(
-              color: AppColors.black.withValues(alpha: 0.40),
-              blurRadius: 28,
-              offset: const Offset(0, 16),
+              color: AppColors.black.withValues(alpha: isDark ? 0.40 : 0.08),
+              blurRadius: isDark ? 28 : 18,
+              offset: Offset(0, isDark ? 16 : 10),
             ),
           ],
         ),

@@ -49,6 +49,10 @@ void main() {
     );
     expect(permissionForLocation('/players/new'), AppPermission.createPlayer);
     expect(permissionForLocation('/settings'), AppPermission.viewSettings);
+    expect(
+      permissionForLocation('/settings/organization'),
+      AppPermission.viewSettings,
+    );
     expect(permissionForLocation('/events'), AppPermission.viewEvents);
   });
 }

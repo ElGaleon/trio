@@ -1,9 +1,9 @@
-import '../theme/app_colors.dart';
+import '../../theme/app_colors.dart';
 
 class AppConstants {
   const AppConstants._();
 
-  static const appTitle = 'TRIO';
+  static const appTitle = 'SKRIM';
 
   static const initialRating = 1000.0;
   static const eloKFactor = 32.0;

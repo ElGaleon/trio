@@ -4,7 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class SportActionButton extends StatelessWidget {
   const SportActionButton({
@@ -21,6 +21,9 @@ class SportActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null;
+    final foreground = AppColors.isDark(context)
+        ? AppColors.white
+        : AppColors.violetDarkSoft;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onPressed,
@@ -42,15 +45,13 @@ class SportActionButton extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: AppColors.white.withValues(alpha: enabled ? 1 : 0.55),
+                  color: foreground.withValues(alpha: enabled ? 1 : 0.55),
                   size: 16,
                 ),
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.white.withValues(
-                      alpha: enabled ? 1 : 0.55,
-                    ),
+                    color: foreground.withValues(alpha: enabled ? 1 : 0.55),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -126,6 +127,7 @@ class SportBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground = AppColors.sportForeground(context);
     return Align(
       alignment: Alignment.centerLeft,
       child: GestureDetector(
@@ -142,14 +144,14 @@ class SportBackButton extends StatelessWidget {
           height: 44,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: AppColors.white.withValues(alpha: 0.08),
+              color: AppColors.sportElevated(
+                context,
+              ).withValues(alpha: AppColors.isDark(context) ? 0.42 : 1),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.white.withValues(alpha: 0.14),
-              ),
+              border: Border.all(color: AppColors.sportBorder(context)),
             ),
-            child: const Center(
-              child: Icon(FIcons.chevronLeft, color: AppColors.white, size: 22),
+            child: Center(
+              child: Icon(FIcons.chevronLeft, color: foreground, size: 22),
             ),
           ),
         ),

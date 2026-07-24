@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/sport_avatar_pill.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
@@ -48,14 +48,14 @@ class RatingChangeRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.titleSmall?.copyWith(
-                        color: AppColors.white,
+                        color: AppColors.sportForeground(context),
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                     Text(
                       '${initial?.round() ?? '-'} -> ${finalRating?.round() ?? '-'}',
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.sportMutedText,
+                        color: AppColors.sportMutedForeground(context),
                         fontWeight: FontWeight.w700,
                       ),
                     ),

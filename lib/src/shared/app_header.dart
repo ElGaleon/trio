@@ -3,7 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class AppHeader extends StatelessWidget {
   final bool showBackButton;
@@ -27,6 +27,8 @@ class AppHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final foreground = AppColors.sportForeground(context);
+    final muted = AppColors.sportMutedForeground(context);
     return Row(
       spacing: 8,
       children: [
@@ -46,17 +48,13 @@ class AppHeader extends StatelessWidget {
               dimension: 44,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.08),
+                  color: AppColors.sportElevated(
+                    context,
+                  ).withValues(alpha: AppColors.isDark(context) ? 0.42 : 1),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.white.withValues(alpha: 0.14),
-                  ),
+                  border: Border.all(color: AppColors.sportBorder(context)),
                 ),
-                child: Icon(
-                  FIcons.chevronLeft,
-                  color: AppColors.white,
-                  size: 20,
-                ),
+                child: Icon(FIcons.chevronLeft, color: foreground, size: 20),
               ),
             ),
           ),
@@ -68,7 +66,7 @@ class AppHeader extends StatelessWidget {
               Text(
                 title,
                 style: textTheme.displaySmall?.copyWith(
-                  color: AppColors.white,
+                  color: foreground,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0,
                 ),
@@ -76,7 +74,7 @@ class AppHeader extends StatelessWidget {
               Text(
                 subtitle,
                 style: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.sportMutedText,
+                  color: muted,
                   fontWeight: FontWeight.w800,
                 ),
               ),

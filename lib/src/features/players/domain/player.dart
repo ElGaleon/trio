@@ -16,6 +16,7 @@ class Player {
     this.linePreference,
     this.role = PlayerRole.cutter,
     this.profileImagePath,
+    this.accountUserId,
     this.isExternal = false,
     this.jerseyNumber,
   });
@@ -32,6 +33,7 @@ class Player {
   PlayerLinePreference? linePreference;
   PlayerRole role;
   String? profileImagePath;
+  String? accountUserId;
   bool isExternal;
   int? jerseyNumber;
 
@@ -66,6 +68,7 @@ class Player {
       'linePreference': linePreference?.name,
       'role': role.name,
       'profileImagePath': profileImagePath,
+      'accountUserId': accountUserId,
       'isExternal': isExternal,
       'jerseyNumber': jerseyNumber,
     };
@@ -94,6 +97,7 @@ class Player {
         orElse: () => PlayerRole.cutter,
       ),
       profileImagePath: map['profileImagePath'] as String?,
+      accountUserId: map['accountUserId'] as String?,
       isExternal: map['isExternal'] as bool? ?? false,
       jerseyNumber: (map['jerseyNumber'] as num?)?.toInt(),
     );

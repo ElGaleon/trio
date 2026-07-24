@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/sport_avatar_pill.dart';
 import 'rank_badge.dart';
 import 'rating_pill.dart';
@@ -65,7 +65,7 @@ class PodiumPlayer extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: textTheme.titleSmall?.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.sportForeground(context),
                   fontWeight: FontWeight.w900,
                 ),
               ),

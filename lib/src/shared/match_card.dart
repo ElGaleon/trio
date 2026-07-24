@@ -4,7 +4,7 @@ import 'package:trio/src/shared/sport_glass_decoration.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 String matchHeroTag(String matchId) => 'match-card-$matchId';
 
@@ -15,12 +15,18 @@ class MatchCard extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     this.onTap,
+    this.onLive,
+    this.highlighted = false,
+    this.planned = false,
   });
 
   final ScrimmageMatch match;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onTap;
+  final VoidCallback? onLive;
+  final bool highlighted;
+  final bool planned;
 
   @override
   Widget build(BuildContext context) {
@@ -45,111 +51,173 @@ class MatchCard extends StatelessWidget {
             },
         child: Material(
           color: AppColors.transparent,
-          child: SportGlassDecoration(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 6, 14),
-              child: Column(
-                spacing: 4,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  /*
-                  Row(
-                    spacing: 4,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      CardActionsMenu(onEdit: onEdit, onDelete: onDelete),
-                    ],
-                  ),
-                   */
-                  Row(
-                    spacing: 4,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Icon(
-                        FIcons.calendarDays,
-                        size: 16,
-                        color: AppColors.violet,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+              border: highlighted || planned
+                  ? Border.all(
+                      color: highlighted
+                          ? AppColors.violetLight
+                          : AppColors.danger,
+                      width: 1.6,
+                    )
+                  : null,
+              boxShadow: highlighted || planned
+                  ? [
+                      BoxShadow(
+                        color:
+                            (highlighted ? AppColors.violet : AppColors.danger)
+                                .withValues(alpha: 0.24),
+                        blurRadius: 22,
+                        spreadRadius: 1,
                       ),
-                      Text(
-                        _dateLabel(match.createdAt),
-                        style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.sportMutedText,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TeamScoreBadge(
-                          name: match.teamAName,
-                          score: match.scoreA,
-                          highlighted: !match.isDraw && match.teamAWon,
-                          alignEnd: false,
-                        ),
-                      ),
-                      MetaData(
-                        metaData: 'match score',
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Column(
-                            spacing: 4,
-                            children: [
-                              Text(
-                                '-',
-                                style: textTheme.headlineSmall?.copyWith(
-                                  color: AppColors.white,
-                                  fontWeight: FontWeight.w900,
-                                ),
+                    ]
+                  : null,
+            ),
+            child: SportGlassDecoration(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 6, 14),
+                child: Column(
+                  spacing: 4,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    /*
+                    Row(
+                      spacing: 4,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        CardActionsMenu(onEdit: onEdit, onDelete: onDelete),
+                      ],
+                    ),
+                     */
+                    Row(
+                      spacing: 4,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: highlighted || planned
+                          ? MainAxisAlignment.spaceBetween
+                          : MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Row(
+                          spacing: 4,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              FIcons.calendarDays,
+                              size: 16,
+                              color: AppColors.violet,
+                            ),
+                            Text(
+                              _dateLabel(match.createdAt),
+                              style: textTheme.bodySmall?.copyWith(
+                                color: AppColors.sportMutedForeground(context),
+                                fontWeight: FontWeight.w500,
                               ),
-                              FBadge(
-                                variant: match.isDraw ? .secondary : .outline,
-                                child: Text(
-                                  '${match.teamSize}v${match.teamSize}',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: AppColors.sportMutedText,
+                            ),
+                          ],
+                        ),
+                        if (highlighted || planned)
+                          FBadge(
+                            child: Text(
+                              highlighted ? 'Live ora' : 'Prevista',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: AppColors.sportForeground(context),
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TeamScoreBadge(
+                            name: match.teamAName,
+                            score: match.scoreA,
+                            highlighted: !match.isDraw && match.teamAWon,
+                            alignEnd: false,
+                          ),
+                        ),
+                        MetaData(
+                          metaData: 'match score',
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Column(
+                              spacing: 4,
+                              children: [
+                                Text(
+                                  '-',
+                                  style: textTheme.headlineSmall?.copyWith(
+                                    color: AppColors.sportForeground(context),
+                                    fontWeight: FontWeight.w900,
                                   ),
                                 ),
-                              ),
-                            ],
+                                FBadge(
+                                  variant: match.isDraw ? .secondary : .outline,
+                                  child: Text(
+                                    '${match.teamSize}v${match.teamSize}',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: AppColors.sportMutedForeground(
+                                        context,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: TeamScoreBadge(
+                            name: match.teamBName,
+                            score: match.scoreB,
+                            highlighted: !match.isDraw && !match.teamAWon,
+                            alignEnd: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      spacing: 6,
+                      children: [
+                        Icon(
+                          match.offenseVsDefense ? FIcons.shield : FIcons.users,
+                          size: 15,
+                          color: AppColors.sportMutedForeground(context),
+                        ),
+                        Text(
+                          match.offenseVsDefense
+                              ? 'Attacco vs difesa'
+                              : 'Squadre libere',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: AppColors.sportMutedForeground(context),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (onLive != null)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 6, right: 8),
+                          child: FButton(
+                            onPress: onLive,
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 6,
+                              children: [
+                                Icon(FIcons.activity, size: 16),
+                                Text('Live'),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: TeamScoreBadge(
-                          name: match.teamBName,
-                          score: match.scoreB,
-                          highlighted: !match.isDraw && !match.teamAWon,
-                          alignEnd: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    spacing: 6,
-                    children: [
-                      Icon(
-                        match.offenseVsDefense ? FIcons.shield : FIcons.users,
-                        size: 15,
-                        color: AppColors.sportMutedText,
-                      ),
-                      Text(
-                        match.offenseVsDefense
-                            ? 'Attacco vs difesa'
-                            : 'Squadre libere',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.sportMutedText,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -191,7 +259,7 @@ class MatchScoreHeroPanel extends StatelessWidget {
                 Text(
                   _dateLabel(match.createdAt),
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -215,7 +283,7 @@ class MatchScoreHeroPanel extends StatelessWidget {
                     Text(
                       '-',
                       style: textTheme.headlineSmall?.copyWith(
-                        color: AppColors.white,
+                        color: AppColors.sportForeground(context),
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -243,14 +311,14 @@ class MatchScoreHeroPanel extends StatelessWidget {
                 Icon(
                   match.offenseVsDefense ? FIcons.shield : FIcons.users,
                   size: 15,
-                  color: AppColors.sportMutedText,
+                  color: AppColors.sportMutedForeground(context),
                 ),
                 Text(
                   match.offenseVsDefense
                       ? 'Attacco vs difesa'
                       : 'Squadre libere',
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -291,7 +359,7 @@ class TeamScoreBadge extends StatelessWidget {
         Text(
           '$score',
           style: textTheme.headlineSmall?.copyWith(
-            color: AppColors.white,
+            color: AppColors.sportForeground(context),
             fontWeight: FontWeight.w900,
           ),
         ),

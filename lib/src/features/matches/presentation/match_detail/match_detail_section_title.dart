@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class MatchDetailSectionTitle extends StatelessWidget {
   const MatchDetailSectionTitle({
@@ -21,7 +21,7 @@ class MatchDetailSectionTitle extends StatelessWidget {
         Text(
           title,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: AppColors.white,
+            color: AppColors.sportForeground(context),
             fontWeight: FontWeight.w900,
           ),
         ),

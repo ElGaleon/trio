@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class RoundHeaderButton extends StatelessWidget {
   const RoundHeaderButton({super.key, required this.icon, required this.onTap});
@@ -9,6 +9,7 @@ class RoundHeaderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground = AppColors.sportForeground(context);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -17,11 +18,13 @@ class RoundHeaderButton extends StatelessWidget {
         height: 42,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.white.withValues(alpha: 0.08),
+            color: AppColors.sportElevated(
+              context,
+            ).withValues(alpha: AppColors.isDark(context) ? 0.42 : 1),
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
+            border: Border.all(color: AppColors.sportBorder(context)),
           ),
-          child: Center(child: Icon(icon, color: AppColors.white, size: 20)),
+          child: Center(child: Icon(icon, color: foreground, size: 20)),
         ),
       ),
     );

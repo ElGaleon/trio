@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class RankBadge extends StatelessWidget {
   const RankBadge({
@@ -31,7 +31,7 @@ class RankBadge extends StatelessWidget {
           child: Text(
             '${rank ?? '-'}',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.white,
+              color: AppColors.sportForeground(context),
               fontWeight: FontWeight.w900,
             ),
           ),

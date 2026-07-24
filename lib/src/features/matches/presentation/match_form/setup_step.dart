@@ -51,21 +51,17 @@ class SetupStep extends StatelessWidget {
           FTileGroup(
             children: [
               FTile(
-                prefix: const Icon(FIcons.users),
+                prefix: Icon(FIcons.users),
                 title: const Text('Squadre libere'),
                 subtitle: const Text('Selezione manuale dei presenti.'),
-                suffix: offenseVsDefense
-                    ? null
-                    : const Icon(FIcons.check, size: 18),
+                suffix: offenseVsDefense ? null : Icon(FIcons.check, size: 18),
                 onPress: () => onModeChanged(false),
               ),
               FTile(
-                prefix: const Icon(FIcons.shield),
+                prefix: Icon(FIcons.shield),
                 title: const Text('Attacco vs difesa'),
                 subtitle: const Text('Precompila le linee attacco e difesa.'),
-                suffix: offenseVsDefense
-                    ? const Icon(FIcons.check, size: 18)
-                    : null,
+                suffix: offenseVsDefense ? Icon(FIcons.check, size: 18) : null,
                 onPress: () => onModeChanged(true),
               ),
             ],
@@ -100,7 +96,7 @@ class SetupStep extends StatelessWidget {
               child: FButton(
                 variant: .outline,
                 onPress: onRegenerateNames,
-                prefix: const Icon(FIcons.dices, size: 16),
+                prefix: Icon(FIcons.dices, size: 16),
                 child: const Text('Rigenera nomi'),
               ),
             ),

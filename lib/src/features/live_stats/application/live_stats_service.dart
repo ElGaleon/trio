@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
 import 'package:trio/src/features/settings/domain/app_settings.dart';
+import 'package:trio/src/features/matches/domain/live_pending_action.dart';
 import 'package:trio/src/features/matches/domain/match_stat_event.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
@@ -54,6 +57,136 @@ class LiveStatsService {
     );
   }
 
+  Future<void> proposeStatAction(
+    ScrimmageMatch match, {
+    required MatchStatType type,
+    required FirestoreTrioRepository repository,
+  }) async {
+    final actor = _actor();
+    await repository.updateMatchTransaction(match.id, (current) {
+      if (current.pendingAction != null) return current;
+      current.pendingAction = LivePendingAction(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        kind: 'stat',
+        statType: type,
+        createdAt: DateTime.now(),
+        createdByUserId: actor.$1,
+        createdByLabel: actor.$2,
+        confirmedByUserIds: [actor.$1],
+      );
+      return current;
+    });
+  }
+
+  Future<void> proposeFinishMatch(
+    ScrimmageMatch match,
+    FirestoreTrioRepository repository,
+  ) async {
+    final actor = _actor();
+    await repository.updateMatchTransaction(match.id, (current) {
+      if (current.pendingAction != null) return current;
+      current.pendingAction = LivePendingAction(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        kind: 'finish',
+        createdAt: DateTime.now(),
+        createdByUserId: actor.$1,
+        createdByLabel: actor.$2,
+        confirmedByUserIds: [actor.$1],
+      );
+      return current;
+    });
+  }
+
+  Future<void> proposeLineup(
+    ScrimmageMatch match, {
+    required List<String> playerIdsA,
+    required List<String> playerIdsB,
+    required bool nextOnOffense,
+    required FirestoreTrioRepository repository,
+  }) async {
+    final actor = _actor();
+    await repository.updateMatchTransaction(match.id, (current) {
+      if (current.pendingAction != null) return current;
+      current.pendingAction = LivePendingAction(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        kind: 'lineup',
+        createdAt: DateTime.now(),
+        createdByUserId: actor.$1,
+        createdByLabel: actor.$2,
+        confirmedByUserIds: [actor.$1],
+        teamAIds: playerIdsA,
+        teamBIds: playerIdsB,
+        nextOnOffense: nextOnOffense,
+      );
+      return current;
+    });
+  }
+
+  Future<RecordEventResult?> confirmPendingAction(
+    ScrimmageMatch match, {
+    required Map<String, Player> playersById,
+    required FirestoreTrioRepository repository,
+    required AppSettings settings,
+  }) async {
+    final actor = _actor();
+    RecordEventResult? result;
+    await repository.updateMatchTransaction(match.id, (current) {
+      final pending = current.pendingAction;
+      if (pending == null) return current;
+      final confirmed = pending.confirm(actor.$1);
+      if (confirmed.confirmedByUserIds.length < 2) {
+        current.pendingAction = confirmed;
+        return current;
+      }
+
+      current.pendingAction = null;
+      if (confirmed.kind == 'lineup') {
+        _applyLineup(
+          current,
+          confirmed.teamAIds,
+          confirmed.teamBIds,
+          confirmed.nextOnOffense ?? true,
+          actor.$1,
+          actor.$2,
+        );
+        return current;
+      }
+      if (confirmed.kind == 'finish') {
+        _applyFinish(current, actor.$1, actor.$2);
+        result = RecordEventResult(
+          scoredPoint: false,
+          finished: true,
+          halfTimeDue: false,
+          oursOnOffense: current.statEvents.lastOrNull?.oursOnOffense ?? true,
+        );
+        return current;
+      }
+      final type = confirmed.statType;
+      if (type == null) return current;
+      result = _applyRecord(
+        current,
+        type: type,
+        player: null,
+        playersById: playersById,
+        settings: settings,
+        actorUserId: actor.$1,
+        actorLabel: actor.$2,
+      );
+      return current;
+    });
+    return result;
+  }
+
+  Future<void> cancelPendingAction(
+    ScrimmageMatch match,
+    FirestoreTrioRepository repository,
+  ) async {
+    await repository.updateMatchTransaction(match.id, (current) {
+      current.pendingAction = null;
+      return current;
+    });
+  }
+
   int pointsPlayed(ScrimmageMatch match, String playerId) {
     return match.statEvents.where((event) {
       final pointEnded =
@@ -72,6 +205,34 @@ class LiveStatsService {
     required FirestoreTrioRepository repository,
     required AppSettings settings,
   }) async {
+    late RecordEventResult result;
+    final actor = _actor();
+    await repository.updateMatchTransaction(match.id, (current) {
+      result = _applyRecord(
+        current,
+        type: type,
+        customStatId: customStatId,
+        player: player,
+        playersById: playersById,
+        settings: settings,
+        actorUserId: actor.$1,
+        actorLabel: actor.$2,
+      );
+      return current;
+    });
+    return result;
+  }
+
+  RecordEventResult _applyRecord(
+    ScrimmageMatch match, {
+    required MatchStatType type,
+    String? customStatId,
+    Player? player,
+    required Map<String, Player> playersById,
+    required AppSettings settings,
+    required String actorUserId,
+    required String actorLabel,
+  }) {
     final lastEvent = match.statEvents.isEmpty ? null : match.statEvents.last;
     var scoreA = match.scoreA;
     var scoreB = match.scoreB;
@@ -178,6 +339,8 @@ class LiveStatsService {
       statValue: type == MatchStatType.custom
           ? customWeight
           : (player == null ? null : settings.statWeightFor(type)),
+      createdByUserId: actorUserId,
+      createdByLabel: actorLabel,
       description: _descriptionFor(
         match: match,
         type: type,
@@ -191,7 +354,6 @@ class LiveStatsService {
       ..scoreA = scoreA
       ..scoreB = scoreB
       ..statEvents = [...match.statEvents, event];
-    await repository.updateMatchTransaction(match.id, (_) => match);
 
     final finished = scoreA >= match.pointsLimit || scoreB >= match.pointsLimit;
     final halfTime = isHalfTimeDue(match, DateTime.now());
@@ -212,6 +374,7 @@ class LiveStatsService {
     required FirestoreTrioRepository repository,
     required AppSettings settings,
   }) async {
+    final actor = _actor();
     final lastEvent = match.statEvents.isEmpty ? null : match.statEvents.last;
     final isPlayerTeamA = match.isExternalOpponent
         ? true
@@ -234,6 +397,8 @@ class LiveStatsService {
       pullDurationSeconds: durationSeconds,
       pullInBounds: inBounds,
       statValue: settings.statWeightFor(MatchStatType.pull),
+      createdByUserId: actor.$1,
+      createdByLabel: actor.$2,
       description:
           '${player.name} · Pull ${durationSeconds}s · ${inBounds ? 'dentro' : 'fuori'}',
     );
@@ -256,52 +421,26 @@ class LiveStatsService {
     bool nextOnOffense,
     FirestoreTrioRepository repository,
   ) async {
-    final last = match.statEvents.lastOrNull;
-    match.statEvents = [
-      ...match.statEvents,
-      MatchStatEvent(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
-        type: endType,
-        createdAt: DateTime.now(),
-        pointNumber: last?.pointNumber ?? 1,
-        scoreA: match.scoreA,
-        scoreB: match.scoreB,
-        oursOnOffense: last?.oursOnOffense ?? nextOnOffense,
-        discHolderId: last?.discHolderId,
-        lineupIds: match.isExternalOpponent
-            ? match.teamAIds
-            : [...match.teamAIds, ...match.teamBIds],
-        description: 'Fine ${title.toLowerCase()}',
-      ),
-    ];
-    await repository.updateMatchTransaction(match.id, (_) => match);
+    await proposeStatAction(match, type: endType, repository: repository);
   }
 
   Future<void> finishMatch(
     ScrimmageMatch match,
     FirestoreTrioRepository repository,
   ) async {
-    if (!match.statEvents.any(
-      (event) => event.type == MatchStatType.matchEnd,
-    )) {
-      match.statEvents = [
-        ...match.statEvents,
-        MatchStatEvent(
-          id: DateTime.now().microsecondsSinceEpoch.toString(),
-          type: MatchStatType.matchEnd,
-          createdAt: DateTime.now(),
-          pointNumber: match.statEvents.lastOrNull?.pointNumber ?? 1,
-          scoreA: match.scoreA,
-          scoreB: match.scoreB,
-          oursOnOffense: match.statEvents.lastOrNull?.oursOnOffense ?? true,
-          lineupIds: match.isExternalOpponent
-              ? match.teamAIds
-              : [...match.teamAIds, ...match.teamBIds],
-          description: 'Partita conclusa',
-        ),
-      ];
-      await repository.updateMatchTransaction(match.id, (_) => match);
-    }
+    await proposeFinishMatch(match, repository);
+  }
+
+  Future<void> saveAndFinishMatch(
+    ScrimmageMatch match,
+    FirestoreTrioRepository repository,
+  ) async {
+    final actor = _actor();
+    await repository.updateMatchTransaction(match.id, (current) {
+      current.pendingAction = null;
+      _applyFinish(current, actor.$1, actor.$2);
+      return current;
+    });
   }
 
   Future<void> undo(
@@ -339,8 +478,24 @@ class LiveStatsService {
     bool nextOnOffense,
     FirestoreTrioRepository repository,
   ) async {
-    if (match.statEvents.isEmpty) return;
-    final last = match.statEvents.last;
+    await proposeLineup(
+      match,
+      playerIdsA: playerIdsA,
+      playerIdsB: playerIdsB,
+      nextOnOffense: nextOnOffense,
+      repository: repository,
+    );
+  }
+
+  void _applyLineup(
+    ScrimmageMatch match,
+    List<String> playerIdsA,
+    List<String> playerIdsB,
+    bool nextOnOffense,
+    String actorUserId,
+    String actorLabel,
+  ) {
+    final last = match.statEvents.lastOrNull;
     match
       ..teamAIds = playerIdsA
       ..teamBIds = playerIdsB
@@ -350,18 +505,47 @@ class LiveStatsService {
           id: DateTime.now().microsecondsSinceEpoch.toString(),
           type: MatchStatType.lineup,
           createdAt: DateTime.now(),
-          pointNumber: last.pointNumber,
+          pointNumber: last?.pointNumber ?? 1,
           scoreA: match.scoreA,
           scoreB: match.scoreB,
           oursOnOffense: nextOnOffense,
           lineupIds: match.isExternalOpponent
               ? playerIdsA
               : [...playerIdsA, ...playerIdsB],
+          createdByUserId: actorUserId,
+          createdByLabel: actorLabel,
           description:
               'Linea ${nextOnOffense ? 'attacco' : 'difesa'} selezionata',
         ),
       ];
-    await repository.updateMatchTransaction(match.id, (_) => match);
+  }
+
+  void _applyFinish(
+    ScrimmageMatch match,
+    String actorUserId,
+    String actorLabel,
+  ) {
+    if (match.statEvents.any((event) => event.type == MatchStatType.matchEnd)) {
+      return;
+    }
+    match.statEvents = [
+      ...match.statEvents,
+      MatchStatEvent(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        type: MatchStatType.matchEnd,
+        createdAt: DateTime.now(),
+        pointNumber: match.statEvents.lastOrNull?.pointNumber ?? 1,
+        scoreA: match.scoreA,
+        scoreB: match.scoreB,
+        oursOnOffense: match.statEvents.lastOrNull?.oursOnOffense ?? true,
+        lineupIds: match.isExternalOpponent
+            ? match.teamAIds
+            : [...match.teamAIds, ...match.teamBIds],
+        createdByUserId: actorUserId,
+        createdByLabel: actorLabel,
+        description: 'Partita conclusa',
+      ),
+    ];
   }
 
   Future<void> replaceInjuredPlayer(
@@ -413,6 +597,8 @@ class LiveStatsService {
         lineupIds: match.isExternalOpponent
             ? activeLineupA
             : [...activeLineupA, ...activeLineupB],
+        createdByUserId: _actor().$1,
+        createdByLabel: _actor().$2,
         description: '${injured.name} infortunio · entra ${replacement.name}',
       ),
     ];
@@ -465,5 +651,21 @@ class LiveStatsService {
       return player == null ? 'Pull' : '${player.name} · Pull';
     }
     return player == null ? type.label : '${player.name} · ${type.label}';
+  }
+
+  (String, String) _actor() {
+    User? user;
+    try {
+      user = FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      user = null;
+    }
+    final id = user?.uid ?? 'local-user';
+    final label = user?.displayName?.trim().isNotEmpty == true
+        ? user!.displayName!.trim()
+        : user?.email?.trim().isNotEmpty == true
+        ? user!.email!.trim()
+        : 'Utente';
+    return (id, label);
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/extensions/theme_extension.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class SportEmptyState extends StatelessWidget {
   const SportEmptyState({
@@ -19,6 +19,8 @@ class SportEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground = AppColors.sportForeground(context);
+    final muted = AppColors.sportMutedForeground(context);
     return GlassDecoration(
       radius: 32,
       child: Padding(
@@ -35,7 +37,7 @@ class SportEmptyState extends StatelessWidget {
                 title,
                 textAlign: TextAlign.center,
                 style: context.textTheme.titleMedium?.copyWith(
-                  color: AppColors.white,
+                  color: foreground,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -43,9 +45,7 @@ class SportEmptyState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: AppColors.sportMutedText,
-              ),
+              style: context.textTheme.bodyMedium?.copyWith(color: muted),
             ),
             if (action != null)
               Padding(padding: const EdgeInsets.only(top: 8), child: action!),

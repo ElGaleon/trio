@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/application/matches_view_mode.dart';
 import 'header_switch_icon.dart';
 
@@ -18,9 +18,11 @@ class MatchesHeaderViewSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.08),
+        color: AppColors.sportForeground(context).withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
+        border: Border.all(
+          color: AppColors.sportForeground(context).withValues(alpha: 0.14),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(4),

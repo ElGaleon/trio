@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class CountdownBanner extends StatelessWidget {
   const CountdownBanner({super.key, required this.label, required this.value});
@@ -31,7 +31,7 @@ class CountdownBanner extends StatelessWidget {
             Text(
               value,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),

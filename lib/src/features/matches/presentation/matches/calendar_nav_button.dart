@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class CalendarNavButton extends StatelessWidget {
   const CalendarNavButton({super.key, required this.icon, required this.onTap});
@@ -18,11 +18,17 @@ class CalendarNavButton extends StatelessWidget {
         height: 42,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.white.withValues(alpha: 0.08),
+            color: AppColors.sportForeground(context).withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
+            border: Border.all(
+              color: AppColors.sportForeground(context).withValues(alpha: 0.12),
+            ),
           ),
-          child: Icon(icon, color: AppColors.white, size: 18),
+          child: Icon(
+            icon,
+            color: AppColors.sportForeground(context),
+            size: 18,
+          ),
         ),
       ),
     );

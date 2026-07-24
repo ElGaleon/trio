@@ -14,6 +14,10 @@ class PlayerStatsCardData {
     required this.defenses,
     required this.errors,
     required this.touches,
+    required this.pointsPlayed,
+    required this.touchesPerPoint,
+    required this.goalsPerPoint,
+    required this.assistsPerPoint,
     required this.pulls,
     required this.pullInRate,
     required this.averagePullSeconds,
@@ -28,6 +32,10 @@ class PlayerStatsCardData {
   final int defenses;
   final int errors;
   final int touches;
+  final int pointsPlayed;
+  final double touchesPerPoint;
+  final double goalsPerPoint;
+  final double assistsPerPoint;
   final int pulls;
   final double pullInRate;
   final double averagePullSeconds;
@@ -44,15 +52,17 @@ class PlayerStatsCardData {
 
   static PlayerStatsCardData from(Player player, List<ScrimmageMatch> matches) {
     final played = matches.where(
-      (match) =>
-          match.teamAIds.contains(player.id) ||
-          match.teamBIds.contains(player.id),
+      (match) => playerParticipatedInMatch(player.id, match),
     );
     var wins = 0;
     var losses = 0;
     for (final match in played) {
       if (match.isDraw) continue;
-      final inTeamA = match.teamAIds.contains(player.id);
+      final inTeamA =
+          match.isExternalOpponent ||
+          match.teamAIds.contains(player.id) ||
+          match.teamARosterIds.contains(player.id) ||
+          !match.teamBRosterIds.contains(player.id);
       final won = inTeamA == match.teamAWon;
       if (won) {
         wins++;
@@ -64,6 +74,30 @@ class PlayerStatsCardData {
     final events = matches.expand((match) {
       return match.statEvents.where((event) => event.playerId == player.id);
     }).toList();
+    final pointsPlayed = matches.fold<int>(0, (total, match) {
+      return total +
+          match.statEvents.where((event) {
+            final pointEnded =
+                event.type == MatchStatType.goal ||
+                event.type == MatchStatType.opponentGoal;
+            return pointEnded && event.lineupIds.contains(player.id);
+          }).length;
+    });
+    final goals = matches.fold<int>(0, (total, match) {
+      return total + _goalScorers(match).where((id) => id == player.id).length;
+    });
+    final assists = matches.fold<int>(0, (total, match) {
+      return total + _assists(match).where((id) => id == player.id).length;
+    });
+    final touches = events
+        .where(
+          (e) =>
+              e.type == MatchStatType.pass ||
+              e.type == MatchStatType.huck ||
+              e.type == MatchStatType.catchDisc ||
+              e.type == MatchStatType.goal,
+        )
+        .length;
     final pulls = events.where((event) => event.type == MatchStatType.pull);
     final pullList = pulls.toList();
     final pullDurations = pullList
@@ -76,8 +110,8 @@ class PlayerStatsCardData {
       matchesPlayed: played.length,
       wins: wins,
       losses: losses,
-      goals: events.where((e) => e.type == MatchStatType.goal).length,
-      assists: events.where((e) => e.type == MatchStatType.assist).length,
+      goals: goals,
+      assists: assists,
       defenses: events
           .where(
             (e) =>
@@ -86,15 +120,11 @@ class PlayerStatsCardData {
           )
           .length,
       errors: events.where((e) => e.type.isError).length,
-      touches: events
-          .where(
-            (e) =>
-                e.type == MatchStatType.pass ||
-                e.type == MatchStatType.huck ||
-                e.type == MatchStatType.catchDisc ||
-                e.type == MatchStatType.goal,
-          )
-          .length,
+      touches: touches,
+      pointsPlayed: pointsPlayed,
+      touchesPerPoint: _ratio(touches, pointsPlayed),
+      goalsPerPoint: _ratio(goals, pointsPlayed),
+      assistsPerPoint: _ratio(assists, pointsPlayed),
       pulls: pullList.length,
       pullInRate: pullList.isEmpty
           ? 0
@@ -123,6 +153,10 @@ class PlayerStatsCardDataWithPlusMinus extends PlayerStatsCardData {
         defenses: base.defenses,
         errors: base.errors,
         touches: base.touches,
+        pointsPlayed: base.pointsPlayed,
+        touchesPerPoint: base.touchesPerPoint,
+        goalsPerPoint: base.goalsPerPoint,
+        assistsPerPoint: base.assistsPerPoint,
         pulls: base.pulls,
         pullInRate: base.pullInRate,
         averagePullSeconds: base.averagePullSeconds,
@@ -132,6 +166,90 @@ class PlayerStatsCardDataWithPlusMinus extends PlayerStatsCardData {
 
   @override
   double? get _cachedPlusMinus => value;
+}
+
+bool playerParticipatedInMatch(String playerId, ScrimmageMatch match) {
+  return match.teamAIds.contains(playerId) ||
+      match.teamBIds.contains(playerId) ||
+      match.teamARosterIds.contains(playerId) ||
+      match.teamBRosterIds.contains(playerId) ||
+      match.presentPlayerIds.contains(playerId) ||
+      match.statEvents.any(
+        (event) =>
+            event.playerId == playerId || event.lineupIds.contains(playerId),
+      );
+}
+
+double _ratio(int numerator, int denominator) {
+  return denominator == 0 ? 0 : numerator / denominator;
+}
+
+List<String> _goalScorers(ScrimmageMatch match) {
+  final links = _passLinks(match);
+  return match.statEvents
+      .where((event) => event.type == MatchStatType.goal)
+      .map((goal) {
+        return goal.playerId ??
+            links
+                .where((link) => link.pointNumber == _scoredPoint(goal))
+                .lastOrNull
+                ?.receiverId;
+      })
+      .nonNulls
+      .toList();
+}
+
+List<String> _assists(ScrimmageMatch match) {
+  final links = _passLinks(match);
+  return match.statEvents
+      .where((event) => event.type == MatchStatType.goal)
+      .map((goal) {
+        return links
+            .where((link) => link.pointNumber == _scoredPoint(goal))
+            .lastOrNull
+            ?.throwerId;
+      })
+      .nonNulls
+      .toList();
+}
+
+List<_PassLink> _passLinks(ScrimmageMatch match) {
+  final links = <_PassLink>[];
+  String? holderId;
+  for (final event in match.statEvents) {
+    if (event.type == MatchStatType.goal ||
+        event.type == MatchStatType.opponentGoal) {
+      holderId = null;
+      continue;
+    }
+    if (event.isCompletedPass && holderId != null && event.playerId != null) {
+      links.add(
+        _PassLink(
+          pointNumber: event.pointNumber,
+          throwerId: holderId,
+          receiverId: event.playerId!,
+        ),
+      );
+    }
+    holderId = event.discHolderId;
+  }
+  return links;
+}
+
+int _scoredPoint(MatchStatEvent event) {
+  return event.pointNumber > 1 ? event.pointNumber - 1 : event.pointNumber;
+}
+
+class _PassLink {
+  const _PassLink({
+    required this.pointNumber,
+    required this.throwerId,
+    required this.receiverId,
+  });
+
+  final int pointNumber;
+  final String throwerId;
+  final String receiverId;
 }
 
 double _sumEventValues(Iterable<MatchStatEvent> events) {

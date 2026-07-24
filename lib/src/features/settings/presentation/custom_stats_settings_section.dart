@@ -4,7 +4,7 @@ import 'package:forui/forui.dart';
 
 import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/settings/application/settings_provider.dart';
 import 'package:trio/src/features/live_stats/presentation/stats_match_setup/stat_toggle_chip.dart';
@@ -50,7 +50,7 @@ class CustomStatsSettingsSection extends ConsumerWidget {
             Text(
               'Aggiungi o modifica statistiche personalizzate ed imposta quali abilitare di default nelle nuove partite.',
               style: textTheme.bodySmall?.copyWith(
-                color: AppColors.sportMutedText,
+                color: AppColors.sportMutedForeground(context),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -59,7 +59,7 @@ class CustomStatsSettingsSection extends ConsumerWidget {
             Text(
               'Le tue statistiche personalizzate',
               style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -69,7 +69,7 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                 child: Text(
                   'Nessuna statistica personalizzata creata. Clicca il pulsante sotto per aggiungerne una.',
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -95,7 +95,7 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                           child: Text(
                             stat.abbreviation,
                             style: textTheme.labelMedium?.copyWith(
-                              color: AppColors.white,
+                              color: AppColors.sportForeground(context),
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -109,14 +109,16 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                               Text(
                                 stat.label,
                                 style: textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.white,
+                                  color: AppColors.sportForeground(context),
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
                               Text(
                                 'Peso: ${stat.weight >= 0 ? '+' : ''}${stat.weight} · ${stat.isError ? 'Errore' : 'Azione positiva'}',
                                 style: textTheme.bodySmall?.copyWith(
-                                  color: AppColors.sportMutedText,
+                                  color: AppColors.sportMutedForeground(
+                                    context,
+                                  ),
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -137,9 +139,9 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                         ),
                         // Edit button
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             FIcons.pencil,
-                            color: AppColors.white,
+                            color: AppColors.sportForeground(context),
                             size: 18,
                           ),
                           onPressed: () async {
@@ -154,7 +156,7 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                         ),
                         // Delete button
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             FIcons.trash,
                             color: AppColors.danger,
                             size: 18,
@@ -191,14 +193,14 @@ class CustomStatsSettingsSection extends ConsumerWidget {
                 Text(
                   'Statistiche preferite di default',
                   style: textTheme.bodyMedium?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 Text(
                   'Seleziona quali statistiche saranno abilitate di default alla creazione di un nuovo match.',
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w700,
                   ),
                 ),

@@ -1,15 +1,57 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:trio/src/features/auth/application/auth_service.dart';
+import 'package:trio/src/features/firebase/data/firestore_paths.dart';
 import 'package:trio/src/features/organizations/domain/organization.dart';
-import 'package:trio/src/shared/state_provider.dart';
 
-final selectedOrganizationIdProvider = mutableProvider<String?>(() => null);
+const _lastOrganizationIdKey = 'lastOrganizationId';
+
+final selectedOrganizationIdProvider =
+    NotifierProvider<SelectedOrganizationIdNotifier, String?>(
+      SelectedOrganizationIdNotifier.new,
+    );
+
+class SelectedOrganizationIdNotifier extends Notifier<String?> {
+  bool _changedLocally = false;
+
+  @override
+  String? build() {
+    unawaited(_load());
+    return null;
+  }
+
+  void set(String? value) {
+    _changedLocally = true;
+    state = value;
+    unawaited(_save(value));
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(_lastOrganizationIdKey);
+    if (!ref.mounted) return;
+    if (!_changedLocally && value != null && value.isNotEmpty) state = value;
+  }
+
+  Future<void> _save(String? value) async {
+    final prefs = await SharedPreferences.getInstance();
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      await prefs.remove(_lastOrganizationIdKey);
+    } else {
+      await prefs.setString(_lastOrganizationIdKey, trimmed);
+    }
+  }
+}
 
 final organizationsProvider = StreamProvider<List<Organization>>((ref) {
-  final user = ref.watch(authStateProvider).value;
+  final authState = ref.watch(authStateProvider);
+  final user = FirebaseAuth.instance.currentUser ?? authState.value;
   if (user == null) return Stream.value(const []);
   return FirebaseFirestore.instance
       .collection('organizations')
@@ -92,6 +134,62 @@ class OrganizationService {
     if (normalizedName != null) data['name'] = normalizedName;
     data['logoUrl'] = _normalized(logoUrl);
     await ref.set(data, SetOptions(merge: true));
+  }
+
+  Future<void> deleteOrganization(String organizationId) async {
+    final user = await _requireUser();
+    final orgRef = _firestore.collection('organizations').doc(organizationId);
+    final snapshot = await orgRef.get();
+    if (snapshot.data()?['ownerId'] != user.uid) {
+      throw StateError('Solo il creatore può eliminare la squadra.');
+    }
+
+    final inviteDocs = await orgRef.collection('invites').get();
+    await _deleteDocuments([
+      ...inviteDocs.docs.map((doc) => doc.reference),
+      for (final doc in inviteDocs.docs)
+        _firestore
+            .collection('userInvites')
+            .doc((doc.data()['email'] as String? ?? doc.id).trim())
+            .collection('items')
+            .doc(organizationId),
+      ...(await _firestore
+              .collection(FirestorePaths.players(organizationId))
+              .get())
+          .docs
+          .map((doc) => doc.reference),
+      ...(await _firestore
+              .collection(FirestorePaths.matches(organizationId))
+              .get())
+          .docs
+          .map((doc) => doc.reference),
+      ...(await _firestore
+              .collection(FirestorePaths.events(organizationId))
+              .get())
+          .docs
+          .map((doc) => doc.reference),
+      ...(await orgRef.collection('settings').get()).docs.map(
+        (doc) => doc.reference,
+      ),
+      orgRef,
+    ]);
+  }
+
+  Future<void> _deleteDocuments(
+    Iterable<DocumentReference<Map<String, dynamic>>> refs,
+  ) async {
+    var batch = _firestore.batch();
+    var count = 0;
+    for (final ref in refs) {
+      batch.delete(ref);
+      count++;
+      if (count == 450) {
+        await batch.commit();
+        batch = _firestore.batch();
+        count = 0;
+      }
+    }
+    if (count > 0) await batch.commit();
   }
 
   Future<User> _requireUser() async {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'stats_settings_selector.dart';
 
@@ -32,14 +32,14 @@ class StatsSelectionStep extends StatelessWidget {
             Text(
               'Statistiche live',
               style: textTheme.titleMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),
             Text(
               'Scegli solo le azioni che vuoi davvero segnare durante questa partita. La scelta resta salvata nel match.',
               style: textTheme.bodySmall?.copyWith(
-                color: AppColors.sportMutedText,
+                color: AppColors.sportMutedForeground(context),
                 fontWeight: FontWeight.w700,
               ),
             ),

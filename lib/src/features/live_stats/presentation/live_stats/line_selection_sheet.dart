@@ -3,7 +3,7 @@ import 'package:forui/forui.dart';
 
 import 'package:trio/src/shared/decorated_panel.dart';
 import 'package:trio/src/shared/sport_button.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
@@ -103,7 +103,7 @@ class LineSelectionSheet {
                           'Seleziona linea ${nextOnOffense ? 'attacco' : 'difesa'}',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                color: AppColors.white,
+                                color: AppColors.sportForeground(context),
                                 fontWeight: FontWeight.w900,
                               ),
                         ),
@@ -135,7 +135,9 @@ class LineSelectionSheet {
                             '${selectedA.length}/${match.teamSize} in campo',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
-                                  color: AppColors.sportMutedText,
+                                  color: AppColors.sportMutedForeground(
+                                    context,
+                                  ),
                                   fontWeight: FontWeight.w800,
                                 ),
                           ),
@@ -166,14 +168,14 @@ class LineSelectionSheet {
                                 },
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
-                                    color: AppColors.white.withValues(
-                                      alpha: 0.06,
-                                    ),
+                                    color: AppColors.sportForeground(
+                                      context,
+                                    ).withValues(alpha: 0.06),
                                     borderRadius: BorderRadius.circular(18),
                                     border: Border.all(
-                                      color: AppColors.white.withValues(
-                                        alpha: 0.10,
-                                      ),
+                                      color: AppColors.sportForeground(
+                                        context,
+                                      ).withValues(alpha: 0.10),
                                     ),
                                   ),
                                   child: Padding(
@@ -190,7 +192,10 @@ class LineSelectionSheet {
                                                 .textTheme
                                                 .bodyMedium
                                                 ?.copyWith(
-                                                  color: AppColors.white,
+                                                  color:
+                                                      AppColors.sportForeground(
+                                                        context,
+                                                      ),
                                                   fontWeight: FontWeight.w900,
                                                 ),
                                           ),
@@ -201,7 +206,10 @@ class LineSelectionSheet {
                                               .textTheme
                                               .bodySmall
                                               ?.copyWith(
-                                                color: AppColors.sportMutedText,
+                                                color:
+                                                    AppColors.sportMutedForeground(
+                                                      context,
+                                                    ),
                                                 fontWeight: FontWeight.w900,
                                               ),
                                         ),
@@ -211,9 +219,11 @@ class LineSelectionSheet {
                                           duration: const Duration(
                                             milliseconds: 180,
                                           ),
-                                          child: const Icon(
+                                          child: Icon(
                                             FIcons.chevronDown,
-                                            color: AppColors.white,
+                                            color: AppColors.sportForeground(
+                                              context,
+                                            ),
                                             size: 18,
                                           ),
                                         ),

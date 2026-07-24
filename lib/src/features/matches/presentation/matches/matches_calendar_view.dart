@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:trio/src/features/events/application/events_providers.dart';
 import 'package:trio/src/features/matches/application/matches_providers.dart';
 import 'calendar_header.dart';
 import 'calendar_grid.dart';
@@ -24,6 +25,7 @@ class MatchesCalendarView extends ConsumerWidget {
     final monthMatches = ref.watch(calendarMonthMatchesProvider);
     final selectedDay = ref.watch(matchesCalendarSelectedDayProvider);
     final selectedMatches = ref.watch(selectedCalendarDayMatchesProvider);
+    final selectedEvents = ref.watch(selectedDayEventsProvider);
 
     return Column(
       spacing: 14,
@@ -78,6 +80,7 @@ class MatchesCalendarView extends ConsumerWidget {
         DayMatches(
           selectedDay: selectedDay,
           matches: selectedMatches,
+          events: selectedEvents,
           onEdit: onEdit,
           onDelete: onDelete,
         ),

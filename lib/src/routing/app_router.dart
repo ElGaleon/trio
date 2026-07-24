@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trio/src/features/auth/application/rbac_provider.dart';
+import 'package:trio/src/features/auth/presentation/user_profile_screen.dart';
+import 'package:trio/src/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:trio/src/features/events/presentation/events_screen.dart';
 import 'package:trio/screens/login_screen.dart';
 import 'package:trio/src/features/home/presentation/home_screen.dart';
@@ -13,23 +15,30 @@ import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/presentation/match_detail/match_detail_screen.dart';
 import 'package:trio/src/features/matches/presentation/match_form/match_form_screen.dart';
 import 'package:trio/src/features/matches/presentation/matches/matches_screen.dart';
+import 'package:trio/src/features/organizations/presentation/organization_management_screen.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/presentation/player_detail/player_detail_screen.dart';
 import 'package:trio/src/features/players/presentation/player_form/player_form_screen.dart';
+import 'package:trio/src/features/players/presentation/my_stats/my_stats_screen.dart';
 import 'package:trio/src/features/players/presentation/player_stats/player_stats_screen.dart';
 import 'package:trio/src/features/players/presentation/players/players_screen.dart';
 import 'package:trio/src/features/players/presentation/ranking/ranking_screen.dart';
 import 'package:trio/src/features/settings/presentation/settings_screen.dart';
+import 'package:trio/src/shared/responsive_layout.dart';
 
 class AppRoutes {
   const AppRoutes._();
 
+  static const dashboard = '/dashboard';
   static const ranking = '/ranking';
   static const login = '/login';
   static const matches = '/matches';
   static const players = '/players';
+  static const me = '/me';
   static const stats = '/stats';
   static const settings = '/settings';
+  static const profile = '/profile';
+  static const organization = '/settings/organization';
   static const events = '/events';
 
   static const newMatch = '/matches/new';
@@ -48,14 +57,19 @@ final appRouter = _createAppRouter();
 GoRouter _createAppRouter() {
   final authNotifier = AuthRedirectNotifier(FirebaseAuth.instance);
   return GoRouter(
-    initialLocation: AppRoutes.ranking,
+    initialLocation: AppRoutes.dashboard,
     refreshListenable: authNotifier,
     redirect: (context, state) {
       if (!authNotifier.initialized) return null;
       final signedIn = authNotifier.user != null;
       final loggingIn = state.matchedLocation == AppRoutes.login;
       if (!signedIn) return loggingIn ? null : AppRoutes.login;
-      if (loggingIn) return AppRoutes.ranking;
+      final size = MediaQuery.maybeSizeOf(context);
+      final wide = size == null || size.width >= ResponsiveLayout.tablet;
+      if (loggingIn) return wide ? AppRoutes.dashboard : AppRoutes.ranking;
+      if (!wide && state.matchedLocation == AppRoutes.dashboard) {
+        return AppRoutes.ranking;
+      }
       final permission = permissionForLocation(state.uri.toString());
       if (permission != null && !can(authNotifier.role, permission)) {
         return AppRoutes.ranking;
@@ -65,13 +79,27 @@ GoRouter _createAppRouter() {
     routes: [
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) =>
+            NoTransitionPage(key: state.pageKey, child: const LoginScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => const UserProfileScreen(),
       ),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return HomeScreen(navigationShell: navigationShell);
-        },
+        pageBuilder: (context, state, navigationShell) => NoTransitionPage(
+          key: state.pageKey,
+          child: HomeScreen(navigationShell: navigationShell),
+        ),
         branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.dashboard,
+                builder: (context, state) => const DashboardScreen(),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -174,8 +202,23 @@ GoRouter _createAppRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: AppRoutes.me,
+                builder: (context, state) => const MyStatsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: AppRoutes.settings,
                 builder: (context, state) => const SettingsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'organization',
+                    builder: (context, state) =>
+                        const OrganizationManagementScreen(),
+                  ),
+                ],
               ),
             ],
           ),

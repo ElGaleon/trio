@@ -13,7 +13,7 @@ import 'package:trio/src/shared/app_empty_state.dart';
 import 'package:trio/src/shared/decorated_panel.dart';
 import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class EventsScreen extends ConsumerWidget {
   const EventsScreen({super.key});
@@ -195,7 +195,9 @@ class _ViewSwitch extends StatelessWidget {
             ),
             selectedColor: AppColors.violet.withValues(alpha: 0.45),
             backgroundColor: AppColors.white.withValues(alpha: 0.06),
-            side: BorderSide(color: AppColors.white.withValues(alpha: 0.12)),
+            side: BorderSide(
+              color: AppColors.sportForeground(context).withValues(alpha: 0.12),
+            ),
           ),
       ],
     );
@@ -236,14 +238,17 @@ class _PeriodHeader extends StatelessWidget {
               variant: FButtonVariant.ghost,
               size: FButtonSizeVariant.sm,
               onPress: onPrevious,
-              child: const Icon(FIcons.chevronLeft, color: AppColors.white),
+              child: Icon(
+                FIcons.chevronLeft,
+                color: AppColors.sportForeground(context),
+              ),
             ),
             Expanded(
               child: Text(
                 label,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.sportForeground(context),
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -258,7 +263,10 @@ class _PeriodHeader extends StatelessWidget {
               variant: FButtonVariant.ghost,
               size: FButtonSizeVariant.sm,
               onPress: onNext,
-              child: const Icon(FIcons.chevronRight, color: AppColors.white),
+              child: Icon(
+                FIcons.chevronRight,
+                color: AppColors.sportForeground(context),
+              ),
             ),
           ],
         ),
@@ -319,7 +327,9 @@ class _MonthView extends ConsumerWidget {
                             label,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
-                                  color: AppColors.sportMutedText,
+                                  color: AppColors.sportMutedForeground(
+                                    context,
+                                  ),
                                   fontWeight: FontWeight.w900,
                                 ),
                           ),
@@ -370,9 +380,9 @@ class _MonthView extends ConsumerWidget {
                               Text(
                                 '${day.day}',
                                 style: TextStyle(
-                                  color: AppColors.white.withValues(
-                                    alpha: inMonth ? 1 : 0.38,
-                                  ),
+                                  color: AppColors.sportForeground(
+                                    context,
+                                  ).withValues(alpha: inMonth ? 1 : 0.38),
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
@@ -384,7 +394,9 @@ class _MonthView extends ConsumerWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
-                                        color: AppColors.white,
+                                        color: AppColors.sportForeground(
+                                          context,
+                                        ),
                                         fontWeight: FontWeight.w800,
                                       ),
                                 ),
@@ -498,7 +510,7 @@ class _DayStrip extends StatelessWidget {
               Text(
                 'Nessun evento',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.sportMutedText,
+                  color: AppColors.sportMutedForeground(context),
                   fontWeight: FontWeight.w700,
                 ),
               )
@@ -564,7 +576,7 @@ class _EventTile extends ConsumerWidget {
     final playable =
         active && (event.type == TeamEventType.training || event.type.isMatch);
     final liveMatch = event.type.isMatch && linkedMatches.isNotEmpty
-        ? linkedMatches.first
+        ? linkedMatches.where((match) => !match.isFinished).firstOrNull
         : null;
 
     return DecoratedPanel(
@@ -574,7 +586,10 @@ class _EventTile extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.event_available_outlined, color: AppColors.white),
+            Icon(
+              Icons.event_available_outlined,
+              color: AppColors.sportForeground(context),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -584,21 +599,21 @@ class _EventTile extends ConsumerWidget {
                   Text(
                     event.title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   Text(
                     '${event.type.label} · ${CalendarUtils.dayLabel(event.startAt)}  ${_time(event.startAt)}-${_time(event.endAt)}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.sportMutedText,
+                      color: AppColors.sportMutedForeground(context),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   Text(
                     event.location,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -606,10 +621,17 @@ class _EventTile extends ConsumerWidget {
                     Text(
                       event.notes,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.sportMutedText,
+                        color: AppColors.sportMutedForeground(context),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                  Text(
+                    '${event.presentPlayerIds.length} presenze registrate',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.sportMutedForeground(context),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                   if (playable)
                     FButton(
                       variant: FButtonVariant.outline,
@@ -645,13 +667,19 @@ class _EventTile extends ConsumerWidget {
               variant: FButtonVariant.ghost,
               size: FButtonSizeVariant.sm,
               onPress: onEdit == null ? null : () => onEdit!(event),
-              child: const Icon(Icons.edit_outlined, color: AppColors.white),
+              child: Icon(
+                Icons.edit_outlined,
+                color: AppColors.sportForeground(context),
+              ),
             ),
             FButton(
               variant: FButtonVariant.ghost,
               size: FButtonSizeVariant.sm,
               onPress: onDelete == null ? null : () => onDelete!(event),
-              child: const Icon(Icons.delete_outline, color: AppColors.white),
+              child: Icon(
+                Icons.delete_outline,
+                color: AppColors.sportForeground(context),
+              ),
             ),
           ],
         ),
@@ -660,25 +688,27 @@ class _EventTile extends ConsumerWidget {
   }
 }
 
-class _EventDialog extends StatefulWidget {
+class _EventDialog extends ConsumerStatefulWidget {
   const _EventDialog({this.event});
 
   final TeamEvent? event;
 
   @override
-  State<_EventDialog> createState() => _EventDialogState();
+  ConsumerState<_EventDialog> createState() => _EventDialogState();
 }
 
-class _EventDialogState extends State<_EventDialog> {
+class _EventDialogState extends ConsumerState<_EventDialog> {
   late final TextEditingController _title;
   late final TextEditingController _location;
   late final TextEditingController _notes;
+  late final Set<String> _presentPlayerIds;
   late DateTime _date;
   late TimeOfDay _start;
   late TimeOfDay _end;
   late TeamEventType _type;
   late TeamEventRecurrence _recurrence;
   DateTime? _recurrenceEndsAt;
+  bool _presenceInitialized = false;
 
   @override
   void initState() {
@@ -696,6 +726,8 @@ class _EventDialogState extends State<_EventDialog> {
     _type = event?.type ?? TeamEventType.other;
     _recurrence = event?.recurrence ?? TeamEventRecurrence.none;
     _recurrenceEndsAt = event?.recurrenceEndsAt;
+    _presentPlayerIds = {...event?.presentPlayerIds ?? const []};
+    _presenceInitialized = event != null;
   }
 
   @override
@@ -708,6 +740,13 @@ class _EventDialogState extends State<_EventDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final playersAsync = ref.watch(firebasePlayersProvider);
+    final players = playersAsync.value ?? const [];
+    if (!_presenceInitialized && playersAsync.hasValue) {
+      _presentPlayerIds.addAll(players.map((player) => player.id));
+      _presenceInitialized = true;
+    }
+
     return AlertDialog(
       title: Text(widget.event == null ? 'Nuovo evento' : 'Modifica evento'),
       content: SizedBox(
@@ -750,7 +789,7 @@ class _EventDialogState extends State<_EventDialog> {
               if (_recurrence != TeamEventRecurrence.none)
                 OutlinedButton.icon(
                   onPressed: _pickRecurrenceEnd,
-                  icon: const Icon(Icons.event_repeat_outlined),
+                  icon: Icon(Icons.event_repeat_outlined),
                   label: Text(
                     _recurrenceEndsAt == null
                         ? 'Senza fine'
@@ -762,7 +801,7 @@ class _EventDialogState extends State<_EventDialog> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _pickDate,
-                      icon: const Icon(Icons.calendar_today_outlined),
+                      icon: Icon(Icons.calendar_today_outlined),
                       label: Text(CalendarUtils.dayLabel(_date)),
                     ),
                   ),
@@ -774,14 +813,14 @@ class _EventDialogState extends State<_EventDialog> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => _pickTime(true),
-                      icon: const Icon(Icons.schedule),
+                      icon: Icon(Icons.schedule),
                       label: Text('Inizio ${_start.format(context)}'),
                     ),
                   ),
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => _pickTime(false),
-                      icon: const Icon(Icons.schedule_outlined),
+                      icon: Icon(Icons.schedule_outlined),
                       label: Text('Fine ${_end.format(context)}'),
                     ),
                   ),
@@ -798,6 +837,36 @@ class _EventDialogState extends State<_EventDialog> {
                 minLines: 3,
                 maxLines: 5,
               ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Presenze',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              ),
+              if (playersAsync.isLoading)
+                const CircularProgressIndicator()
+              else if (players.isEmpty)
+                const Text('Nessun giocatore disponibile.')
+              else
+                for (final player in players)
+                  CheckboxListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    value: _presentPlayerIds.contains(player.id),
+                    title: Text(player.name),
+                    onChanged: (checked) {
+                      setState(() {
+                        if (checked ?? false) {
+                          _presentPlayerIds.add(player.id);
+                        } else {
+                          _presentPlayerIds.remove(player.id);
+                        }
+                      });
+                    },
+                  ),
             ],
           ),
         ),
@@ -859,6 +928,7 @@ class _EventDialogState extends State<_EventDialog> {
         notes: _notes.text.trim(),
         type: _type,
         matchIds: widget.event?.matchIds ?? const [],
+        presentPlayerIds: _presentPlayerIds.toList()..sort(),
         recurrence: _recurrence,
         recurrenceEndsAt: _recurrence == TeamEventRecurrence.none
             ? null

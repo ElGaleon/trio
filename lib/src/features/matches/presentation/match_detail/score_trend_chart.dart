@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
@@ -58,12 +58,12 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
             Row(
               spacing: 8,
               children: [
-                const Icon(FIcons.activity, size: 18, color: AppColors.violet),
+                Icon(FIcons.activity, size: 18, color: AppColors.violet),
                 Expanded(
                   child: Text(
                     'Andamento Punteggio',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -137,10 +137,14 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
 
                 return DecoratedBox(
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.05),
+                    color: AppColors.sportForeground(
+                      context,
+                    ).withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AppColors.white.withValues(alpha: 0.08),
+                      color: AppColors.sportForeground(
+                        context,
+                      ).withValues(alpha: 0.08),
                     ),
                   ),
                   child: Padding(
@@ -169,7 +173,7 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                             padding: const EdgeInsets.all(8),
                             child: Icon(
                               isOurGoal ? FIcons.flag : FIcons.circleDot,
-                              color: AppColors.white,
+                              color: AppColors.sportForeground(context),
                               size: 16,
                             ),
                           ),
@@ -185,7 +189,7 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                                     : 'Meta avversaria',
                                 style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
-                                      color: AppColors.white,
+                                      color: AppColors.sportForeground(context),
                                       fontWeight: FontWeight.w900,
                                     ),
                               ),
@@ -193,7 +197,9 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                                 'Punteggio: ${event.scoreA} - ${event.scoreB} · Tempo: $min\'$sec"',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: AppColors.sportMutedText,
+                                      color: AppColors.sportMutedForeground(
+                                        context,
+                                      ),
                                       fontWeight: FontWeight.w700,
                                     ),
                               ),
@@ -208,10 +214,14 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
             ] else if (selectedIndex == 0) ...[
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.05),
+                  color: AppColors.sportForeground(
+                    context,
+                  ).withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppColors.white.withValues(alpha: 0.08),
+                    color: AppColors.sportForeground(
+                      context,
+                    ).withValues(alpha: 0.08),
                   ),
                 ),
                 child: Padding(
@@ -224,17 +234,21 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                     children: [
                       DecoratedBox(
                         decoration: BoxDecoration(
-                          color: AppColors.white.withValues(alpha: 0.1),
+                          color: AppColors.sportForeground(
+                            context,
+                          ).withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.white.withValues(alpha: 0.2),
+                            color: AppColors.sportForeground(
+                              context,
+                            ).withValues(alpha: 0.2),
                           ),
                         ),
-                        child: const Padding(
+                        child: Padding(
                           padding: EdgeInsets.all(8),
                           child: Icon(
                             FIcons.play,
-                            color: AppColors.white,
+                            color: AppColors.sportForeground(context),
                             size: 16,
                           ),
                         ),
@@ -248,7 +262,7 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                               'Inizio della partita',
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                    color: AppColors.white,
+                                    color: AppColors.sportForeground(context),
                                     fontWeight: FontWeight.w900,
                                   ),
                             ),
@@ -256,7 +270,9 @@ class _ScoreTrendChartState extends ConsumerState<ScoreTrendChart> {
                               'Punteggio di partenza: 0 - 0',
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
-                                    color: AppColors.sportMutedText,
+                                    color: AppColors.sportMutedForeground(
+                                      context,
+                                    ),
                                     fontWeight: FontWeight.w700,
                                   ),
                             ),
@@ -296,7 +312,7 @@ class LegendItem extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppColors.white.withValues(alpha: 0.8),
+            color: AppColors.sportForeground(context).withValues(alpha: 0.8),
             fontWeight: FontWeight.w800,
           ),
         ),

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
@@ -6,10 +7,13 @@ import 'package:trio/src/features/firebase/application/firebase_repository_provi
 import 'package:trio/src/features/matches/application/match_provider.dart';
 
 import 'package:trio/src/shared/app_empty_state.dart';
+import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
+import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/live_stats/application/live_stats_service.dart';
 import 'package:trio/src/features/live_stats/domain/live_match_stats_summary.dart';
 import 'active_pause.dart';
@@ -40,7 +44,8 @@ class LiveStatsScreen extends ConsumerStatefulWidget {
 
 class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
   String _selectedTeamTab = 'teamA';
-  bool _firstLoadChecked = false;
+  String? _lastLineSelectionPromptKey;
+  bool _lineSelectionOpen = false;
   late final PageController _pageController;
 
   @override
@@ -86,6 +91,25 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
             icon: FIcons.cloudOff,
             title: 'Firebase non disponibile',
             message: 'Accedi di nuovo per registrare statistiche live.',
+          ),
+        ),
+      );
+    }
+    if (match.isFinished) {
+      return Scaffold(
+        body: SportScreenShell(
+          title: 'Live stats',
+          subtitle: 'Partita salvata',
+          child: SportEmptyState(
+            icon: FIcons.lock,
+            title: 'Partita chiusa',
+            message:
+                'Questa partita e stata salvata e non puo piu essere aperta live.',
+            action: SportActionButton(
+              label: 'Vai al dettaglio',
+              icon: FIcons.arrowRight,
+              onPressed: () => context.go(AppRoutes.matchDetail(match.id)),
+            ),
           ),
         ),
       );
@@ -148,40 +172,95 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
 
         Future<void> triggerFinishMatch() async {
           await service.finishMatch(match, repository);
+        }
+
+        Future<void> showFinalStatsAndExit() async {
+          await FinalStatsSheet.show(context, match, playersById);
           if (context.mounted) {
-            await FinalStatsSheet.show(context, match, playersById);
-            if (context.mounted) {
-              context.go(AppRoutes.matchDetail(match.id));
-            }
+            context.go(AppRoutes.matchDetail(match.id));
+          }
+        }
+
+        Future<void> confirmSaveAndClose() async {
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Salvare e chiudere la partita?'),
+              content: const Text(
+                'Dopo il salvataggio la partita sara chiusa e non potra piu essere aperta in modalita live.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Annulla'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Salva'),
+                ),
+              ],
+            ),
+          );
+          if (confirmed != true || !context.mounted) return;
+          await service.saveAndFinishMatch(match, repository);
+          if (context.mounted) {
+            context.go(AppRoutes.matchDetail(match.id));
           }
         }
 
         Future<void> triggerShowLineSelection(bool nextOnOffense) async {
+          if (_lineSelectionOpen || match.pendingAction != null) return;
           final allPlayers = ref
               .read(rankedPlayersProvider)
               .where((player) => match.presentPlayerIds.contains(player.id))
               .toList();
-          final result = await LineSelectionSheet.show(
-            context,
-            match: match,
-            allPlayers: allPlayers,
-            getPointsPlayed: (pid) => service.pointsPlayed(match, pid),
-            nextOnOffense: nextOnOffense,
-          );
-          if (result != null) {
-            await service.updateLineup(
-              match,
-              result.teamAIds.toList(),
-              result.teamBIds.toList(),
-              nextOnOffense,
-              repository,
+          _lineSelectionOpen = true;
+          try {
+            final result = await LineSelectionSheet.show(
+              context,
+              match: match,
+              allPlayers: allPlayers,
+              getPointsPlayed: (pid) => service.pointsPlayed(match, pid),
+              nextOnOffense: nextOnOffense,
             );
+            if (result != null) {
+              await service.updateLineup(
+                match,
+                result.teamAIds.toList(),
+                result.teamBIds.toList(),
+                nextOnOffense,
+                repository,
+              );
+            }
+          } finally {
+            _lineSelectionOpen = false;
           }
         }
 
-        if (!_firstLoadChecked && match.teamAIds.isEmpty) {
-          _firstLoadChecked = true;
+        if (_lineSelectionOpen && match.pendingAction != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted || !_lineSelectionOpen) return;
+            Navigator.of(context).maybePop();
+          });
+        }
+        if (match.pendingAction?.kind == 'lineup') {
+          _lastLineSelectionPromptKey = null;
+        }
+
+        final needsLineSelection = match.isExternalOpponent
+            ? match.teamAIds.isEmpty
+            : match.teamAIds.isEmpty || match.teamBIds.isEmpty;
+        final lineSelectionPromptKey =
+            '${match.scoreA}-${match.scoreB}-${lastEvent?.pointNumber ?? 1}-${lastEvent?.oursOnOffense ?? true}';
+        if (needsLineSelection &&
+            match.pendingAction == null &&
+            activePause == null &&
+            !match.isFinished &&
+            !_lineSelectionOpen &&
+            _lastLineSelectionPromptKey != lineSelectionPromptKey) {
+          _lastLineSelectionPromptKey = lineSelectionPromptKey;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
             triggerShowLineSelection(lastEvent?.oursOnOffense ?? true);
           });
         }
@@ -237,6 +316,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                     hasDisc: player.id == discHolderId,
                     noDiscHolder: playerOnOffense && discHolderId == null,
                     onEvent: (type, customStatId) async {
+                      if (match.pendingAction != null) return;
                       final res = await service.record(
                         match,
                         type: type,
@@ -270,16 +350,12 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
 
         return Scaffold(
           body: DecoratedBox(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment.topRight,
                 radius: 1.25,
-                colors: [
-                  AppColors.sportBackgroundStart,
-                  AppColors.sportBackgroundMid,
-                  AppColors.sportBackgroundEnd,
-                ],
-                stops: [0, 0.46, 1],
+                colors: AppColors.sportBackgroundGradient(context),
+                stops: const [0, 0.46, 1],
               ),
             ),
             child: SafeArea(
@@ -299,17 +375,20 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                             dimension: 38,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
-                                color: AppColors.white.withValues(alpha: 0.08),
+                                color: AppColors.sportElevated(context)
+                                    .withValues(
+                                      alpha: AppColors.isDark(context)
+                                          ? 0.42
+                                          : 1,
+                                    ),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: AppColors.white.withValues(
-                                    alpha: 0.14,
-                                  ),
+                                  color: AppColors.sportBorder(context),
                                 ),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 FIcons.chevronLeft,
-                                color: AppColors.white,
+                                color: AppColors.sportForeground(context),
                                 size: 18,
                               ),
                             ),
@@ -321,7 +400,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: textTheme.titleMedium?.copyWith(
-                              color: AppColors.white,
+                              color: AppColors.sportForeground(context),
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -333,8 +412,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                         ),
                         RoundHeaderButton(
                           icon: FIcons.save,
-                          onTap: () =>
-                              context.go(AppRoutes.matchDetail(match.id)),
+                          onTap: confirmSaveAndClose,
                         ),
                       ],
                     ),
@@ -352,12 +430,47 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                               context,
                               service,
                               match,
-                              playersById,
                               repository,
-                              settings,
                             )
                           : null,
                     ),
+                    if (match.pendingAction != null)
+                      _PendingLiveActionPanel(
+                        match: match,
+                        playersById: playersById,
+                        onConfirm: () async {
+                          final pending = match.pendingAction;
+                          if (pending == null) return;
+                          final res = await service.confirmPendingAction(
+                            match,
+                            playersById: playersById,
+                            repository: repository,
+                            settings: settings,
+                          );
+                          if (!context.mounted) return;
+                          if (pending.kind == 'finish') {
+                            if (res?.finished == true) {
+                              await showFinalStatsAndExit();
+                            }
+                            return;
+                          }
+                          if (res == null) return;
+                          if (res.finished) {
+                            await service.proposeFinishMatch(match, repository);
+                            return;
+                          }
+                          if (res.halfTimeDue && context.mounted) {
+                            await HalfTimePrompt.show(
+                              context,
+                              service,
+                              match,
+                              repository,
+                            );
+                          }
+                        },
+                        onCancel: () =>
+                            service.cancelPendingAction(match, repository),
+                      ),
                     if (!match.isExternalOpponent && activePause == null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 4),
@@ -438,7 +551,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                               ],
                             ),
                     ),
-                    if (activePause == null)
+                    if (activePause == null && match.pendingAction == null)
                       BottomActions(
                         oursOnOffense: oursOnOffense,
                         showThrowaway: match.tracks(
@@ -509,12 +622,10 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                               }
                             : null,
                         onTimeout: match.hasTimeouts
-                            ? () => service.record(
+                            ? () => service.proposeStatAction(
                                 match,
                                 type: MatchStatType.timeout,
-                                playersById: playersById,
                                 repository: repository,
-                                settings: settings,
                               )
                             : null,
                         onInjury: triggerInjurySubstitution,
@@ -530,6 +641,164 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+class _PendingLiveActionPanel extends StatelessWidget {
+  const _PendingLiveActionPanel({
+    required this.match,
+    required this.playersById,
+    required this.onConfirm,
+    required this.onCancel,
+  });
+
+  final ScrimmageMatch match;
+  final Map<String, Player> playersById;
+  final Future<void> Function() onConfirm;
+  final Future<void> Function() onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = match.pendingAction;
+    if (pending == null) return const SizedBox.shrink();
+    final userId = _currentUserId();
+    final confirmed = pending.confirmedBy(userId);
+    final isCreator = pending.createdByUserId == userId;
+    final label = switch (pending.kind) {
+      'lineup' => 'nuova linea',
+      'finish' => 'fine partita',
+      _ => pending.statType?.label ?? 'azione',
+    };
+    final lineupSummary = pending.kind == 'lineup'
+        ? '${_lineupSummary(pending.teamAIds, pending.teamBIds)} · ${pending.confirmedByUserIds.length}/2'
+        : null;
+    final subtitle = confirmed
+        ? 'Hai gia confermato. In attesa dell altro utente.'
+        : 'Conferma per applicare l evento live.';
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.violet.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.violetLight.withValues(alpha: 0.5)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          spacing: 10,
+          children: [
+            Icon(
+              FIcons.userCheck,
+              color: AppColors.sportForeground(context),
+              size: 18,
+            ),
+            Expanded(
+              child: Column(
+                spacing: 2,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${pending.createdByLabel} propone: $label',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.sportForeground(context),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Text(
+                    lineupSummary ??
+                        '$subtitle ${pending.confirmedByUserIds.length}/2',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.sportMutedForeground(context),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isCreator)
+              _PendingActionButton(
+                label: 'Annulla',
+                onTap: onCancel,
+                muted: true,
+              ),
+            _PendingActionButton(
+              label: confirmed ? 'Confermato' : 'Conferma',
+              onTap: confirmed ? null : onConfirm,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _lineupSummary(List<String> teamAIds, List<String> teamBIds) {
+    String names(List<String> ids) {
+      return ids
+          .map((id) => playersById[id]?.name)
+          .whereType<String>()
+          .join(', ');
+    }
+
+    final teamA = names(teamAIds);
+    final teamB = names(teamBIds);
+    if (match.isExternalOpponent) {
+      return teamA.isEmpty ? 'Linea proposta vuota' : teamA;
+    }
+    return '${match.teamAName}: ${teamA.isEmpty ? '-' : teamA} · ${match.teamBName}: ${teamB.isEmpty ? '-' : teamB}';
+  }
+}
+
+String _currentUserId() {
+  try {
+    return FirebaseAuth.instance.currentUser?.uid ?? 'local-user';
+  } catch (_) {
+    return 'local-user';
+  }
+}
+
+class _PendingActionButton extends StatelessWidget {
+  const _PendingActionButton({
+    required this.label,
+    required this.onTap,
+    this.muted = false,
+  });
+
+  final String label;
+  final Future<void> Function()? onTap;
+  final bool muted;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: enabled ? () => onTap?.call() : null,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: muted
+              ? AppColors.white.withValues(alpha: 0.08)
+              : AppColors.violetLight.withValues(alpha: enabled ? 0.28 : 0.12),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.sportForeground(context).withValues(alpha: 0.14),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: enabled ? AppColors.white : AppColors.sportMutedText,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

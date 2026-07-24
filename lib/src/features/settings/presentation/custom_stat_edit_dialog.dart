@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/settings/domain/custom_stat.dart';
 
 class CustomStatEditDialog extends StatefulWidget {
@@ -110,7 +110,7 @@ class _CustomStatEditDialogState extends State<CustomStatEditDialog> {
                         ? 'Nuova Statistica'
                         : 'Modifica Statistica',
                     style: textTheme.titleLarge?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -147,7 +147,7 @@ class _CustomStatEditDialogState extends State<CustomStatEditDialog> {
                           child: Text(
                             'È un errore (turnover)',
                             style: textTheme.bodyMedium?.copyWith(
-                              color: AppColors.white,
+                              color: AppColors.sportForeground(context),
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -172,7 +172,7 @@ class _CustomStatEditDialogState extends State<CustomStatEditDialog> {
                         child: Text(
                           'Annulla',
                           style: textTheme.labelLarge?.copyWith(
-                            color: AppColors.sportMutedText,
+                            color: AppColors.sportMutedForeground(context),
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -193,7 +193,7 @@ class _CustomStatEditDialogState extends State<CustomStatEditDialog> {
                           child: Text(
                             'Salva',
                             style: textTheme.labelLarge?.copyWith(
-                              color: AppColors.white,
+                              color: AppColors.sportForeground(context),
                               fontWeight: FontWeight.w900,
                             ),
                           ),

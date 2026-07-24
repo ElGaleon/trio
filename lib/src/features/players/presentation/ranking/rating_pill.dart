@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class RatingPill extends StatelessWidget {
   const RatingPill({super.key, required this.rating, this.emphasized = false});
@@ -17,7 +17,9 @@ class RatingPill extends StatelessWidget {
             ? AppColors.violet.withValues(alpha: 0.18)
             : AppColors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
+        border: Border.all(
+          color: AppColors.sportForeground(context).withValues(alpha: 0.12),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -33,7 +35,7 @@ class RatingPill extends StatelessWidget {
             Text(
               '$rating',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),

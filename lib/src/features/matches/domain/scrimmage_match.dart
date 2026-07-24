@@ -1,5 +1,6 @@
 import 'match_stat_type.dart';
 import 'match_stat_event.dart';
+import 'live_pending_action.dart';
 
 class ScrimmageMatch {
   final String id;
@@ -35,6 +36,7 @@ class ScrimmageMatch {
   List<String> enabledCustomStatIds;
   String? eventId;
   String? trainingEventId;
+  LivePendingAction? pendingAction;
 
   ScrimmageMatch({
     required this.id,
@@ -70,6 +72,7 @@ class ScrimmageMatch {
     List<String>? enabledCustomStatIds,
     this.eventId,
     this.trainingEventId,
+    this.pendingAction,
   }) : teamSize = teamSize ?? teamAIds.length,
        teamAName = teamAName ?? (offenseVsDefense ? 'Attacco' : 'A'),
        teamBName = teamBName ?? (offenseVsDefense ? 'Difesa' : 'B'),
@@ -86,6 +89,16 @@ class ScrimmageMatch {
   bool get isDraw => scoreA == scoreB;
 
   bool get teamAWon => scoreA > scoreB;
+
+  bool get isFinished {
+    return statEvents.any((event) => event.type == MatchStatType.matchEnd);
+  }
+
+  bool isLiveAt(DateTime now) {
+    if (isFinished || now.isBefore(createdAt)) return false;
+    final endsAt = createdAt.add(Duration(minutes: durationMinutes));
+    return now.isBefore(endsAt) || now.isAtSameMomentAs(endsAt);
+  }
 
   int get goals => statEvents.where((e) => e.isGoal).length;
 
@@ -139,6 +152,7 @@ class ScrimmageMatch {
       'enabledCustomStatIds': enabledCustomStatIds,
       'eventId': eventId,
       'trainingEventId': trainingEventId,
+      'pendingAction': pendingAction?.toMap(),
     };
   }
 
@@ -192,6 +206,7 @@ class ScrimmageMatch {
       ),
       eventId: map['eventId'] as String?,
       trainingEventId: map['trainingEventId'] as String?,
+      pendingAction: LivePendingAction.fromMap(map['pendingAction']),
     );
   }
 }

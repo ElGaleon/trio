@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
 import 'package:trio/src/features/settings/domain/app_settings.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
@@ -10,7 +10,6 @@ import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/live_stats/application/live_stats_service.dart';
 import 'general_action_button.dart';
-import 'half_time_prompt.dart';
 
 class GoalRecordingHandler {
   const GoalRecordingHandler._();
@@ -49,16 +48,16 @@ class GoalRecordingHandler {
                   Text(
                     closesMatch ? 'Conferma fine match' : 'Conferma meta',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   Text(
                     closesMatch
-                        ? 'Il punteggio diventa $nextScoreA - $nextScoreB and la partita arriva al limite di ${match.pointsLimit}.'
-                        : 'Il punteggio diventa $nextScoreA - $nextScoreB. Confermi?',
+                        ? 'Il punteggio diventa $nextScoreA - $nextScoreB e la partita arriva al limite di ${match.pointsLimit}. La meta dovra essere confermata anche dall altro utente.'
+                        : 'Il punteggio diventa $nextScoreA - $nextScoreB. La meta dovra essere confermata anche dall altro utente.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.sportMutedText,
+                      color: AppColors.sportMutedForeground(context),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -96,31 +95,6 @@ class GoalRecordingHandler {
     if (confirmed != true) return;
     if (!context.mounted) return;
 
-    final res = await service.record(
-      match,
-      type: type,
-      playersById: playersById,
-      repository: repository,
-      settings: settings,
-    );
-    if (!context.mounted) return;
-    if (res.finished) {
-      await onFinish();
-      return;
-    }
-    if (res.halfTimeDue) {
-      await HalfTimePrompt.show(
-        context,
-        service,
-        match,
-        playersById,
-        repository,
-        settings,
-      );
-    }
-    if (!context.mounted) return;
-    if (res.scoredPoint && context.mounted) {
-      await onShowLineSelection(res.oursOnOffense);
-    }
+    await service.proposeStatAction(match, type: type, repository: repository);
   }
 }

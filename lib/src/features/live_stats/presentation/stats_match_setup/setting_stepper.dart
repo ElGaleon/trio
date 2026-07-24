@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'mini_icon_button.dart';
 
 class SettingStepper extends StatelessWidget {
@@ -34,7 +34,7 @@ class SettingStepper extends StatelessWidget {
             child: Text(
               label,
               style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.sportMutedText,
+                color: AppColors.sportMutedForeground(context),
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -49,7 +49,7 @@ class SettingStepper extends StatelessWidget {
               suffix.isEmpty ? '$value' : '$value $suffix',
               textAlign: TextAlign.center,
               style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),

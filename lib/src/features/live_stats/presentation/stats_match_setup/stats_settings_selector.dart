@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 import 'stat_toggle_chip.dart';
@@ -43,9 +43,11 @@ class StatsSettingsSelector extends ConsumerWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.06),
+        color: AppColors.sportForeground(context).withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
+        border: Border.all(
+          color: AppColors.sportForeground(context).withValues(alpha: 0.12),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -60,14 +62,14 @@ class StatsSettingsSelector extends ConsumerWidget {
                 Text(
                   'Statistiche da tracciare',
                   style: textTheme.bodyMedium?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 Text(
                   'Questo set viene salvato nel match e non modifica le partite vecchie.',
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -88,7 +90,9 @@ class StatsSettingsSelector extends ConsumerWidget {
             ),
             if (customStats.isNotEmpty) ...[
               Divider(
-                color: AppColors.white.withValues(alpha: 0.12),
+                color: AppColors.sportForeground(
+                  context,
+                ).withValues(alpha: 0.12),
                 height: 24,
               ),
               Column(
@@ -98,14 +102,14 @@ class StatsSettingsSelector extends ConsumerWidget {
                   Text(
                     'Statistiche personalizzate',
                     style: textTheme.bodyMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   Text(
                     'Abilita le statistiche che hai creato nelle impostazioni.',
                     style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.sportMutedText,
+                      color: AppColors.sportMutedForeground(context),
                       fontWeight: FontWeight.w700,
                     ),
                   ),

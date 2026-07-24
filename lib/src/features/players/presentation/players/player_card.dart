@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/card_actions_menu.dart';
 import 'package:trio/src/shared/sport_avatar_pill.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
@@ -56,7 +56,7 @@ class PlayerCard extends StatelessWidget {
                       Text(
                         player.name,
                         style: textTheme.titleMedium?.copyWith(
-                          color: AppColors.white,
+                          color: AppColors.sportForeground(context),
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                         ),
@@ -70,7 +70,7 @@ class PlayerCard extends StatelessWidget {
                           if (player.isExternal) 'Esterno',
                         ].join(' · '),
                         style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.sportMutedText,
+                          color: AppColors.sportMutedForeground(context),
                           fontWeight: FontWeight.w700,
                         ),
                       ),

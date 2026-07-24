@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class CardActionsMenu extends StatelessWidget {
   const CardActionsMenu({
@@ -21,7 +21,7 @@ class CardActionsMenu extends StatelessWidget {
         FTileGroup(
           children: [
             FTile(
-              prefix: const Icon(FIcons.pencil, size: 18),
+              prefix: Icon(FIcons.pencil, size: 18),
               title: const Text('Modifica'),
               onPress: () {
                 controller.hide();
@@ -46,7 +46,11 @@ class CardActionsMenu extends StatelessWidget {
         variant: .ghost,
         size: .sm,
         onPress: controller.toggle,
-        child: const Icon(FIcons.ellipsis, color: AppColors.white, size: 18),
+        child: Icon(
+          FIcons.ellipsis,
+          color: AppColors.sportForeground(context),
+          size: 18,
+        ),
       ),
     );
   }

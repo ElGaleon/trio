@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trio/src/extensions/theme_extension.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class SportFilterPill extends StatelessWidget {
   const SportFilterPill({
@@ -18,6 +18,8 @@ class SportFilterPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground = AppColors.sportForeground(context);
+    final muted = AppColors.sportMutedForeground(context);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onPressed,
@@ -29,23 +31,22 @@ class SportFilterPill extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? AppColors.violet.withValues(alpha: 0.24)
-              : AppColors.white.withValues(alpha: 0.075),
+              : AppColors.sportGlass(context),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: selected
-                ? AppColors.violet
-                : AppColors.white.withValues(alpha: 0.12),
+            color: selected ? AppColors.violet : AppColors.sportBorder(context),
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           spacing: 4,
           children: [
-            if (icon != null) Icon(icon, color: AppColors.white, size: 16),
+            if (icon != null)
+              Icon(icon, color: selected ? foreground : muted, size: 16),
             Text(
               label,
               style: context.textTheme.bodySmall?.copyWith(
-                color: AppColors.white,
+                color: selected ? foreground : muted,
                 fontWeight: FontWeight.w900,
               ),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class StatWeightField extends StatelessWidget {
   const StatWeightField({
@@ -22,7 +23,7 @@ class StatWeightField extends StatelessWidget {
           child: Text(
             type.label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
+              color: AppColors.sportForeground(context),
               fontWeight: FontWeight.w900,
             ),
           ),

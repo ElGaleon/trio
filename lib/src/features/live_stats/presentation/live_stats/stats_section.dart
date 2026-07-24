@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class StatsSection extends StatelessWidget {
   const StatsSection({super.key, required this.title, required this.children});
@@ -11,9 +11,11 @@ class StatsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.06),
+        color: AppColors.sportForeground(context).withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.10)),
+        border: Border.all(
+          color: AppColors.sportForeground(context).withValues(alpha: 0.10),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -24,7 +26,7 @@ class StatsSection extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),

@@ -19,40 +19,57 @@ class StatsSummaryView extends StatelessWidget {
         StatsSection(
           title: 'Team',
           children: [
-            MetricPill(label: 'Goals', value: '${summary.goals}'),
+            MetricPill(label: 'Mete', value: '${summary.goals}'),
             MetricPill(label: 'Turnover', value: '${summary.turnovers}'),
-            MetricPill(label: 'Break', value: '${summary.breaks}'),
+            MetricPill(label: 'Break fatti', value: '${summary.breaks}'),
             MetricPill(
-              label: 'Pass accuracy',
+              label: 'Break subiti',
+              value: '${summary.breaksConceded}',
+            ),
+            MetricPill(
+              label: 'Turnover generati',
+              value: '${summary.generatedTurnovers}',
+            ),
+            MetricPill(
+              label: 'Precisione passaggi',
               value: summary.passAccuracy.percent,
             ),
             MetricPill(
-              label: 'O-line effectiveness',
+              label: 'Conversione attacco',
               value: summary.oLineEffectiveness.percent,
             ),
             MetricPill(
-              label: 'O-line efficiency',
-              value: summary.oLineEfficiency.percent,
+              label: 'Attacchi puliti',
+              value: summary.cleanOffenseRatio.percent,
             ),
             MetricPill(
-              label: 'D-line turnover',
+              label: 'Turnover/difese',
               value: summary.dLineTurnoverRatio.percent,
             ),
             MetricPill(
-              label: 'D-line conversion',
+              label: 'Conversione dopo turnover',
               value: summary.dLineConversionRatio.percent,
             ),
           ],
         ),
         const SizedBox(height: 12),
         StatsSection(
-          title: 'Player leaders',
+          title: 'Leader giocatori',
           children: [
             MetricPill(label: 'Top scorer', value: summary.topScorer),
-            MetricPill(label: 'Most assist', value: summary.mostAssist),
-            MetricPill(label: 'Most touches', value: summary.mostTouches),
-            MetricPill(label: 'Best defender', value: summary.bestDefender),
-            MetricPill(label: 'Most played', value: summary.mostPlayed),
+            MetricPill(label: 'Assist', value: summary.mostAssist),
+            MetricPill(
+              label: 'Assist secondari',
+              value: summary.mostSecondaryAssist,
+            ),
+            MetricPill(label: 'Tocchi', value: summary.mostTouches),
+            MetricPill(label: 'Difesa', value: summary.bestDefender),
+            MetricPill(label: 'Piu in campo', value: summary.mostPlayed),
+            MetricPill(label: 'Connessione', value: summary.bestConnection),
+            MetricPill(
+              label: 'Coppia assist/meta',
+              value: summary.bestAssistGoalPair,
+            ),
           ],
         ),
         const SizedBox(height: 12),

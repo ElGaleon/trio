@@ -40,14 +40,14 @@ class RecentTeamsPicker extends StatelessWidget {
               final selected = _hasSameMembers(selectedIds, team.playerIds);
               return FTile(
                 selected: selected,
-                prefix: const Icon(FIcons.zap, size: 18),
+                prefix: Icon(FIcons.zap, size: 18),
                 title: Text(team.name),
                 subtitle: Text(team.playerNames.join(', ')),
                 details: FBadge(
                   variant: selected ? .primary : .secondary,
                   child: Text('${team.playerIds.length}'),
                 ),
-                suffix: selected ? const Icon(FIcons.check, size: 18) : null,
+                suffix: selected ? Icon(FIcons.check, size: 18) : null,
                 onPress: () => onApplyRecentTeam(team),
               );
             }),

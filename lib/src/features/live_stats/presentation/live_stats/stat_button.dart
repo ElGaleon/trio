@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class StatButton extends StatelessWidget {
   const StatButton({
@@ -33,7 +33,7 @@ class StatButton extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.white,
+              color: AppColors.sportForeground(context),
               fontWeight: FontWeight.w900,
             ),
           ),

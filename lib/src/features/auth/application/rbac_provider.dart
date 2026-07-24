@@ -89,6 +89,7 @@ Set<AppPermission> permissionsForRole(AppRole role) {
 
 AppPermission? permissionForLocation(String location) {
   final path = Uri.parse(location).path;
+  if (path == '/dashboard') return AppPermission.viewRanking;
   if (path == '/ranking') return AppPermission.viewRanking;
   if (path == '/matches/new' || path == '/matches/new_stats') {
     return AppPermission.createMatch;
@@ -105,8 +106,9 @@ AppPermission? permissionForLocation(String location) {
     return AppPermission.editPlayer;
   }
   if (path.startsWith('/players')) return AppPermission.viewPlayers;
+  if (path == '/me') return AppPermission.viewPlayerStats;
   if (path == '/stats') return AppPermission.viewPlayerStats;
-  if (path == '/settings') return AppPermission.viewSettings;
+  if (path.startsWith('/settings')) return AppPermission.viewSettings;
   if (path == '/events') return AppPermission.viewEvents;
   return null;
 }

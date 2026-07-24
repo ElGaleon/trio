@@ -13,6 +13,52 @@ import 'package:trio/src/features/matches/application/matches_providers.dart';
 import 'package:trio/src/features/players/application/player_stats_provider.dart';
 
 void main() {
+  test('detects live matches only while they are in progress', () {
+    final now = DateTime(2026, 7, 22, 20);
+    final live = ScrimmageMatch(
+      id: 'live',
+      createdAt: now.subtract(const Duration(minutes: 20)),
+      durationMinutes: 80,
+      teamAIds: const [],
+      teamBIds: const [],
+      scoreA: 0,
+      scoreB: 0,
+    );
+    final expired = ScrimmageMatch(
+      id: 'expired',
+      createdAt: now.subtract(const Duration(days: 1)),
+      durationMinutes: 80,
+      teamAIds: const [],
+      teamBIds: const [],
+      scoreA: 0,
+      scoreB: 0,
+    );
+    final finished = ScrimmageMatch(
+      id: 'finished',
+      createdAt: now.subtract(const Duration(minutes: 20)),
+      durationMinutes: 80,
+      teamAIds: const [],
+      teamBIds: const [],
+      scoreA: 0,
+      scoreB: 0,
+      statEvents: [
+        MatchStatEvent(
+          id: 'end',
+          type: MatchStatType.matchEnd,
+          createdAt: now,
+          pointNumber: 1,
+          scoreA: 0,
+          scoreB: 0,
+          oursOnOffense: true,
+        ),
+      ],
+    );
+
+    expect(live.isLiveAt(now), isTrue);
+    expect(expired.isLiveAt(now), isFalse);
+    expect(finished.isLiveAt(now), isFalse);
+  });
+
   test('expands weekly recurring events', () {
     final events = expandRecurringEvents([
       TeamEvent(

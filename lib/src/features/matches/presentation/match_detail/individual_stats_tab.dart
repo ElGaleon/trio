@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:trio/src/extensions/double_extension.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/final_stats_summary.dart';
 import 'package:trio/src/features/matches/domain/individual_stat_line.dart';
 import 'package:trio/src/shared/sport_avatar_pill.dart';
@@ -21,7 +22,9 @@ class StatPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.black.withValues(alpha: 0.20),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.10)),
+        border: Border.all(
+          color: AppColors.sportForeground(context).withValues(alpha: 0.10),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -40,7 +43,7 @@ class StatPill extends StatelessWidget {
             Text(
               value,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -72,9 +75,11 @@ class LeaderCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.05),
+        color: AppColors.sportForeground(context).withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.08)),
+        border: Border.all(
+          color: AppColors.sportForeground(context).withValues(alpha: 0.08),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -91,7 +96,11 @@ class LeaderCard extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(8),
-                child: Icon(icon, color: AppColors.white, size: 16),
+                child: Icon(
+                  icon,
+                  color: AppColors.sportForeground(context),
+                  size: 16,
+                ),
               ),
             ),
             Expanded(
@@ -102,14 +111,14 @@ class LeaderCard extends StatelessWidget {
                   Text(
                     names,
                     style: textTheme.bodyMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   Text(
                     '$label · $value $valueSuffix',
                     style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.sportMutedText,
+                      color: AppColors.sportMutedForeground(context),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -158,7 +167,7 @@ class GroupedStatsBlock extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -179,9 +188,11 @@ class IndividualStatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.06),
+        color: AppColors.sportForeground(context).withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.10)),
+        border: Border.all(
+          color: AppColors.sportForeground(context).withValues(alpha: 0.10),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -203,12 +214,19 @@ class IndividualStatCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   Text(
                     'M ${row.goals} · A ${row.assists} · T ${row.touches} · D ${row.defenses} · E ${row.errors} · PT ${row.pointsPlayed}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: sportMutedText,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
+                    'Tocchi/PG ${row.touchesPerPoint.percent} · Mete/PG ${row.goalsPerPoint.percent} · Assist/PG ${row.assistsPerPoint.percent}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: sportMutedText,
                       fontWeight: FontWeight.w800,
@@ -231,7 +249,7 @@ class IndividualStatCard extends StatelessWidget {
                 child: Text(
                   row.rating.toStringAsFixed(1),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -260,16 +278,22 @@ class IndividualStatsTab extends StatelessWidget {
     final summary = FinalStatsSummary.from(match, playersById);
     final scorer = parseLeader(summary.topScorer);
     final assistant = parseLeader(summary.mostAssist);
+    final secondaryAssistant = parseLeader(summary.mostSecondaryAssist);
     final touches = parseLeader(summary.mostTouches);
     final defender = parseLeader(summary.bestDefender);
     final presence = parseLeader(summary.mostPlayed);
+    final connection = parseLeader(summary.bestConnection);
+    final assistGoalPair = parseLeader(summary.bestAssistGoalPair);
 
     final hasLeaders =
         scorer != null ||
         assistant != null ||
+        secondaryAssistant != null ||
         touches != null ||
         defender != null ||
-        presence != null;
+        presence != null ||
+        connection != null ||
+        assistGoalPair != null;
 
     return Column(
       spacing: 12,
@@ -298,6 +322,16 @@ class IndividualStatsTab extends StatelessWidget {
                       icon: FIcons.arrowRight,
                       valueSuffix: assistant.$2 == '1' ? 'assist' : 'assist',
                     ),
+                  if (secondaryAssistant != null)
+                    LeaderCard(
+                      label: 'Assist secondari',
+                      names: secondaryAssistant.$1,
+                      value: secondaryAssistant.$2,
+                      icon: FIcons.arrowRight,
+                      valueSuffix: secondaryAssistant.$2 == '1'
+                          ? 'assist'
+                          : 'assist',
+                    ),
                   if (touches != null)
                     LeaderCard(
                       label: 'Most Touches',
@@ -322,6 +356,24 @@ class IndividualStatsTab extends StatelessWidget {
                       icon: FIcons.timer,
                       valueSuffix: presence.$2 == '1' ? 'punto' : 'punti',
                     ),
+                  if (connection != null)
+                    LeaderCard(
+                      label: 'Connessione passaggi',
+                      names: connection.$1,
+                      value: connection.$2,
+                      icon: FIcons.activity,
+                      valueSuffix: connection.$2 == '1'
+                          ? 'passaggio'
+                          : 'passaggi',
+                    ),
+                  if (assistGoalPair != null)
+                    LeaderCard(
+                      label: 'Coppia assist/meta',
+                      names: assistGoalPair.$1,
+                      value: assistGoalPair.$2,
+                      icon: FIcons.flag,
+                      valueSuffix: assistGoalPair.$2 == '1' ? 'meta' : 'mete',
+                    ),
                 ],
               ),
             ],
@@ -336,6 +388,28 @@ class IndividualStatsTab extends StatelessWidget {
                 StatPill(label: item.name, value: '${item.value} pt'),
           ],
         ),
+        GroupedStatsBlock(
+          title: 'Efficienza per punto',
+          children: [
+            if (rows.isEmpty)
+              const StatPill(label: 'Nessun dato', value: '-')
+            else
+              SizedBox(
+                width: double.infinity,
+                child: Column(
+                  spacing: 6,
+                  children: [
+                    for (final row in rows)
+                      _EfficiencyLine(
+                        name: row.player.name,
+                        value:
+                            'T ${row.touchesPerPoint.percent} · M ${row.goalsPerPoint.percent} · A ${row.assistsPerPoint.percent}',
+                      ),
+                  ],
+                ),
+              ),
+          ],
+        ),
         GlassDecoration(
           radius: 28,
           child: Padding(
@@ -346,7 +420,7 @@ class IndividualStatsTab extends StatelessWidget {
                 Text(
                   'Performance Giocatori',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -365,6 +439,52 @@ class IndividualStatsTab extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _EfficiencyLine extends StatelessWidget {
+  const _EfficiencyLine({required this.name, required this.value});
+
+  final String name;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.sportForeground(context).withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.sportForeground(context).withValues(alpha: 0.08),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Row(
+          spacing: 10,
+          children: [
+            Expanded(
+              child: Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.sportForeground(context),
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: sportMutedText,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

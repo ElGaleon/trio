@@ -86,9 +86,9 @@ class PresenceStep extends StatelessWidget {
                     '${player.role.label} · ${player.linePreference?.label ?? 'Nessuna'}',
                   ),
                   suffix: selected
-                      ? const Icon(FIcons.check, size: 18)
+                      ? Icon(FIcons.check, size: 18)
                       : disabled
-                      ? const Icon(FIcons.x, size: 18)
+                      ? Icon(FIcons.x, size: 18)
                       : null,
                   onPress: disabled ? null : () => onChanged(player.id),
                 );

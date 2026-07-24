@@ -12,8 +12,9 @@ import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/constants/app_constants.dart';
 import 'package:trio/src/features/auth/application/rbac_provider.dart';
 import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:trio/src/features/events/application/events_providers.dart';
 import 'package:trio/src/features/matches/application/matches_providers.dart';
 import 'package:trio/src/features/matches/application/matches_view_mode.dart';
 import 'match_date_filters.dart';
@@ -31,6 +32,9 @@ class MatchesScreen extends ConsumerWidget {
     final repository = ref.watch(firestoreTrioRepositoryProvider);
     final matches = ref.watch(matchesProvider);
     final filteredMatches = ref.watch(filteredMatchesProvider);
+    final eventIds = {
+      for (final event in ref.watch(eventsProvider)) event.storageId,
+    };
     final startDate = ref.watch(matchesStartDateFilterProvider);
     final endDate = ref.watch(matchesEndDateFilterProvider);
     final viewMode = ref.watch(matchesViewModeProvider);
@@ -41,7 +45,9 @@ class MatchesScreen extends ConsumerWidget {
         players.length >= AppConstants.minTeamSize * 2;
     final canEdit = can(role, AppPermission.editMatch);
     final canDelete = can(role, AppPermission.deleteMatch);
+    final canOpenLive = can(role, AppPermission.recordLiveStats);
     final hasFilters = startDate != null || endDate != null;
+    final now = DateTime.now();
 
     return SportScreenShell(
       title: 'Matches',
@@ -100,8 +106,17 @@ class MatchesScreen extends ConsumerWidget {
                           : ResponsiveGrid(
                               minTileWidth: 360,
                               children: filteredMatches.map((match) {
+                                final liveNow = match.isLiveAt(now);
+                                final planned =
+                                    !liveNow &&
+                                    (eventIds.contains(match.eventId) ||
+                                        eventIds.contains(
+                                          match.trainingEventId,
+                                        ));
                                 return MatchCard(
                                   match: match,
+                                  highlighted: liveNow,
+                                  planned: planned,
                                   onTap: () => context.go(
                                     AppRoutes.matchDetail(match.id),
                                   ),
@@ -113,6 +128,11 @@ class MatchesScreen extends ConsumerWidget {
                                       : null,
                                   onDelete: canDelete
                                       ? () => repository?.deleteMatch(match.id)
+                                      : null,
+                                  onLive: canOpenLive && liveNow
+                                      ? () => context.go(
+                                          AppRoutes.liveStats(match.id),
+                                        )
                                       : null,
                                 );
                               }).toList(),
@@ -166,14 +186,14 @@ class MatchesScreen extends ConsumerWidget {
                     Text(
                       'Nuova Partita',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppColors.white,
+                        color: AppColors.sportForeground(context),
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                     Text(
                       'Scegli il tipo di partita da registrare',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.sportMutedText,
+                        color: AppColors.sportMutedForeground(context),
                         fontWeight: FontWeight.w800,
                       ),
                     ),

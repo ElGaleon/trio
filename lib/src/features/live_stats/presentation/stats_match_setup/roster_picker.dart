@@ -3,7 +3,7 @@ import 'package:forui/forui.dart';
 
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/shared/sport_player_avatar.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 
@@ -59,7 +59,7 @@ class _RosterPickerState extends State<RosterPicker> {
                   child: Text(
                     '${widget.title} · ${widget.preferredLine.label}',
                     style: textTheme.titleMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -69,7 +69,7 @@ class _RosterPickerState extends State<RosterPicker> {
                       ? '${widget.selectedIds.length}/${widget.minimum} min'
                       : '${widget.selectedIds.length}/${widget.maximum}',
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -81,10 +81,14 @@ class _RosterPickerState extends State<RosterPicker> {
               onTap: () => setState(() => _showOtherLine = !_showOtherLine),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.06),
+                  color: AppColors.sportForeground(
+                    context,
+                  ).withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: AppColors.white.withValues(alpha: 0.10),
+                    color: AppColors.sportForeground(
+                      context,
+                    ).withValues(alpha: 0.10),
                   ),
                 ),
                 child: Padding(
@@ -98,7 +102,7 @@ class _RosterPickerState extends State<RosterPicker> {
                         child: Text(
                           'Giocatori $otherLineLabel',
                           style: textTheme.bodyMedium?.copyWith(
-                            color: AppColors.white,
+                            color: AppColors.sportForeground(context),
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -106,7 +110,7 @@ class _RosterPickerState extends State<RosterPicker> {
                       Text(
                         '${otherPlayers.where((player) => widget.selectedIds.contains(player.id)).length}/${otherPlayers.length}',
                         style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.sportMutedText,
+                          color: AppColors.sportMutedForeground(context),
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -114,9 +118,9 @@ class _RosterPickerState extends State<RosterPicker> {
                       AnimatedRotation(
                         turns: _showOtherLine ? 0.5 : 0,
                         duration: const Duration(milliseconds: 180),
-                        child: const Icon(
+                        child: Icon(
                           FIcons.chevronDown,
-                          color: AppColors.white,
+                          color: AppColors.sportForeground(context),
                           size: 18,
                         ),
                       ),
@@ -180,7 +184,7 @@ class _RosterPickerState extends State<RosterPicker> {
                   child: Text(
                     player.name,
                     style: textTheme.titleSmall?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),

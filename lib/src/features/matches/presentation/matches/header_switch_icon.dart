@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class HeaderSwitchIcon extends StatelessWidget {
   const HeaderSwitchIcon({
@@ -29,7 +29,7 @@ class HeaderSwitchIcon extends StatelessWidget {
               : AppColors.transparent,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Icon(icon, color: AppColors.white, size: 17),
+        child: Icon(icon, color: AppColors.sportForeground(context), size: 17),
       ),
     );
   }

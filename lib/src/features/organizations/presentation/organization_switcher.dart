@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:go_router/go_router.dart';
+import 'package:trio/src/extensions/theme_extension.dart';
 
 import 'package:trio/src/features/auth/application/auth_service.dart';
 import 'package:trio/src/features/organizations/application/organization_providers.dart';
 import 'package:trio/src/features/organizations/domain/organization.dart';
+import 'package:trio/src/routing/app_router.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class OrganizationSwitcher extends ConsumerWidget {
-  const OrganizationSwitcher({super.key, this.compact = false});
-
-  final bool compact;
+  const OrganizationSwitcher({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,10 +24,10 @@ class OrganizationSwitcher extends ConsumerWidget {
     if (organizations.isEmpty) {
       return FButton(
         variant: FButtonVariant.outline,
-        size: compact ? FButtonSizeVariant.sm : FButtonSizeVariant.md,
+        size: FButtonSizeVariant.sm,
         mainAxisSize: MainAxisSize.min,
         onPress: () => showCreateOrganizationDialog(context, ref),
-        prefix: const Icon(Icons.add_business_outlined),
+        prefix: Icon(Icons.add_business_outlined),
         child: const Text('Crea workspace'),
       );
     }
@@ -49,7 +51,7 @@ class OrganizationSwitcher extends ConsumerWidget {
         FItemGroup(
           children: [
             FItem(
-              prefix: const Icon(Icons.add),
+              prefix: Icon(Icons.add),
               title: const Text('Aggiungi organizzazione'),
               onPress: () {
                 controller.hide();
@@ -58,11 +60,11 @@ class OrganizationSwitcher extends ConsumerWidget {
             ),
             if (canEditOrganization)
               FItem(
-                prefix: const Icon(Icons.settings_outlined),
+                prefix: Icon(Icons.settings_outlined),
                 title: const Text('Dati squadra'),
                 onPress: () {
                   controller.hide();
-                  showOrganizationDataDialog(context, ref, activeOrganization);
+                  context.go(AppRoutes.organization);
                 },
               ),
           ],
@@ -70,18 +72,30 @@ class OrganizationSwitcher extends ConsumerWidget {
       ],
       builder: (context, controller, child) {
         return FButton(
-          variant: FButtonVariant.outline,
-          size: compact ? FButtonSizeVariant.sm : FButtonSizeVariant.md,
-          mainAxisSize: MainAxisSize.min,
+          variant: FButtonVariant.ghost,
+          size: FButtonSizeVariant.sm,
+          mainAxisSize: MainAxisSize.max,
           onPress: controller.toggle,
           prefix: _OrganizationLogo(organization: activeOrganization),
-          suffix: const Icon(FIcons.chevronsUpDown),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: compact ? 150 : 240),
-            child: Text(
-              activeOrganization?.name ?? 'Seleziona workspace',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+          suffix: Icon(FIcons.chevronsUpDown),
+          child: Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 0,
+              children: [
+                Text(
+                  activeOrganization?.name.toUpperCase() ?? 'Seleziona workspace',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.labelLarge,
+                ),
+                Text(
+                  'Organization',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodySmall?.copyWith(color: AppColors.violetLight),
+                ),
+              ],
             ),
           ),
         );
@@ -97,8 +111,8 @@ class OrganizationSwitcher extends ConsumerWidget {
   }) {
     return FItem(
       prefix: _OrganizationLogo(organization: organization),
-      title: Text(organization.name),
-      suffix: selected ? const Icon(FIcons.check, size: 18) : null,
+      title: Text(organization.name.toUpperCase()),
+      suffix: selected ? Icon(FIcons.check, size: 18) : null,
       selected: selected,
       onPress: () {
         ref.read(selectedOrganizationIdProvider.notifier).set(organization.id);
@@ -117,17 +131,17 @@ class _OrganizationLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final logoUrl = organization?.logoUrl?.trim();
     if (logoUrl == null || logoUrl.isEmpty) {
-      return const Icon(Icons.business_outlined);
+      return Icon(Icons.business_outlined);
     }
     return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(4),
       child: Image.network(
         logoUrl,
-        width: 22,
-        height: 22,
+        width: 24,
+        height: 24,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.business_outlined),
+            Icon(FIcons.layers),
       ),
     );
   }

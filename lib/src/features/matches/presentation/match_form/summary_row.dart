@@ -14,7 +14,7 @@ class SummaryRow extends StatelessWidget {
         spacing: 8,
         children: [
           Expanded(child: Text(label)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w900)),
+          Text(value, style: TextStyle(fontWeight: FontWeight.w900)),
         ],
       ),
     );

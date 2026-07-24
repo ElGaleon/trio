@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:trio/src/routing/app_router.dart';
 import 'package:trio/src/shared/responsive_layout.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 const sportMutedText = AppColors.sportMutedText;
 
@@ -68,6 +68,7 @@ class _SportScreenShellState extends State<SportScreenShell> {
   @override
   Widget build(BuildContext context) {
     final safeTop = MediaQuery.paddingOf(context).top;
+    final isDark = AppColors.isDark(context);
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final size = MediaQuery.sizeOf(context);
     final showFloatingInHeader = kIsWeb && widget.floatingActionButton != null;
@@ -98,107 +99,110 @@ class _SportScreenShellState extends State<SportScreenShell> {
         ((size.width - contentWidth) / 2).clamp(0.0, double.infinity) +
         horizontalPadding;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light.copyWith(
-        statusBarColor: AppColors.transparent,
-        systemNavigationBarColor: AppColors.sportBackgroundEnd,
-        systemNavigationBarDividerColor: AppColors.transparent,
-      ),
-      child: SizedBox.expand(
-        child: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment.topRight,
-              radius: 1.25,
-              colors: [
-                AppColors.sportBackgroundStart,
-                AppColors.sportBackgroundMid,
-                AppColors.sportBackgroundEnd,
-              ],
-              stops: [0, 0.46, 1],
-            ),
+      value: (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+          .copyWith(
+            statusBarColor: AppColors.transparent,
+            systemNavigationBarColor: AppColors.pageBackground(context),
+            systemNavigationBarDividerColor: AppColors.transparent,
           ),
-          child: Stack(
-            children: [
-              SafeArea(
-                bottom: false,
-                child: Stack(
-                  children: [
-                    CustomScrollView(
-                      controller: _scrollController,
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      slivers: [
-                        SliverAppBar(
-                          pinned: true,
-                          automaticallyImplyLeading: false,
-                          backgroundColor: AppColors.transparent,
-                          surfaceTintColor: AppColors.transparent,
-                          elevation: 0,
-                          toolbarHeight: _minHeaderExtent,
-                          collapsedHeight: _minHeaderExtent,
-                          expandedHeight: _maxHeaderExtent,
-                          flexibleSpace: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final range = _maxHeaderExtent - _minHeaderExtent;
-                              final currentHeight = constraints.biggest.height;
-                              final progress =
-                                  ((_maxHeaderExtent - currentHeight) / range)
-                                      .clamp(0.0, 1.0);
-                              return SportHeaderContent(
-                                title: widget.title,
-                                subtitle: widget.subtitle,
-                                progress: progress,
-                                showBackButton: widget.showBackButton,
-                                actions: headerActions,
-                              );
-                            },
+      child: Material(
+        type: MaterialType.transparency,
+        child: SizedBox.expand(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.topRight,
+                radius: 1.25,
+                colors: AppColors.sportBackgroundGradient(context),
+                stops: const [0, 0.46, 1],
+              ),
+            ),
+            child: Stack(
+              children: [
+                SafeArea(
+                  bottom: false,
+                  child: Stack(
+                    children: [
+                      CustomScrollView(
+                        controller: _scrollController,
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        slivers: [
+                          SliverAppBar(
+                            pinned: true,
+                            automaticallyImplyLeading: false,
+                            backgroundColor: AppColors.transparent,
+                            surfaceTintColor: AppColors.transparent,
+                            elevation: 0,
+                            toolbarHeight: _minHeaderExtent,
+                            collapsedHeight: _minHeaderExtent,
+                            expandedHeight: _maxHeaderExtent,
+                            flexibleSpace: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final range =
+                                    _maxHeaderExtent - _minHeaderExtent;
+                                final currentHeight =
+                                    constraints.biggest.height;
+                                final progress =
+                                    ((_maxHeaderExtent - currentHeight) / range)
+                                        .clamp(0.0, 1.0);
+                                return SportHeaderContent(
+                                  title: widget.title,
+                                  subtitle: widget.subtitle,
+                                  progress: progress,
+                                  showBackButton: widget.showBackButton,
+                                  actions: headerActions,
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        SliverPadding(
-                          padding: contentPadding,
-                          sliver: SliverToBoxAdapter(
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: ResponsiveLayout.contentMaxWidth,
+                          SliverPadding(
+                            padding: contentPadding,
+                            sliver: SliverToBoxAdapter(
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: ResponsiveLayout.contentMaxWidth,
+                                  ),
+                                  child: widget.child,
                                 ),
-                                child: widget.child,
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    if (floatingActionButton != null)
-                      Positioned(
-                        right: floatingRight,
-                        bottom: 16 + keyboardInset,
-                        child: floatingActionButton,
+                        ],
                       ),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: safeTop,
-                child: IgnorePointer(
-                  child: ValueListenableBuilder<double>(
-                    valueListenable: _headerProgress,
-                    builder: (context, progress, child) {
-                      return DecoratedBox(
-                        decoration: pinnedHeaderDecoration(
-                          progress,
-                          includeBorder: false,
+                      if (floatingActionButton != null)
+                        Positioned(
+                          right: floatingRight,
+                          bottom: 16 + keyboardInset,
+                          child: floatingActionButton,
                         ),
-                      );
-                    },
+                    ],
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: safeTop,
+                  child: IgnorePointer(
+                    child: ValueListenableBuilder<double>(
+                      valueListenable: _headerProgress,
+                      builder: (context, progress, child) {
+                        return DecoratedBox(
+                          decoration: pinnedHeaderDecoration(
+                            progress,
+                            includeBorder: false,
+                            context: context,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -225,12 +229,14 @@ class SportHeaderContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final foreground = AppColors.sportForeground(context);
+    final muted = AppColors.sportMutedForeground(context);
     final titleSize = 40 - (8 * progress);
     final actionSize = 44 - (6 * progress);
     final topPadding = 16 - (8 * progress);
     final bottomPadding = 12 - (4 * progress);
     return DecoratedBox(
-      decoration: pinnedHeaderDecoration(progress),
+      decoration: pinnedHeaderDecoration(progress, context: context),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(
@@ -264,7 +270,7 @@ class SportHeaderContent extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: textTheme.displaySmall?.copyWith(
-                          color: AppColors.white,
+                          color: foreground,
                           fontSize: titleSize,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0,
@@ -277,7 +283,7 @@ class SportHeaderContent extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.bodySmall?.copyWith(
-                            color: sportMutedText,
+                            color: muted,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -324,12 +330,14 @@ class SportHeaderDelegate extends SliverPersistentHeaderDelegate {
   ) {
     final progress = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
     final textTheme = Theme.of(context).textTheme;
+    final foreground = AppColors.sportForeground(context);
+    final muted = AppColors.sportMutedForeground(context);
     final titleSize = 40 - (8 * progress);
     final actionSize = 44 - (6 * progress);
     final topPadding = 16 - (8 * progress);
     final bottomPadding = 12 - (4 * progress);
     return DecoratedBox(
-      decoration: pinnedHeaderDecoration(progress),
+      decoration: pinnedHeaderDecoration(progress, context: context),
       child: Padding(
         padding: EdgeInsets.fromLTRB(16, topPadding, 16, bottomPadding),
         child: Row(
@@ -358,7 +366,7 @@ class SportHeaderDelegate extends SliverPersistentHeaderDelegate {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.displaySmall?.copyWith(
-                      color: AppColors.white,
+                      color: foreground,
                       fontSize: titleSize,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0,
@@ -378,7 +386,7 @@ class SportHeaderDelegate extends SliverPersistentHeaderDelegate {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: textTheme.bodyMedium?.copyWith(
-                                color: sportMutedText,
+                                color: muted,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -428,6 +436,7 @@ class HeaderIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground = AppColors.sportForeground(context);
     return Tooltip(
       message: tooltip,
       child: Semantics(
@@ -443,15 +452,13 @@ class HeaderIconButton extends StatelessWidget {
               height: size,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.08),
+                  color: AppColors.sportElevated(
+                    context,
+                  ).withValues(alpha: AppColors.isDark(context) ? 0.42 : 1),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.white.withValues(alpha: 0.14),
-                  ),
+                  border: Border.all(color: AppColors.sportBorder(context)),
                 ),
-                child: Center(
-                  child: Icon(icon, color: AppColors.white, size: 21),
-                ),
+                child: Center(child: Icon(icon, color: foreground, size: 21)),
               ),
             ),
           ),
@@ -464,14 +471,19 @@ class HeaderIconButton extends StatelessWidget {
 BoxDecoration pinnedHeaderDecoration(
   double progress, {
   bool includeBorder = true,
+  BuildContext? context,
 }) {
+  final isDark = context == null || AppColors.isDark(context);
+  final surface = context == null
+      ? AppColors.sportHeaderDark
+      : AppColors.sportSurface(context);
   return BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        AppColors.sportHeaderDark.withValues(alpha: 0.92 * progress),
-        AppColors.sportHeaderDark.withValues(alpha: 0.70 * progress),
+        surface.withValues(alpha: (isDark ? 0.92 : 0.98) * progress),
+        surface.withValues(alpha: (isDark ? 0.70 : 0.88) * progress),
       ],
     ),
     border: includeBorder

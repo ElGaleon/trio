@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:trio/src/shared/match_card.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
 import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'compact_match_title.dart';
 
@@ -40,7 +40,9 @@ class MatchScoreHeaderDelegate extends SliverPersistentHeaderDelegate {
         ),
         border: Border(
           bottom: BorderSide(
-            color: AppColors.white.withValues(alpha: 0.08 + 0.08 * progress),
+            color: AppColors.sportForeground(
+              context,
+            ).withValues(alpha: 0.08 + 0.08 * progress),
           ),
         ),
       ),

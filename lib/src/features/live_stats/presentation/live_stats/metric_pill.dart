@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class MetricPill extends StatelessWidget {
   const MetricPill({super.key, required this.label, required this.value});
@@ -13,7 +13,9 @@ class MetricPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.black.withValues(alpha: 0.20),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.10)),
+        border: Border.all(
+          color: AppColors.sportForeground(context).withValues(alpha: 0.10),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -25,14 +27,14 @@ class MetricPill extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.sportMutedText,
+                color: AppColors.sportMutedForeground(context),
                 fontWeight: FontWeight.w800,
               ),
             ),
             Text(
               value,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),

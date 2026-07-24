@@ -17,6 +17,8 @@ class MatchStatEvent {
     this.pullInBounds,
     this.statValue,
     this.customStatId,
+    this.createdByUserId,
+    this.createdByLabel,
   });
 
   final String id;
@@ -34,6 +36,8 @@ class MatchStatEvent {
   final bool? pullInBounds;
   final double? statValue;
   final String? customStatId;
+  final String? createdByUserId;
+  final String? createdByLabel;
 
   bool get isGoal => type == MatchStatType.goal;
   bool get isError => type.isError;
@@ -60,6 +64,8 @@ class MatchStatEvent {
       'pullInBounds': pullInBounds,
       'statValue': statValue,
       'customStatId': customStatId,
+      'createdByUserId': createdByUserId,
+      'createdByLabel': createdByLabel,
     };
   }
 
@@ -86,6 +92,8 @@ class MatchStatEvent {
       pullInBounds: map['pullInBounds'] as bool?,
       statValue: (map['statValue'] as num?)?.toDouble(),
       customStatId: map['customStatId'] as String?,
+      createdByUserId: map['createdByUserId'] as String?,
+      createdByLabel: map['createdByLabel'] as String?,
     );
   }
 }

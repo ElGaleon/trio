@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 
 class LineupPlayerTile extends StatelessWidget {
@@ -53,7 +53,7 @@ class LineupPlayerTile extends StatelessWidget {
                     ? Text(
                         player.initials,
                         style: textTheme.labelMedium?.copyWith(
-                          color: AppColors.white,
+                          color: AppColors.sportForeground(context),
                           fontWeight: FontWeight.w900,
                         ),
                       )
@@ -69,14 +69,14 @@ class LineupPlayerTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.white,
+                        color: AppColors.sportForeground(context),
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                     Text(
                       '${player.linePreference?.label ?? 'Nessuna'} · ${player.role.label}',
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.sportMutedText,
+                        color: AppColors.sportMutedForeground(context),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -88,7 +88,9 @@ class LineupPlayerTile extends StatelessWidget {
                   color: AppColors.black.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: AppColors.white.withValues(alpha: 0.10),
+                    color: AppColors.sportForeground(
+                      context,
+                    ).withValues(alpha: 0.10),
                   ),
                 ),
                 child: Padding(
@@ -99,7 +101,7 @@ class LineupPlayerTile extends StatelessWidget {
                   child: Text(
                     '$pointsPlayed pt',
                     style: textTheme.labelMedium?.copyWith(
-                      color: AppColors.sportMutedText,
+                      color: AppColors.sportMutedForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),

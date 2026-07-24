@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class FormNavButton extends StatelessWidget {
   const FormNavButton({
@@ -37,7 +37,9 @@ class FormNavButton extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.white.withValues(alpha: enabled ? 1 : 0.45),
+            color: AppColors.sportForeground(
+              context,
+            ).withValues(alpha: enabled ? 1 : 0.45),
             fontWeight: FontWeight.w900,
           ),
         ),

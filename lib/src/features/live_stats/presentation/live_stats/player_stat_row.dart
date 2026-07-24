@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
@@ -38,7 +38,9 @@ class PlayerStatRow extends ConsumerWidget {
             ? AppColors.violet.withValues(alpha: 0.10)
             : AppColors.transparent,
         border: Border(
-          bottom: BorderSide(color: AppColors.white.withValues(alpha: 0.08)),
+          bottom: BorderSide(
+            color: AppColors.sportForeground(context).withValues(alpha: 0.08),
+          ),
         ),
       ),
       child: Padding(
@@ -54,7 +56,7 @@ class PlayerStatRow extends ConsumerWidget {
                   Text(
                     _numberLabel(player),
                     style: textTheme.titleLarge?.copyWith(
-                      color: AppColors.sportMutedText,
+                      color: AppColors.sportMutedForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -68,7 +70,7 @@ class PlayerStatRow extends ConsumerWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.bodySmall?.copyWith(
-                            color: AppColors.white,
+                            color: AppColors.sportForeground(context),
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -103,7 +105,7 @@ class PlayerStatRow extends ConsumerWidget {
                     clipBehavior: Clip.none,
                     child: Row(
                       spacing: 6,
-                      children: _buttons(actions, useFullLabels),
+                      children: _buttons(context, actions, useFullLabels),
                     ),
                   );
                 },
@@ -298,6 +300,7 @@ class PlayerStatRow extends ConsumerWidget {
   }
 
   List<Widget> _buttons(
+    BuildContext context,
     List<
       ({
         String short,
@@ -312,10 +315,10 @@ class PlayerStatRow extends ConsumerWidget {
   ) {
     if (visibleActions.isEmpty) {
       return [
-        const Text(
+        Text(
           'Nessuna stat',
           style: TextStyle(
-            color: AppColors.sportMutedText,
+            color: AppColors.sportMutedForeground(context),
             fontWeight: FontWeight.w800,
             fontSize: 12,
           ),

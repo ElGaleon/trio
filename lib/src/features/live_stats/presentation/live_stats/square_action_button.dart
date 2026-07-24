@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class SquareActionButton extends StatelessWidget {
   const SquareActionButton({
@@ -36,7 +36,11 @@ class SquareActionButton extends StatelessWidget {
                 border: Border.all(color: accent.withValues(alpha: 0.72)),
               ),
               child: Center(
-                child: Icon(icon, color: AppColors.white, size: 19),
+                child: Icon(
+                  icon,
+                  color: AppColors.sportForeground(context),
+                  size: 19,
+                ),
               ),
             ),
           ),

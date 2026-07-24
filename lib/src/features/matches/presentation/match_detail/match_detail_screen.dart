@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:go_router/go_router.dart';
 
+import 'package:trio/src/features/auth/application/rbac_provider.dart';
+import 'package:trio/src/routing/app_router.dart';
 import 'package:trio/src/shared/app_empty_state.dart';
+import 'package:trio/src/shared/sport_button.dart';
 import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/application/match_provider.dart';
 import 'package:trio/src/features/players/domain/player.dart';
@@ -73,6 +77,10 @@ class MatchDetailScreen extends ConsumerWidget {
     final preMatchRatingB = teamInitialRating(currentMatch, teamB);
     final winProbabilityA = expectedScore(preMatchRatingA, preMatchRatingB);
     final winProbabilityB = 1 - winProbabilityA;
+    final liveNow = currentMatch.isLiveAt(DateTime.now());
+    final canOpenLive =
+        can(ref.watch(currentRoleProvider), AppPermission.recordLiveStats) &&
+        liveNow;
 
     return Scaffold(
       body: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -106,6 +114,17 @@ class MatchDetailScreen extends ConsumerWidget {
                   child: Column(
                     spacing: 12,
                     children: [
+                      if (canOpenLive)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: SportActionButton(
+                            label: 'Apri live stats',
+                            icon: FIcons.activity,
+                            onPressed: () => context.go(
+                              AppRoutes.liveStats(currentMatch.id),
+                            ),
+                          ),
+                        ),
                       if (currentMatch.statEvents.length > 1) ...[
                         MatchStatsTabs(
                           match: currentMatch,

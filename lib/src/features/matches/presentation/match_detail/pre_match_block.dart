@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class PreMatchBlock extends StatelessWidget {
@@ -77,7 +77,7 @@ class MetricCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -85,7 +85,7 @@ class MetricCard extends StatelessWidget {
               Text(
                 value,
                 style: textTheme.titleLarge?.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.sportForeground(context),
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -118,7 +118,7 @@ class MetricRow extends StatelessWidget {
                 child: Text(
                   label,
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -126,7 +126,7 @@ class MetricRow extends StatelessWidget {
               Text(
                 value,
                 style: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.sportForeground(context),
                   fontWeight: FontWeight.w900,
                 ),
               ),

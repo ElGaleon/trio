@@ -11,7 +11,7 @@ import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/players/domain/player_role.dart';
 import 'package:trio/src/features/players/application/player_form_provider.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class PlayerFormScreen extends ConsumerStatefulWidget {
@@ -210,7 +210,7 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
                             children: [
                               Icon(
                                 state.isExternal ? FIcons.check : FIcons.circle,
-                                color: AppColors.white,
+                                color: AppColors.sportForeground(context),
                                 size: 18,
                               ),
                               Expanded(
@@ -218,7 +218,9 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
                                   'Giocatore esterno',
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
-                                        color: AppColors.white,
+                                        color: AppColors.sportForeground(
+                                          context,
+                                        ),
                                         fontWeight: FontWeight.w800,
                                       ),
                                 ),
@@ -263,7 +265,9 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
               color: AppColors.sportHeaderDark,
               borderRadius: BorderRadius.circular(26),
               border: Border.all(
-                color: AppColors.white.withValues(alpha: 0.14),
+                color: AppColors.sportForeground(
+                  context,
+                ).withValues(alpha: 0.14),
               ),
               boxShadow: [
                 BoxShadow(
@@ -401,9 +405,11 @@ class ImageSourceTile extends StatelessWidget {
       onTap: onTap,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.white.withValues(alpha: 0.08),
+          color: AppColors.sportForeground(context).withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
+          border: Border.all(
+            color: AppColors.sportForeground(context).withValues(alpha: 0.12),
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -419,21 +425,25 @@ class ImageSourceTile extends StatelessWidget {
                     Text(
                       title,
                       style: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.white,
+                        color: AppColors.sportForeground(context),
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                     Text(
                       subtitle,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.sportMutedText,
+                        color: AppColors.sportMutedForeground(context),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(FIcons.chevronRight, color: AppColors.white, size: 18),
+              Icon(
+                FIcons.chevronRight,
+                color: AppColors.sportForeground(context),
+                size: 18,
+              ),
             ],
           ),
         ),

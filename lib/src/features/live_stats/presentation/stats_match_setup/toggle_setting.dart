@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class ToggleSetting extends StatelessWidget {
   const ToggleSetting({
@@ -24,9 +24,11 @@ class ToggleSetting extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.06),
+        color: AppColors.sportForeground(context).withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
+        border: Border.all(
+          color: AppColors.sportForeground(context).withValues(alpha: 0.12),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -43,7 +45,7 @@ class ToggleSetting extends StatelessWidget {
                     child: Text(
                       title,
                       style: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.white,
+                        color: AppColors.sportForeground(context),
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -51,7 +53,7 @@ class ToggleSetting extends StatelessWidget {
                   Text(
                     detail,
                     style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.sportMutedText,
+                      color: AppColors.sportMutedForeground(context),
                       fontWeight: FontWeight.w800,
                     ),
                   ),

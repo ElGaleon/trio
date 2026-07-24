@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:trio/src/features/auth/application/auth_service.dart';
 import 'package:trio/src/features/players/domain/player_line_preference.dart';
 import 'package:trio/src/features/players/domain/player_role.dart';
 import 'package:trio/src/features/players/domain/player_stats_card_data.dart';
@@ -18,7 +20,21 @@ final statsLineFilterProvider = mutableProvider<PlayerLinePreference?>(
   () => null,
 );
 
+final statsStartDateFilterProvider = mutableProvider<DateTime?>(() => null);
+
+final statsEndDateFilterProvider = mutableProvider<DateTime?>(() => null);
+
 final selectedStatsPlayerIdProvider = mutableProvider<String?>(() => null);
+
+final currentUserPlayerProvider = Provider((ref) {
+  final authState = ref.watch(authStateProvider);
+  final user = FirebaseAuth.instance.currentUser ?? authState.value;
+  if (user == null) return null;
+  return ref
+      .watch(rankedPlayersProvider)
+      .where((player) => player.accountUserId == user.uid)
+      .firstOrNullCompat;
+});
 
 final playerDetailTournamentFilterProvider =
     mutableProviderFamily<String?, String>((playerId) => null);
@@ -30,6 +46,11 @@ final playerDetailMatchFilterProvider = mutableProviderFamily<String?, String>(
 final playerAnalyticsProvider = Provider<PlayerAnalytics>((ref) {
   final players = ref.watch(rankedPlayersProvider);
   final matches = ref.watch(matchesProvider);
+  final filteredMatches = filterMatchesByDate(
+    matches,
+    ref.watch(statsStartDateFilterProvider),
+    ref.watch(statsEndDateFilterProvider),
+  );
   final query = ref.watch(statsSearchQueryProvider).trim().toLowerCase();
   final role = ref.watch(statsRoleFilterProvider);
   final line = ref.watch(statsLineFilterProvider);
@@ -45,13 +66,13 @@ final playerAnalyticsProvider = Provider<PlayerAnalytics>((ref) {
   final playerIds = filteredPlayers.map((player) => player.id).toSet();
   final cards = [
     for (final player in filteredPlayers)
-      PlayerStatsCardData.from(player, matches),
+      PlayerStatsCardData.from(player, filteredMatches),
   ];
 
   return PlayerAnalytics(
     players: filteredPlayers,
     cards: cards,
-    group: GroupStats.from(cards, matches, playerIds),
+    group: GroupStats.from(cards, filteredMatches, playerIds),
   );
 });
 
@@ -65,8 +86,7 @@ final playerDetailStatsProvider = Provider.family<PlayerDetailStats?, String>((
       .firstOrNullCompat;
   if (player == null) return null;
   final allMatches = ref.watch(matchesProvider).where((match) {
-    return match.teamAIds.contains(playerId) ||
-        match.teamBIds.contains(playerId);
+    return playerParticipatedInMatch(playerId, match);
   }).toList();
   final tournaments =
       allMatches

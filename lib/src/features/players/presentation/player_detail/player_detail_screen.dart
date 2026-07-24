@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:trio/src/features/auth/application/auth_service.dart';
 import 'package:trio/src/features/auth/application/rbac_provider.dart';
+import 'package:trio/src/features/organizations/application/organization_invite_service.dart';
+import 'package:trio/src/features/organizations/application/organization_providers.dart';
 import 'package:trio/src/routing/app_router.dart';
 import 'package:trio/src/features/players/presentation/player_detail/player_detail_section_title.dart';
 import 'package:trio/src/features/players/presentation/player_detail/player_hero.dart';
@@ -19,7 +23,7 @@ import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/application/matches_providers.dart';
 import 'package:trio/src/features/players/application/player_providers.dart';
 import 'package:trio/src/features/players/application/player_stats_provider.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 import 'package:trio/src/features/players/domain/player_stats_card_data.dart';
 
@@ -77,6 +81,12 @@ class PlayerDetailScreen extends ConsumerWidget {
     };
     final role = ref.watch(currentRoleProvider);
     final canEdit = can(role, AppPermission.editPlayer);
+    final activeOrganization = ref.watch(activeOrganizationProvider);
+    final currentUser =
+        FirebaseAuth.instance.currentUser ?? ref.watch(authStateProvider).value;
+    final canInvite =
+        activeOrganization?.ownerId == currentUser?.uid &&
+        player.email.trim().isNotEmpty;
 
     return Scaffold(
       body: SportScreenShell(
@@ -87,6 +97,10 @@ class PlayerDetailScreen extends ConsumerWidget {
           spacing: 12,
           children: [
             PlayerHero(player: currentPlayer),
+            _PlayerAccountStatusCard(
+              player: currentPlayer,
+              canInvite: canInvite,
+            ),
             if (canEdit)
               Align(
                 alignment: Alignment.centerLeft,
@@ -212,6 +226,150 @@ class PlayerDetailScreen extends ConsumerWidget {
   }
 }
 
+class _PlayerAccountStatusCard extends ConsumerWidget {
+  const _PlayerAccountStatusCard({
+    required this.player,
+    required this.canInvite,
+  });
+
+  final Player player;
+  final bool canInvite;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final linkedUserId = player.accountUserId?.trim();
+    if (linkedUserId != null && linkedUserId.isNotEmpty) {
+      return const _AccountStatusPanel(
+        icon: Icons.verified_user_outlined,
+        title: 'Account collegato',
+        message: 'Questo giocatore e collegato a un account utente.',
+      );
+    }
+
+    final invite = ref.watch(playerPendingInviteProvider(player.id));
+    return invite.when(
+      loading: () => const _AccountStatusPanel(
+        icon: Icons.sync,
+        title: 'Verifica account',
+        message: 'Controllo se esiste un invito pendente.',
+      ),
+      error: (error, stackTrace) => const _AccountStatusPanel(
+        icon: Icons.error_outline,
+        title: 'Stato account non disponibile',
+        message: 'Non riesco a verificare inviti o collegamenti.',
+      ),
+      data: (invite) {
+        if (invite != null && !invite.isExpired) {
+          return _AccountStatusPanel(
+            icon: Icons.mark_email_unread_outlined,
+            title: 'Invito pendente',
+            message: 'Invito inviato a ${invite.email}.',
+            action: canInvite
+                ? SportActionButton(
+                    label: 'Rigenera invito',
+                    icon: Icons.refresh,
+                    onPressed: () => _sendInvite(context, ref),
+                  )
+                : null,
+          );
+        }
+        final hasEmail = player.email.trim().isNotEmpty;
+        return _AccountStatusPanel(
+          icon: Icons.person_add_disabled_outlined,
+          title: 'Nessun account collegato',
+          message: hasEmail
+              ? 'Nessun invito attivo per ${player.email}.'
+              : 'Aggiungi una mail al giocatore per poterlo invitare.',
+          action: canInvite && hasEmail
+              ? SportActionButton(
+                  label: 'Invita giocatore',
+                  icon: Icons.mail_outline,
+                  onPressed: () => _sendInvite(context, ref),
+                )
+              : null,
+        );
+      },
+    );
+  }
+
+  Future<void> _sendInvite(BuildContext context, WidgetRef ref) async {
+    final organizationId = ref.read(activeOrganizationIdProvider);
+    if (organizationId == null) return;
+    try {
+      await ref
+          .read(organizationInviteServiceProvider)
+          .invitePlayer(
+            organizationId: organizationId,
+            playerId: player.id,
+            email: player.email,
+          );
+      ref.invalidate(playerPendingInviteProvider(player.id));
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Invito rigenerato.')));
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    }
+  }
+}
+
+class _AccountStatusPanel extends StatelessWidget {
+  const _AccountStatusPanel({
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.action,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return GlassDecoration(
+      radius: 22,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          spacing: 12,
+          children: [
+            Icon(icon, color: AppColors.violet, size: 22),
+            Expanded(
+              child: Column(
+                spacing: 4,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: textTheme.titleSmall?.copyWith(
+                      color: AppColors.sportForeground(context),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Text(
+                    message,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: AppColors.sportMutedForeground(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ?action,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _PlayerStatsFilters extends ConsumerWidget {
   const _PlayerStatsFilters({
     required this.playerId,
@@ -318,21 +476,41 @@ class _PlayerStatsSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassDecoration(
       child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.7,
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          spacing: 6,
           children: [
-            _MiniStat(label: '+/-', value: _signed(data.plusMinus)),
-            _MiniStat(label: 'Mete', value: '${data.goals}'),
-            _MiniStat(label: 'Assist', value: '${data.assists}'),
-            _MiniStat(label: 'Difese', value: '${data.defenses}'),
-            _MiniStat(label: 'Errori', value: '${data.errors}'),
-            _MiniStat(label: 'Pull dentro', value: _percent(data.pullInRate)),
+            _CompactStatRow(
+              items: [
+                ('+/-', _signed(data.plusMinus)),
+                ('PT', '${data.pointsPlayed}'),
+                ('Tocchi', '${data.touches}'),
+              ],
+            ),
+            _CompactStatRow(
+              items: [
+                ('Mete', '${data.goals}'),
+                ('Assist', '${data.assists}'),
+                ('Difese', '${data.defenses}'),
+              ],
+            ),
+            _CompactStatRow(
+              items: [
+                ('Tocchi/PT', _percent(data.touchesPerPoint)),
+                ('Mete/PT', _percent(data.goalsPerPoint)),
+                ('Assist/PT', _percent(data.assistsPerPoint)),
+              ],
+            ),
+            _CompactStatRow(
+              items: [
+                ('Errori', '${data.errors}'),
+                ('Pull dentro', _percent(data.pullInRate)),
+                (
+                  'Pull medio',
+                  '${data.averagePullSeconds.toStringAsFixed(1)}s',
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -340,43 +518,59 @@ class _PlayerStatsSummary extends StatelessWidget {
   }
 }
 
-class _MiniStat extends StatelessWidget {
-  const _MiniStat({required this.label, required this.value});
+class _CompactStatRow extends StatelessWidget {
+  const _CompactStatRow({required this.items});
 
-  final String label;
-  final String value;
+  final List<(String, String)> items;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.10)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.white,
-                fontWeight: FontWeight.w900,
+    return Row(
+      spacing: 6,
+      children: [
+        for (final item in items)
+          Expanded(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.sportForeground(
+                  context,
+                ).withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.sportForeground(
+                    context,
+                  ).withValues(alpha: 0.09),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.$2,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: AppColors.sportForeground(context),
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      item.$1,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: sportMutedText,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: sportMutedText,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 }

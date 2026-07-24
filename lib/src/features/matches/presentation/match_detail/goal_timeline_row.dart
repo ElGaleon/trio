@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/match_stat_event.dart';
@@ -54,7 +54,9 @@ class GoalTimelineRow extends StatelessWidget {
                   child: Container(
                     width: 1,
                     margin: const EdgeInsets.symmetric(vertical: 6),
-                    color: AppColors.white.withValues(alpha: 0.10),
+                    color: AppColors.sportForeground(
+                      context,
+                    ).withValues(alpha: 0.10),
                   ),
                 ),
             ],
@@ -76,7 +78,7 @@ class GoalTimelineRow extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.bodyMedium?.copyWith(
-                            color: AppColors.white,
+                            color: AppColors.sportForeground(context),
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -84,7 +86,7 @@ class GoalTimelineRow extends StatelessWidget {
                       Text(
                         '${goal.scoreA} - ${goal.scoreB}',
                         style: textTheme.titleSmall?.copyWith(
-                          color: AppColors.white,
+                          color: AppColors.sportForeground(context),
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -93,7 +95,7 @@ class GoalTimelineRow extends StatelessWidget {
                   Text(
                     '${minute <= 0 ? 1 : minute}’ · $teamName',
                     style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.sportMutedText,
+                      color: AppColors.sportMutedForeground(context),
                       fontWeight: FontWeight.w800,
                     ),
                   ),

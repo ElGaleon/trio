@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'podium_player.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
@@ -42,7 +42,9 @@ class LeaderboardShowcase extends StatelessWidget {
             child: Text(
               '#1',
               style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                color: AppColors.white.withValues(alpha: 0.055),
+                color: AppColors.sportForeground(
+                  context,
+                ).withValues(alpha: 0.055),
                 fontSize: 118,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0,

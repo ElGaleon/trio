@@ -2,10 +2,12 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:trio/src/features/events/domain/team_event.dart';
 import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
+import 'package:trio/src/features/live_stats/application/live_stats_service.dart';
 import 'package:trio/src/features/matches/domain/match_stat_event.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'package:trio/src/features/players/domain/player_role.dart';
+import 'package:trio/src/features/settings/domain/app_settings.dart';
 
 void main() {
   test(
@@ -80,6 +82,52 @@ void main() {
     },
   );
 
+  test('collaborates on live match updates through realtime streams', () async {
+    final firestore = FakeFirebaseFirestore();
+    final clientA = FirestoreTrioRepository(
+      firestore: firestore,
+      organizationId: 'org-1',
+    );
+    final clientB = FirestoreTrioRepository(
+      firestore: firestore,
+      organizationId: 'org-1',
+    );
+
+    final playerId = await clientA.addPlayerWithLine(
+      'Alice',
+      linePreference: null,
+      role: PlayerRole.handler,
+    );
+    await clientA.upsertMatch(
+      ScrimmageMatch(
+        id: 'live-1',
+        createdAt: DateTime(2026, 7, 22, 20),
+        teamAIds: [playerId],
+        teamBIds: const [],
+        scoreA: 0,
+        scoreB: 0,
+      ),
+    );
+
+    final player = (await clientA.watchPlayers().first).single;
+    final streamedFromClientB = clientB
+        .watchMatch('live-1')
+        .firstWhere((match) => match?.statEvents.isNotEmpty == true);
+
+    await LiveStatsService.instance.record(
+      (await clientA.watchMatch('live-1').first)!,
+      type: MatchStatType.pass,
+      player: player,
+      playersById: {player.id: player},
+      repository: clientA,
+      settings: AppSettings(),
+    );
+
+    final received = await streamedFromClientB;
+    expect(received?.statEvents.single.type, MatchStatType.pass);
+    expect(received?.statEvents.single.playerId, playerId);
+  });
+
   test('creates updates and deletes calendar events', () async {
     final firestore = FakeFirebaseFirestore();
     final repository = FirestoreTrioRepository(
@@ -96,6 +144,7 @@ void main() {
         location: 'Campo Nord',
         notes: 'Portare maglia bianca e scura',
         type: TeamEventType.training,
+        presentPlayerIds: const ['alice', 'bob'],
       ),
     );
 
@@ -103,6 +152,7 @@ void main() {
     expect(events.single.id, eventId);
     expect(events.single.location, 'Campo Nord');
     expect(events.single.type, TeamEventType.training);
+    expect(events.single.presentPlayerIds, ['alice', 'bob']);
 
     await repository.upsertMatch(
       ScrimmageMatch(

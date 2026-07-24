@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/live_stats/domain/live_match_stats_summary.dart';
 import 'active_pause.dart';
 import 'general_action_button.dart';
@@ -30,7 +30,9 @@ class PausePanel extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.sportHeaderDark,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
+            border: Border.all(
+              color: AppColors.sportForeground(context).withValues(alpha: 0.14),
+            ),
             boxShadow: [
               BoxShadow(
                 color: AppColors.black.withValues(alpha: 0.40),
@@ -51,7 +53,7 @@ class PausePanel extends StatelessWidget {
                       child: Text(
                         pause.title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppColors.white,
+                          color: AppColors.sportForeground(context),
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -68,7 +70,7 @@ class PausePanel extends StatelessWidget {
                 Text(
                   'Durante la pausa puoi scegliere la prossima linea e leggere le statistiche intermedie.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w700,
                   ),
                 ),

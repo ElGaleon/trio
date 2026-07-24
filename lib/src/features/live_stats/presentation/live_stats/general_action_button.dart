@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 
 class GeneralActionButton extends StatelessWidget {
   const GeneralActionButton({
@@ -41,11 +41,15 @@ class GeneralActionButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 8,
             children: [
-              Icon(icon, color: AppColors.white, size: compact ? 16 : 20),
+              Icon(
+                icon,
+                color: AppColors.sportForeground(context),
+                size: compact ? 16 : 20,
+              ),
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.sportForeground(context),
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0,
                 ),

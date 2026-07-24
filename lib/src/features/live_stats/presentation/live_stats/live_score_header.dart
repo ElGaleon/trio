@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 import 'countdown_banner.dart';
 
@@ -46,7 +46,7 @@ class LiveScoreHeader extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -57,14 +57,14 @@ class LiveScoreHeader extends StatelessWidget {
                     Text(
                       '${match.scoreA} - ${match.scoreB}',
                       style: textTheme.headlineMedium?.copyWith(
-                        color: AppColors.white,
+                        color: AppColors.sportForeground(context),
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                     Text(
                       _format(matchRemaining),
                       style: textTheme.titleSmall?.copyWith(
-                        color: AppColors.sportMutedText,
+                        color: AppColors.sportMutedForeground(context),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -77,7 +77,7 @@ class LiveScoreHeader extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleMedium?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -100,10 +100,14 @@ class LiveScoreHeader extends StatelessWidget {
               ),
             DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.07),
+                color: AppColors.sportForeground(
+                  context,
+                ).withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AppColors.white.withValues(alpha: 0.12),
+                  color: AppColors.sportForeground(
+                    context,
+                  ).withValues(alpha: 0.12),
                 ),
               ),
               child: Padding(

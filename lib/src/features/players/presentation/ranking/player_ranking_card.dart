@@ -3,7 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:trio/src/constants/app_constants.dart';
 
 import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/card_actions_menu.dart';
 
 class PlayerRankingCard extends StatelessWidget {

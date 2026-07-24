@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trio/src/shared/match_card.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
 
 class CompactMatchTitle extends StatelessWidget {
@@ -36,7 +36,7 @@ class CompactMatchTitle extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.end,
                   style: textTheme.labelMedium?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -47,7 +47,7 @@ class CompactMatchTitle extends StatelessWidget {
         Text(
           '${match.scoreA} - ${match.scoreB}',
           style: textTheme.titleSmall?.copyWith(
-            color: AppColors.white,
+            color: AppColors.sportForeground(context),
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -62,7 +62,7 @@ class CompactMatchTitle extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.labelMedium?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
                 ),

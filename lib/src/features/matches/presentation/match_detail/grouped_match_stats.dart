@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:trio/src/features/matches/domain/match_stat_event.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/matches/domain/final_stats_summary.dart';
 import 'package:trio/src/features/matches/application/match_detail_provider.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
@@ -38,8 +39,8 @@ class FotMobStatRow extends StatelessWidget {
             children: [
               Text(
                 leftValue,
-                style: const TextStyle(
-                  color: AppColors.white,
+                style: TextStyle(
+                  color: AppColors.sportForeground(context),
                   fontSize: 15,
                   fontWeight: FontWeight.w900,
                 ),
@@ -48,8 +49,8 @@ class FotMobStatRow extends StatelessWidget {
                 child: Text(
                   label,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AppColors.sportMutedText,
+                  style: TextStyle(
+                    color: AppColors.sportMutedForeground(context),
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                   ),
@@ -57,8 +58,8 @@ class FotMobStatRow extends StatelessWidget {
               ),
               Text(
                 rightValue,
-                style: const TextStyle(
-                  color: AppColors.white,
+                style: TextStyle(
+                  color: AppColors.sportForeground(context),
                   fontSize: 15,
                   fontWeight: FontWeight.w900,
                 ),
@@ -114,7 +115,9 @@ class FotMobStatRow extends StatelessWidget {
                             Expanded(
                               flex: rightFlex,
                               child: Container(
-                                color: AppColors.white.withValues(alpha: 0.08),
+                                color: AppColors.sportForeground(
+                                  context,
+                                ).withValues(alpha: 0.08),
                               ),
                             ),
                           ],
@@ -144,10 +147,7 @@ class GroupedMatchStats extends ConsumerWidget {
     final activeTab = ref.watch(matchDetailSubTabProvider(match.id));
     final summary = FinalStatsSummary.from(match, playersById);
     final events = match.statEvents;
-    final opponentGoals = events
-        .where((e) => e.type == MatchStatType.opponentGoal)
-        .length;
-    final opponentErrors = events.where((e) => e.type.isError).length;
+    final opponentGoals = summary.opponentGoals;
 
     final pointStarts = <int, bool>{};
     for (final event in events) {
@@ -164,13 +164,7 @@ class GroupedMatchStats extends ConsumerWidget {
         .toSet();
 
     final ourGoals = summary.goals;
-    final dLineGoals = events
-        .where(
-          (e) =>
-              e.type == MatchStatType.goal &&
-              dLineStarts.contains(e.pointNumber),
-        )
-        .length;
+    final dLineGoals = summary.breaks;
 
     final opponentOLineStarts = dLineStarts;
     final opponentDLineStarts = oLineStarts;
@@ -179,14 +173,12 @@ class GroupedMatchStats extends ConsumerWidget {
       (e) => e.type == MatchStatType.opponentGoal,
     );
     final opponentOLineGoals = opponentGoalEvents
-        .where((event) => opponentOLineStarts.contains(event.pointNumber))
+        .where((event) => opponentOLineStarts.contains(_scoredPoint(event)))
         .length;
-    final opponentDLineGoals = opponentGoalEvents
-        .where((event) => opponentDLineStarts.contains(event.pointNumber))
-        .length;
+    final opponentDLineGoals = summary.breaksConceded;
 
     final ourTurnovers = summary.turnovers;
-    final opponentTurnovers = opponentErrors;
+    final opponentTurnovers = summary.generatedTurnovers;
 
     final completedPasses = events
         .where(
@@ -233,7 +225,7 @@ class GroupedMatchStats extends ConsumerWidget {
             Text(
               'Statistiche Team',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.sportForeground(context),
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -284,6 +276,12 @@ class GroupedMatchStats extends ConsumerWidget {
                     : dLineGoals / (dLineGoals + opponentDLineGoals),
               ),
               FotMobStatRow(
+                label: 'Break subiti',
+                leftValue: '${summary.breaksConceded}',
+                rightValue: 'N/A',
+                leftPercent: summary.breaksConceded == 0 ? 0.0 : 1.0,
+              ),
+              FotMobStatRow(
                 label: 'Punti Giocati',
                 leftValue: '$totalPoints',
                 rightValue: '$totalPoints',
@@ -314,10 +312,10 @@ class GroupedMatchStats extends ConsumerWidget {
                               opponentOLineConversion),
               ),
               FotMobStatRow(
-                label: 'O-Line Efficiency (Clean goals)',
-                leftValue: '${(summary.oLineEfficiency * 100).round()}%',
+                label: 'Attacchi puliti',
+                leftValue: '${(summary.cleanOffenseRatio * 100).round()}%',
                 rightValue: 'N/A',
-                leftPercent: summary.oLineEfficiency,
+                leftPercent: summary.cleanOffenseRatio,
               ),
             ] else if (activeTab == MatchDetailSubTab.difesa) ...[
               FotMobStatRow(
@@ -327,7 +325,13 @@ class GroupedMatchStats extends ConsumerWidget {
                 leftPercent: 1.0,
               ),
               FotMobStatRow(
-                label: 'D-Line Conversion',
+                label: 'Turnover generati',
+                leftValue: '${summary.generatedTurnovers}',
+                rightValue: 'N/A',
+                leftPercent: summary.dLineTurnoverRatio,
+              ),
+              FotMobStatRow(
+                label: 'Conversione dopo turnover',
                 leftValue: '${(summary.dLineConversionRatio * 100).round()}%',
                 rightValue: '${(opponentDLineConversion * 100).round()}%',
                 leftPercent:
@@ -339,7 +343,7 @@ class GroupedMatchStats extends ConsumerWidget {
                               opponentDLineConversion),
               ),
               FotMobStatRow(
-                label: 'D-Line Turnover Ratio',
+                label: 'Turnover generati / punti in difesa',
                 leftValue: '${(summary.dLineTurnoverRatio * 100).round()}%',
                 rightValue: 'N/A',
                 leftPercent: summary.dLineTurnoverRatio,
@@ -382,12 +386,16 @@ class GroupedMatchStats extends ConsumerWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.white,
+              color: AppColors.sportForeground(context),
               fontWeight: FontWeight.w900,
             ),
           ),
         ),
       ),
     );
+  }
+
+  int _scoredPoint(MatchStatEvent event) {
+    return event.pointNumber > 1 ? event.pointNumber - 1 : event.pointNumber;
   }
 }

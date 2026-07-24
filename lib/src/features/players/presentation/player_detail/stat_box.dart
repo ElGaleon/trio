@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
 
 class StatBox extends StatelessWidget {
@@ -35,7 +35,7 @@ class StatBox extends StatelessWidget {
                 child: Text(
                   label,
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.sportMutedText,
+                    color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -43,7 +43,7 @@ class StatBox extends StatelessWidget {
               Text(
                 value,
                 style: textTheme.titleLarge?.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.sportForeground(context),
                   fontWeight: FontWeight.w900,
                 ),
               ),

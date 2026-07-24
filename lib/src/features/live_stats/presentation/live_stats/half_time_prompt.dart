@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/src/theme/app_colors.dart';
+import 'package:trio/theme/app_colors.dart';
 import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
-import 'package:trio/src/features/settings/domain/app_settings.dart';
 import 'package:trio/src/features/matches/domain/match_stat_type.dart';
 import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/players/domain/player.dart';
 import 'package:trio/src/features/live_stats/application/live_stats_service.dart';
 import 'general_action_button.dart';
 
@@ -18,9 +16,7 @@ class HalfTimePrompt {
     BuildContext context,
     LiveStatsService service,
     ScrimmageMatch match,
-    Map<String, Player> playersById,
     FirestoreTrioRepository repository,
-    AppSettings settings,
   ) async {
     if (service.hasHalfTimeEvent(match)) return;
     final start = await showModalBottomSheet<bool>(
@@ -41,14 +37,14 @@ class HalfTimePrompt {
                   Text(
                     'Half time',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.sportForeground(context),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   Text(
                     'Siete arrivati alla metà partita. Vuoi avviare il countdown ora?',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.sportMutedText,
+                      color: AppColors.sportMutedForeground(context),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -85,12 +81,10 @@ class HalfTimePrompt {
     );
     if (start != true) return;
     if (!context.mounted) return;
-    await service.record(
+    await service.proposeStatAction(
       match,
       type: MatchStatType.halfTime,
-      playersById: playersById,
       repository: repository,
-      settings: settings,
     );
   }
 }
