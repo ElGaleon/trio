@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:trio/src/features/auth/application/rbac_provider.dart';
-import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
-import 'package:trio/src/features/organizations/application/organization_invite_service.dart';
-import 'package:trio/src/features/organizations/application/organization_providers.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/features/players/domain/player_role.dart';
-import 'package:trio/src/features/players/domain/player_form_state.dart';
+import 'package:skrim/src/features/auth/application/rbac_provider.dart';
+import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:skrim/src/features/organizations/application/organization_invite_service.dart';
+import 'package:skrim/src/features/organizations/application/organization_providers.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/features/players/domain/player_role.dart';
+import 'package:skrim/src/features/players/domain/player_form_state.dart';
 import 'player_providers.dart';
 
 class PlayerFormNotifier extends Notifier<PlayerFormState> {
@@ -174,7 +174,7 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
         ? AppPermission.createPlayer
         : AppPermission.editPlayer;
     if (!can(role, permission)) return false;
-    final repository = ref.read(firestoreTrioRepositoryProvider);
+    final repository = ref.read(firestoreSkrimRepositoryProvider);
     if (repository == null) {
       throw StateError(
         'Seleziona o crea un workspace prima di salvare giocatori.',

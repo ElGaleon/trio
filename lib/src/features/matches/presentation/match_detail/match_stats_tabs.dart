@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/matches/domain/match_stat_event.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/final_stats_summary.dart';
-import 'package:trio/src/features/matches/domain/individual_stat_line.dart';
-import 'package:trio/src/features/matches/application/match_detail_provider.dart';
-import 'package:trio/src/shared/sport_avatar_pill.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_event.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/final_stats_summary.dart';
+import 'package:skrim/src/features/matches/domain/individual_stat_line.dart';
+import 'package:skrim/src/features/matches/application/match_detail_provider.dart';
+import 'package:skrim/src/shared/sport_avatar_pill.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
 import 'grouped_match_stats.dart';
 import 'individual_stats_tab.dart';
 import 'timeline_tab.dart';
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
-import 'package:trio/src/features/matches/domain/match_detail_tab.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/src/features/matches/domain/match_detail_tab.dart';
 
 class StatsTabButton extends StatelessWidget {
   const StatsTabButton({

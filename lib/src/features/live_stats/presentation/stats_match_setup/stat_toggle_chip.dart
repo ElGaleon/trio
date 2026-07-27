@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class StatToggleChip extends StatelessWidget {
   const StatToggleChip({

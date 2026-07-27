@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:trio/src/extensions/double_extension.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/final_stats_summary.dart';
-import 'package:trio/src/features/matches/domain/individual_stat_line.dart';
-import 'package:trio/src/shared/sport_avatar_pill.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/src/extensions/double_extension.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/final_stats_summary.dart';
+import 'package:skrim/src/features/matches/domain/individual_stat_line.dart';
+import 'package:skrim/src/shared/sport_avatar_pill.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
 
 class StatPill extends StatelessWidget {
   const StatPill({super.key, required this.label, required this.value});

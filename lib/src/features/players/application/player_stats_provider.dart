@@ -1,16 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:trio/src/features/auth/application/auth_service.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/features/players/domain/player_role.dart';
-import 'package:trio/src/features/players/domain/player_stats_card_data.dart';
-import 'package:trio/src/features/players/domain/group_stats.dart';
-import 'package:trio/src/features/players/domain/player_analytics.dart';
-import 'package:trio/src/features/players/domain/player_detail_stats.dart';
+import 'package:skrim/src/features/auth/application/auth_service.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/features/players/domain/player_role.dart';
+import 'package:skrim/src/features/players/domain/player_stats_card_data.dart';
+import 'package:skrim/src/features/players/domain/group_stats.dart';
+import 'package:skrim/src/features/players/domain/player_analytics.dart';
+import 'package:skrim/src/features/players/domain/player_detail_stats.dart';
 import 'player_providers.dart';
-import 'package:trio/src/features/matches/application/matches_providers.dart';
-import 'package:trio/src/shared/state_provider.dart';
+import 'package:skrim/src/features/matches/application/matches_providers.dart';
+import 'package:skrim/src/shared/state_provider.dart';
 
 final statsSearchQueryProvider = mutableProvider<String>(() => '');
 

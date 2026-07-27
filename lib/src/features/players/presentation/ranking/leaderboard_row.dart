@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/shared/sport_avatar_pill.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/shared/sport_avatar_pill.dart';
 import 'rank_badge.dart';
 import 'rating_pill.dart';
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
 
 class LeaderboardRow extends StatelessWidget {
   const LeaderboardRow({

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/extensions/theme_extension.dart';
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/src/extensions/theme_extension.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class SportFilterPill extends StatelessWidget {
   const SportFilterPill({

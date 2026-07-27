@@ -1,4 +1,4 @@
-package com.example.trio
+package com.skrim.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,4 +1,4 @@
-# Trio
+# SKRIM
 
 App Flutter per gestire giocatori, partite di Ultimate Frisbee, ranking Elo e statistiche live.
 
@@ -11,7 +11,7 @@ App Flutter per gestire giocatori, partite di Ultimate Frisbee, ranking Elo e st
 - Riverpod gestisce stato e reattività; Firestore persiste giocatori, partite, impostazioni e statistiche live.
 - Non usare API Riverpod legacy (`flutter_riverpod/legacy.dart`, `StateProvider`, `StateNotifierProvider`, ecc.); usa i provider supportati da Riverpod 3, come `NotifierProvider`, `AsyncNotifierProvider`, `StreamProvider` e helper moderni locali.
 - La multi-tenancy usa organizzazioni Firestore: dopo il login Firebase l'utente lavora dentro l'organizzazione selezionata o auto-selezionata quando è l'unica disponibile.
-- `FirestoreTrioRepository` è il punto comune per modifiche persistenti a partite, giocatori e rating.
+- `FirestoreSkrimRepository` è il punto comune per modifiche persistenti a partite, giocatori e rating.
 
 ## Regole di modifica
 

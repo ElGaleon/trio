@@ -1,4 +1,4 @@
-import 'package:trio/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
 import 'match_stat_event.dart';
 import 'scrimmage_match.dart';
 import 'match_stat_type.dart';

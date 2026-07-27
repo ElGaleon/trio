@@ -1,4 +1,4 @@
-import 'package:trio/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
 
 class InjurySubstitutionDraft {
   const InjurySubstitutionDraft({

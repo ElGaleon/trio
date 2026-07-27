@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class RatingPill extends StatelessWidget {
   const RatingPill({super.key, required this.rating, this.emphasized = false});

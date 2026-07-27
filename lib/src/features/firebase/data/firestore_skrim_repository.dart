@@ -2,16 +2,16 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:trio/src/features/events/domain/team_event.dart';
-import 'package:trio/src/features/firebase/data/firestore_paths.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/features/players/domain/player_role.dart';
-import 'package:trio/src/features/settings/domain/app_settings.dart';
+import 'package:skrim/src/features/events/domain/team_event.dart';
+import 'package:skrim/src/features/firebase/data/firestore_paths.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/features/players/domain/player_role.dart';
+import 'package:skrim/src/features/settings/domain/app_settings.dart';
 
-class FirestoreTrioRepository {
-  FirestoreTrioRepository({
+class FirestoreSkrimRepository {
+  FirestoreSkrimRepository({
     required FirebaseFirestore firestore,
     required String organizationId,
   }) : _firestore = firestore,

@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
-import 'package:trio/src/features/players/application/player_providers.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:skrim/src/features/players/application/player_providers.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 import 'matches_view_mode.dart';
 import 'recent_match_team.dart';
-import 'package:trio/src/shared/state_provider.dart';
+import 'package:skrim/src/shared/state_provider.dart';
 
 final matchesProvider = Provider<List<ScrimmageMatch>>((ref) {
   return ref.watch(firebaseMatchesProvider).value ?? const [];

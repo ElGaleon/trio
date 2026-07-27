@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
-import 'package:trio/src/features/matches/application/match_provider.dart';
+import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:skrim/src/features/matches/application/match_provider.dart';
 
-import 'package:trio/src/shared/app_empty_state.dart';
-import 'package:trio/src/shared/sport_button.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/live_stats/application/live_stats_service.dart';
-import 'package:trio/src/features/live_stats/domain/live_match_stats_summary.dart';
+import 'package:skrim/src/shared/app_empty_state.dart';
+import 'package:skrim/src/shared/sport_button.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/routing/app_router.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/live_stats/application/live_stats_service.dart';
+import 'package:skrim/src/features/live_stats/domain/live_match_stats_summary.dart';
 import 'active_pause.dart';
 import 'bottom_actions.dart';
 import 'final_stats_sheet.dart';
@@ -31,7 +31,7 @@ import 'player_stat_row.dart';
 import 'pull_sheet.dart';
 import 'round_header_button.dart';
 import 'team_tab_header.dart';
-import 'package:trio/src/features/players/application/player_providers.dart';
+import 'package:skrim/src/features/players/application/player_providers.dart';
 
 class LiveStatsScreen extends ConsumerStatefulWidget {
   const LiveStatsScreen({super.key, required this.matchId});
@@ -80,7 +80,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
     }
 
     final service = LiveStatsService.instance;
-    final repository = ref.watch(firestoreTrioRepositoryProvider);
+    final repository = ref.watch(firestoreSkrimRepositoryProvider);
     final settings = ref.watch(appSettingsProvider);
     if (repository == null) {
       return const Scaffold(

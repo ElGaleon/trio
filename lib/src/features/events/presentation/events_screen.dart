@@ -3,17 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:trio/src/features/auth/application/rbac_provider.dart';
-import 'package:trio/src/features/events/application/events_providers.dart';
-import 'package:trio/src/features/events/domain/team_event.dart';
-import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
-import 'package:trio/src/features/matches/presentation/matches/calendar_utils.dart';
-import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/shared/app_empty_state.dart';
-import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/src/shared/sport_button.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/src/features/auth/application/rbac_provider.dart';
+import 'package:skrim/src/features/events/application/events_providers.dart';
+import 'package:skrim/src/features/events/domain/team_event.dart';
+import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:skrim/src/features/matches/presentation/matches/calendar_utils.dart';
+import 'package:skrim/src/routing/app_router.dart';
+import 'package:skrim/src/shared/app_empty_state.dart';
+import 'package:skrim/src/shared/decorated_panel.dart';
+import 'package:skrim/src/shared/sport_button.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class EventsScreen extends ConsumerWidget {
   const EventsScreen({super.key});
@@ -38,7 +38,7 @@ class EventsScreen extends ConsumerWidget {
       );
     }
 
-    final repository = ref.watch(firestoreTrioRepositoryProvider);
+    final repository = ref.watch(firestoreSkrimRepositoryProvider);
     final events = ref.watch(eventsProvider);
     final selectedDay = ref.watch(eventsSelectedDayProvider);
     final viewMode = ref.watch(eventsViewModeProvider);
@@ -156,7 +156,7 @@ class EventsScreen extends ConsumerWidget {
         ? AppPermission.createEvent
         : AppPermission.editEvent;
     if (!can(role, permission)) return;
-    final repository = ref.read(firestoreTrioRepositoryProvider);
+    final repository = ref.read(firestoreSkrimRepositoryProvider);
     if (repository == null) return;
     final saved = await showDialog<TeamEvent>(
       context: context,

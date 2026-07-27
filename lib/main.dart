@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
@@ -90,7 +89,7 @@ class StartupLoadingApp extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'TRIO',
+                    'SKRIM',
                     style: TextStyle(
                       color: palette.onColor,
                       fontSize: 42,

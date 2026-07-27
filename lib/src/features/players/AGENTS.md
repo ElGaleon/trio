@@ -13,7 +13,7 @@ Gestisce anagrafica, immagini, filtri, ranking Elo e analisi individuali.
 ## Invarianti
 
 - `Player.id` è il riferimento usato dalle partite: non cambiarlo durante una modifica.
-- Il rating deriva dalle partite tramite `FirestoreTrioRepository`; non modificarlo direttamente nella UI.
+- Il rating deriva dalle partite tramite `FirestoreSkrimRepository`; non modificarlo direttamente nella UI.
 - La cancellazione deve considerare i riferimenti nelle partite.
 - Le immagini persistite devono sopravvivere alla chiusura dell'app.
 - Modificando `Player`, aggiorna serializzazione Firestore e test collegati.

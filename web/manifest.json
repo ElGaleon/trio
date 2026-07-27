@@ -1,11 +1,11 @@
 {
-    "name": "trio",
-    "short_name": "trio",
+    "name": "SKRIM",
+    "short_name": "SKRIM",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "App per roster, partite di Ultimate Frisbee, ranking Elo e statistiche live collaborative.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

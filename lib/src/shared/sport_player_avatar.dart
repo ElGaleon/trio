@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/theme/app_colors.dart';
 import 'sport_initials.dart';
 
 class SportPlayerAvatar extends StatelessWidget {

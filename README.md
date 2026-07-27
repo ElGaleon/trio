@@ -1,4 +1,4 @@
-# TRIO
+# SKRIM
 
 App Flutter per gestire roster, partite di Ultimate Frisbee, ranking Elo e statistiche live collaborative.
 
@@ -8,7 +8,7 @@ App Flutter per gestire roster, partite di Ultimate Frisbee, ranking Elo e stati
 - Firebase Auth gestisce l'accesso email/password e Google.
 - Firestore persiste giocatori, partite, impostazioni e statistiche live.
 - Le statistiche live sono collaborative: più utenti autenticati possono aprire la stessa partita e vedere gli aggiornamenti in realtime.
-- La multi-tenancy è disattivata: tutti gli utenti autenticati lavorano sulle collection Firestore condivise.
+- La multi-tenancy usa organizzazioni Firestore: dopo il login l'utente lavora dentro l'organizzazione selezionata o auto-selezionata quando è l'unica disponibile.
 - `go_router` centralizza tutte le rotte in `lib/src/routing/app_router.dart`.
 
 ## Login

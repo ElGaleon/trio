@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/constants/app_constants.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/constants/app_constants.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
 
 import 'custom_stat.dart';
 

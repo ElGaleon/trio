@@ -17,4 +17,4 @@ Configura una partita statistica e registra eventi, lineup, pause, pull, sostitu
 - Timer e scadenze derivano da timestamp persistiti, non da soli contatori UI.
 - Lineup e sostituzioni devono contenere soltanto giocatori appartenenti al roster corretto.
 - Le scritture passano da `LiveStatsService` o dal notifier di setup.
-- Per collaborazione real-time completa, le mutazioni evento-per-evento devono usare `FirestoreTrioRepository.updateMatchTransaction`.
+- Per collaborazione real-time completa, le mutazioni evento-per-evento devono usare `FirestoreSkrimRepository.updateMatchTransaction`.

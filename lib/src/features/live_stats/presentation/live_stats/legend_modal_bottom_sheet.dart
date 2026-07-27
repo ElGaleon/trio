@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/shared/decorated_panel.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 import 'legend_row.dart';
 
 class LegendModalBottomSheet extends StatelessWidget {

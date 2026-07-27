@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/constants/app_constants.dart';
+import 'package:skrim/src/constants/app_constants.dart';
 
 class SetupStep extends StatelessWidget {
   const SetupStep({

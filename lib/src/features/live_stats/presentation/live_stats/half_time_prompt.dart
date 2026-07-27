@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/live_stats/application/live_stats_service.dart';
+import 'package:skrim/src/shared/decorated_panel.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/firebase/data/firestore_skrim_repository.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/live_stats/application/live_stats_service.dart';
 import 'general_action_button.dart';
 
 class HalfTimePrompt {
@@ -16,7 +16,7 @@ class HalfTimePrompt {
     BuildContext context,
     LiveStatsService service,
     ScrimmageMatch match,
-    FirestoreTrioRepository repository,
+    FirestoreSkrimRepository repository,
   ) async {
     if (service.hasHalfTimeEvent(match)) return;
     final start = await showModalBottomSheet<bool>(

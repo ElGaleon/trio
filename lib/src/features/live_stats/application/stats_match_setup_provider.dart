@@ -1,15 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:trio/src/features/auth/application/rbac_provider.dart';
-import 'package:trio/src/features/events/domain/team_event.dart';
-import 'package:trio/src/features/matches/domain/match_stat_event.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/features/live_stats/domain/stats_match_setup_state.dart';
-import 'package:trio/src/features/players/application/player_providers.dart';
+import 'package:skrim/src/features/auth/application/rbac_provider.dart';
+import 'package:skrim/src/features/events/domain/team_event.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_event.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/features/live_stats/domain/stats_match_setup_state.dart';
+import 'package:skrim/src/features/players/application/player_providers.dart';
 
 class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
   @override
@@ -248,7 +248,7 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
     if (!can(ref.read(currentRoleProvider), AppPermission.recordLiveStats)) {
       return '';
     }
-    final repository = ref.read(firestoreTrioRepositoryProvider);
+    final repository = ref.read(firestoreSkrimRepositoryProvider);
     if (repository == null) return '';
     final id = DateTime.now().microsecondsSinceEpoch.toString();
     final opponent = state.opponentName.trim().isEmpty

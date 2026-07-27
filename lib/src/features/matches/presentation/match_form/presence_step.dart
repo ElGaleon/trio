@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/features/matches/application/recent_match_team.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/features/matches/application/recent_match_team.dart';
 import 'recent_teams_picker.dart';
 
 class PresenceStep extends StatelessWidget {

@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
-import 'package:trio/src/features/settings/domain/app_settings.dart';
-import 'package:trio/src/features/matches/domain/live_pending_action.dart';
-import 'package:trio/src/features/matches/domain/match_stat_event.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/settings/domain/custom_stat.dart';
+import 'package:skrim/src/features/firebase/data/firestore_skrim_repository.dart';
+import 'package:skrim/src/features/settings/domain/app_settings.dart';
+import 'package:skrim/src/features/matches/domain/live_pending_action.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_event.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/settings/domain/custom_stat.dart';
 import 'record_event_result.dart';
 
 class LiveStatsService {
@@ -60,7 +60,7 @@ class LiveStatsService {
   Future<void> proposeStatAction(
     ScrimmageMatch match, {
     required MatchStatType type,
-    required FirestoreTrioRepository repository,
+    required FirestoreSkrimRepository repository,
   }) async {
     final actor = _actor();
     await repository.updateMatchTransaction(match.id, (current) {
@@ -80,7 +80,7 @@ class LiveStatsService {
 
   Future<void> proposeFinishMatch(
     ScrimmageMatch match,
-    FirestoreTrioRepository repository,
+    FirestoreSkrimRepository repository,
   ) async {
     final actor = _actor();
     await repository.updateMatchTransaction(match.id, (current) {
@@ -102,7 +102,7 @@ class LiveStatsService {
     required List<String> playerIdsA,
     required List<String> playerIdsB,
     required bool nextOnOffense,
-    required FirestoreTrioRepository repository,
+    required FirestoreSkrimRepository repository,
   }) async {
     final actor = _actor();
     await repository.updateMatchTransaction(match.id, (current) {
@@ -125,7 +125,7 @@ class LiveStatsService {
   Future<RecordEventResult?> confirmPendingAction(
     ScrimmageMatch match, {
     required Map<String, Player> playersById,
-    required FirestoreTrioRepository repository,
+    required FirestoreSkrimRepository repository,
     required AppSettings settings,
   }) async {
     final actor = _actor();
@@ -179,7 +179,7 @@ class LiveStatsService {
 
   Future<void> cancelPendingAction(
     ScrimmageMatch match,
-    FirestoreTrioRepository repository,
+    FirestoreSkrimRepository repository,
   ) async {
     await repository.updateMatchTransaction(match.id, (current) {
       current.pendingAction = null;
@@ -202,7 +202,7 @@ class LiveStatsService {
     String? customStatId,
     Player? player,
     required Map<String, Player> playersById,
-    required FirestoreTrioRepository repository,
+    required FirestoreSkrimRepository repository,
     required AppSettings settings,
   }) async {
     late RecordEventResult result;
@@ -371,7 +371,7 @@ class LiveStatsService {
     required Player player,
     required int durationSeconds,
     required bool inBounds,
-    required FirestoreTrioRepository repository,
+    required FirestoreSkrimRepository repository,
     required AppSettings settings,
   }) async {
     final actor = _actor();
@@ -419,21 +419,21 @@ class LiveStatsService {
     String title,
     MatchStatType endType,
     bool nextOnOffense,
-    FirestoreTrioRepository repository,
+    FirestoreSkrimRepository repository,
   ) async {
     await proposeStatAction(match, type: endType, repository: repository);
   }
 
   Future<void> finishMatch(
     ScrimmageMatch match,
-    FirestoreTrioRepository repository,
+    FirestoreSkrimRepository repository,
   ) async {
     await proposeFinishMatch(match, repository);
   }
 
   Future<void> saveAndFinishMatch(
     ScrimmageMatch match,
-    FirestoreTrioRepository repository,
+    FirestoreSkrimRepository repository,
   ) async {
     final actor = _actor();
     await repository.updateMatchTransaction(match.id, (current) {
@@ -445,7 +445,7 @@ class LiveStatsService {
 
   Future<void> undo(
     ScrimmageMatch match,
-    FirestoreTrioRepository repository,
+    FirestoreSkrimRepository repository,
   ) async {
     if (match.statEvents.isEmpty) return;
     final events = [...match.statEvents]..removeLast();
@@ -476,7 +476,7 @@ class LiveStatsService {
     List<String> playerIdsA,
     List<String> playerIdsB,
     bool nextOnOffense,
-    FirestoreTrioRepository repository,
+    FirestoreSkrimRepository repository,
   ) async {
     await proposeLineup(
       match,
@@ -553,7 +553,7 @@ class LiveStatsService {
     required Player injured,
     required Player replacement,
     required bool oursOnOffense,
-    required FirestoreTrioRepository repository,
+    required FirestoreSkrimRepository repository,
     required AppSettings settings,
   }) async {
     final last = match.statEvents.lastOrNull;

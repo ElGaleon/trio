@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/shared/app_empty_state.dart';
-import 'package:trio/src/shared/sport_avatar_pill.dart';
-import 'package:trio/src/shared/responsive_layout.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/features/players/domain/player_role.dart';
-import 'package:trio/src/features/players/application/player_stats_provider.dart';
-import 'package:trio/src/features/matches/presentation/matches/match_date_filters.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
-import 'package:trio/src/features/players/domain/group_stats.dart';
-import 'package:trio/src/features/players/domain/player_stats_card_data.dart';
+import 'package:skrim/src/shared/app_empty_state.dart';
+import 'package:skrim/src/shared/sport_avatar_pill.dart';
+import 'package:skrim/src/shared/responsive_layout.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/features/players/domain/player_role.dart';
+import 'package:skrim/src/features/players/application/player_stats_provider.dart';
+import 'package:skrim/src/features/matches/presentation/matches/match_date_filters.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/src/features/players/domain/group_stats.dart';
+import 'package:skrim/src/features/players/domain/player_stats_card_data.dart';
 
 class PlayerStatsScreen extends ConsumerWidget {
   const PlayerStatsScreen({super.key});

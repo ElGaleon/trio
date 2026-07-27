@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:trio/src/extensions/theme_extension.dart';
+import 'package:skrim/src/extensions/theme_extension.dart';
 
 class AnimatedScoreStepper extends StatelessWidget {
   const AnimatedScoreStepper({

@@ -3,16 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/shared/sport_avatar_pill.dart';
-import 'package:trio/src/shared/sport_button.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/features/players/domain/player_role.dart';
-import 'package:trio/src/features/players/application/player_form_provider.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/src/routing/app_router.dart';
+import 'package:skrim/src/shared/sport_avatar_pill.dart';
+import 'package:skrim/src/shared/sport_button.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/features/players/domain/player_role.dart';
+import 'package:skrim/src/features/players/application/player_form_provider.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
 
 class PlayerFormScreen extends ConsumerStatefulWidget {
   const PlayerFormScreen({super.key, this.player, this.playerId});

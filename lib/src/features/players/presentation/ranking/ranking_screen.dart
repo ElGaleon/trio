@@ -3,19 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:trio/src/constants/app_constants.dart';
-import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/features/players/presentation/ranking/leaderboard_row.dart';
-import 'package:trio/src/features/players/presentation/ranking/line_average_summary.dart';
-import 'package:trio/src/features/players/presentation/ranking/ranking_filters.dart';
-import 'package:trio/src/features/players/presentation/ranking/ranking_summary.dart';
-import 'package:trio/src/features/matches/presentation/matches/match_date_filters.dart';
-import 'package:trio/src/shared/app_empty_state.dart';
-import 'package:trio/src/shared/responsive_layout.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/players/application/player_providers.dart';
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/src/constants/app_constants.dart';
+import 'package:skrim/src/routing/app_router.dart';
+import 'package:skrim/src/features/players/presentation/ranking/leaderboard_row.dart';
+import 'package:skrim/src/features/players/presentation/ranking/line_average_summary.dart';
+import 'package:skrim/src/features/players/presentation/ranking/ranking_filters.dart';
+import 'package:skrim/src/features/players/presentation/ranking/ranking_summary.dart';
+import 'package:skrim/src/features/matches/presentation/matches/match_date_filters.dart';
+import 'package:skrim/src/shared/app_empty_state.dart';
+import 'package:skrim/src/shared/responsive_layout.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/application/player_providers.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class RankingScreen extends ConsumerWidget {
   const RankingScreen({super.key});

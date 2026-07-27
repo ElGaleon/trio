@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/players/domain/player.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
 
 class LastActionBar extends StatelessWidget {
   const LastActionBar({

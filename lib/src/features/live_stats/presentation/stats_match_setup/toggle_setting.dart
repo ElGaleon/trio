@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class ToggleSetting extends StatelessWidget {
   const ToggleSetting({

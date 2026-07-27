@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
 import 'lineup_player_tile.dart';
 
 class SelectableLineupTile extends StatelessWidget {

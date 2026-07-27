@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
-import 'package:trio/src/features/settings/domain/app_settings.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/live_stats/application/live_stats_service.dart';
+import 'package:skrim/src/shared/decorated_panel.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/firebase/data/firestore_skrim_repository.dart';
+import 'package:skrim/src/features/settings/domain/app_settings.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/live_stats/application/live_stats_service.dart';
 import 'general_action_button.dart';
 
 class GoalRecordingHandler {
@@ -20,7 +20,7 @@ class GoalRecordingHandler {
     required ScrimmageMatch match,
     required MatchStatType type,
     required Map<String, Player> playersById,
-    required FirestoreTrioRepository repository,
+    required FirestoreSkrimRepository repository,
     required AppSettings settings,
     required Future<void> Function() onFinish,
     required Future<void> Function(bool nextOnOffense) onShowLineSelection,

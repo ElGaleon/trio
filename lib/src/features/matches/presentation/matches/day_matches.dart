@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trio/src/shared/app_empty_state.dart';
-import 'package:trio/src/shared/match_card.dart';
-import 'package:trio/src/features/events/domain/team_event.dart';
-import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/shared/app_empty_state.dart';
+import 'package:skrim/src/shared/match_card.dart';
+import 'package:skrim/src/features/events/domain/team_event.dart';
+import 'package:skrim/src/routing/app_router.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 import 'calendar_utils.dart';
 
 class DayMatches extends StatelessWidget {

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trio/src/components/sidebar.dart';
-import 'package:trio/src/features/auth/application/rbac_provider.dart';
-import 'package:trio/src/features/home/presentation/organization_setup_screen.dart';
-import 'package:trio/src/features/organizations/application/organization_providers.dart';
-import 'package:trio/src/shared/responsive_layout.dart';
+import 'package:skrim/src/components/sidebar.dart';
+import 'package:skrim/src/features/auth/application/rbac_provider.dart';
+import 'package:skrim/src/features/home/presentation/organization_setup_screen.dart';
+import 'package:skrim/src/features/organizations/application/organization_providers.dart';
+import 'package:skrim/src/shared/responsive_layout.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key, required this.navigationShell});

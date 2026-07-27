@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/live_stats/domain/live_match_stats_summary.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/live_stats/domain/live_match_stats_summary.dart';
 import 'active_pause.dart';
 import 'general_action_button.dart';
 import 'stats_summary_view.dart';

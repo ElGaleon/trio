@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 
-import 'package:trio/firebase_options.dart';
+import 'package:skrim/firebase_options.dart';
 
 class FirebaseBootstrap {
   const FirebaseBootstrap._();

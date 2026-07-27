@@ -1,5 +1,5 @@
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
 import 'player_stats_card_data.dart';
 
 class GroupStats {

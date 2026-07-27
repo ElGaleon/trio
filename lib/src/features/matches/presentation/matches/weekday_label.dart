@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
 
 class WeekdayLabel extends StatelessWidget {
   const WeekdayLabel({super.key, required this.label});

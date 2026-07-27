@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 extension ThemeExtension on BuildContext {
   ThemeData get theme => Theme.of(this);

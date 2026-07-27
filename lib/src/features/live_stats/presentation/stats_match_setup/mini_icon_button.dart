@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class MiniIconButton extends StatelessWidget {
   const MiniIconButton({super.key, required this.icon, required this.onTap});

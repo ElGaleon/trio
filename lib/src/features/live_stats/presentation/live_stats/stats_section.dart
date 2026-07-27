@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class StatsSection extends StatelessWidget {
   const StatsSection({super.key, required this.title, required this.children});

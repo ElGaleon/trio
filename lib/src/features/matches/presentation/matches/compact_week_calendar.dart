@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 import 'calendar_utils.dart';
 import 'compact_day_card.dart';
 

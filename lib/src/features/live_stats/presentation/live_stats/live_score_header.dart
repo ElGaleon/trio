@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 import 'countdown_banner.dart';
 
 class LiveScoreHeader extends StatelessWidget {

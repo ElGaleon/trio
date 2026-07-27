@@ -1,17 +1,14 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/assets.dart';
 import 'package:forui/forui.dart';
-import 'package:forui/widgets/sidebar.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trio/src/extensions/theme_extension.dart';
-import 'package:trio/src/features/auth/application/auth_service.dart';
-import 'package:trio/src/features/auth/application/rbac_provider.dart';
-import 'package:trio/src/features/organizations/application/organization_providers.dart';
-import 'package:trio/src/features/organizations/presentation/organization_switcher.dart';
-import 'package:trio/src/features/settings/application/theme_mode_provider.dart';
-import 'package:trio/src/routing/app_router.dart';
+import 'package:skrim/src/extensions/theme_extension.dart';
+import 'package:skrim/src/features/auth/application/auth_service.dart';
+import 'package:skrim/src/features/auth/application/rbac_provider.dart';
+import 'package:skrim/src/features/organizations/application/organization_providers.dart';
+import 'package:skrim/src/features/organizations/presentation/organization_switcher.dart';
+import 'package:skrim/src/features/settings/application/theme_mode_provider.dart';
+import 'package:skrim/src/routing/app_router.dart';
 
 import '../shared/sport_player_avatar.dart';
 
@@ -39,9 +36,7 @@ class Sidebar extends ConsumerWidget {
         padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            OrganizationSwitcher(),
-          ],
+          children: [OrganizationSwitcher()],
         ),
       ),
       footer: _SidebarUserFooter(
@@ -62,17 +57,29 @@ class Sidebar extends ConsumerWidget {
           children: [
             for (final item in visibleNavItems(role, wide: true))
               FSidebarItem(
-                style: FSidebarItemStyleDelta.delta(iconSpacing: 8, borderRadius: BorderRadius.circular(4),padding: EdgeInsetsGeometryDelta.value(EdgeInsetsGeometry.symmetric(horizontal: 8, vertical: 12))),
+                style: FSidebarItemStyleDelta.delta(
+                  iconSpacing: 8,
+                  borderRadius: BorderRadius.circular(4),
+                  padding: EdgeInsetsGeometryDelta.value(
+                    EdgeInsetsGeometry.symmetric(horizontal: 8, vertical: 12),
+                  ),
+                ),
                 icon: Icon(item.icon),
-                label: Text(item.label, style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),),
+                label: Text(
+                  item.label,
+                  style: context.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 selected: navigationShell.currentIndex == item.branch,
                 onPress: () {
                   navigationShell.goBranch(
                     item.branch,
-                    initialLocation: item.branch == navigationShell.currentIndex,
+                    initialLocation:
+                        item.branch == navigationShell.currentIndex,
                   );
                 },
-              )
+              ),
           ],
         ),
       ],
@@ -80,8 +87,8 @@ class Sidebar extends ConsumerWidget {
   }
 }
 
-class _NavItem {
-  const _NavItem(this.branch, this.icon, this.label, this.permission);
+class NavItem {
+  const NavItem(this.branch, this.icon, this.label, this.permission);
 
   final int branch;
   final IconData icon;
@@ -89,32 +96,32 @@ class _NavItem {
   final AppPermission permission;
 }
 
-List<_NavItem> visibleNavItems(AppRole role, {required bool wide}) {
+List<NavItem> visibleNavItems(AppRole role, {required bool wide}) {
   final items = [
     if (wide)
-      const _NavItem(
+      const NavItem(
         0,
         Icons.dashboard_outlined,
         'Dashboard',
         AppPermission.viewRanking,
       ),
-    const _NavItem(1, FIcons.chartBar, 'Ranking', AppPermission.viewRanking),
-    const _NavItem(
+    const NavItem(1, FIcons.chartBar, 'Ranking', AppPermission.viewRanking),
+    const NavItem(
       2,
       Icons.scoreboard_outlined,
       'Matches',
       AppPermission.viewMatches,
     ),
-    const _NavItem(3, FIcons.users, 'Players', AppPermission.viewPlayers),
-    const _NavItem(4, FIcons.activity, 'Stats', AppPermission.viewPlayerStats),
-    const _NavItem(
+    const NavItem(3, FIcons.users, 'Players', AppPermission.viewPlayers),
+    const NavItem(4, FIcons.activity, 'Stats', AppPermission.viewPlayerStats),
+    const NavItem(
       5,
       Icons.account_circle_outlined,
       'Le mie stats',
       AppPermission.viewPlayerStats,
     ),
-    const _NavItem(6, FIcons.settings, 'Settings', AppPermission.viewSettings),
-    const _NavItem(
+    const NavItem(6, FIcons.settings, 'Settings', AppPermission.viewSettings),
+    const NavItem(
       7,
       Icons.calendar_month_outlined,
       'Calendario',

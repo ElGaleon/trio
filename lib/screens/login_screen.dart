@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trio/src/extensions/theme_extension.dart';
-import 'package:trio/src/features/auth/application/login_service.dart';
-import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/shared/app_background.dart';
-import 'package:trio/src/shared/google_logo.dart';
-import 'package:trio/src/shared/responsive_layout.dart';
-import 'package:trio/src/shared/sport_glass_decoration.dart';
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/src/extensions/theme_extension.dart';
+import 'package:skrim/src/features/auth/application/login_service.dart';
+import 'package:skrim/src/routing/app_router.dart';
+import 'package:skrim/src/shared/app_background.dart';
+import 'package:skrim/src/shared/google_logo.dart';
+import 'package:skrim/src/shared/responsive_layout.dart';
+import 'package:skrim/src/shared/sport_glass_decoration.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});

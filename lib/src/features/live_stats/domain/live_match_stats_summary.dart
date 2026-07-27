@@ -1,6 +1,6 @@
-import 'package:trio/src/features/matches/domain/match_derived_stats.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/matches/domain/match_derived_stats.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
 import 'live_named_count.dart';
 
 class LiveMatchStatsSummary {

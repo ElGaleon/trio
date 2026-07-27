@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:trio/src/features/live_stats/presentation/live_stats/bottom_actions.dart';
+import 'package:skrim/src/features/live_stats/presentation/live_stats/bottom_actions.dart';
 
 void main() {
   testWidgets(

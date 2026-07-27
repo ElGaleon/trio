@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/shared/match_card.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/shared/match_card.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 
 class CompactMatchTitle extends StatelessWidget {
   const CompactMatchTitle({super.key, required this.match});

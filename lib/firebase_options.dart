@@ -71,7 +71,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '628524860787',
     projectId: 'skrim-6c8b7',
     storageBucket: 'skrim-6c8b7.firebasestorage.app',
-    iosBundleId: 'com.example.trio',
+    iosBundleId: 'com.skrim.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

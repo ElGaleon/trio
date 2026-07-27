@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:trio/src/features/organizations/application/organization_providers.dart';
-import 'package:trio/src/features/organizations/domain/organization.dart';
+import 'package:skrim/src/features/organizations/application/organization_providers.dart';
+import 'package:skrim/src/features/organizations/domain/organization.dart';
 
 void main() {
   const organizations = [

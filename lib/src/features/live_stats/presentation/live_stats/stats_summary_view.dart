@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:trio/src/extensions/double_extension.dart';
-import 'package:trio/src/features/live_stats/domain/live_match_stats_summary.dart';
+import 'package:skrim/src/extensions/double_extension.dart';
+import 'package:skrim/src/features/live_stats/domain/live_match_stats_summary.dart';
 import 'metric_pill.dart';
 import 'stats_section.dart';
 

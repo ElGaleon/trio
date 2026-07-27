@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/application/matches_view_mode.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/application/matches_view_mode.dart';
 import 'header_switch_icon.dart';
 
 class MatchesHeaderViewSwitch extends StatelessWidget {

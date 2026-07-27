@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:trio/src/constants/app_constants.dart';
-import 'package:trio/src/features/auth/application/rbac_provider.dart';
-import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/features/players/application/player_providers.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/matches/domain/match_form_state.dart';
+import 'package:skrim/src/constants/app_constants.dart';
+import 'package:skrim/src/features/auth/application/rbac_provider.dart';
+import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/features/players/application/player_providers.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/matches/domain/match_form_state.dart';
 import 'matches_providers.dart';
 import 'recent_match_team.dart';
 
@@ -170,7 +170,7 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
         ? AppPermission.createMatch
         : AppPermission.editMatch;
     if (!can(role, permission)) return;
-    final repository = ref.read(firestoreTrioRepositoryProvider);
+    final repository = ref.read(firestoreSkrimRepositoryProvider);
     if (repository == null) return;
     final matches = ref.read(matchesProvider);
     ScrimmageMatch? originalMatch;

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/shared/card_actions_menu.dart';
-import 'package:trio/src/shared/sport_avatar_pill.dart';
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/shared/card_actions_menu.dart';
+import 'package:skrim/src/shared/sport_avatar_pill.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
 
 class PlayerCard extends StatelessWidget {
   const PlayerCard({

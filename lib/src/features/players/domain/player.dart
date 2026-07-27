@@ -1,4 +1,4 @@
-import 'package:trio/src/constants/app_constants.dart';
+import 'package:skrim/src/constants/app_constants.dart';
 import 'player_line_preference.dart';
 import 'player_role.dart';
 

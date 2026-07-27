@@ -1,4 +1,4 @@
-import 'package:trio/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
 import 'match_derived_stats.dart';
 import 'scrimmage_match.dart';
 import 'named_count.dart';

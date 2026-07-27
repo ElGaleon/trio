@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:trio/src/features/matches/domain/match_detail_tab.dart';
-import 'package:trio/src/features/matches/domain/match_detail_sub_tab.dart';
+import 'package:skrim/src/features/matches/domain/match_detail_tab.dart';
+import 'package:skrim/src/features/matches/domain/match_detail_sub_tab.dart';
 
 class MatchDetailTabNotifier extends Notifier<MatchDetailTab> {
   final String matchId;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/shared/sport_filter_pill.dart';
+import 'package:skrim/src/shared/sport_filter_pill.dart';
 
 class PointStartSelector extends StatelessWidget {
   const PointStartSelector({

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/settings/domain/custom_stat.dart';
+import 'package:skrim/src/shared/decorated_panel.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/settings/domain/custom_stat.dart';
 
 class CustomStatEditDialog extends StatefulWidget {
   final CustomStat? initialStat;

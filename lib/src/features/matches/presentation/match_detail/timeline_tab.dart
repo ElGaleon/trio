@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/matches/domain/match_stat_event.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_event.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
 
 class TimelineSeparator extends StatelessWidget {
   final MatchStatEvent event;

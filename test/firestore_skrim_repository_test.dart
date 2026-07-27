@@ -1,20 +1,20 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:trio/src/features/events/domain/team_event.dart';
-import 'package:trio/src/features/firebase/data/firestore_trio_repository.dart';
-import 'package:trio/src/features/live_stats/application/live_stats_service.dart';
-import 'package:trio/src/features/matches/domain/match_stat_event.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/players/domain/player_role.dart';
-import 'package:trio/src/features/settings/domain/app_settings.dart';
+import 'package:skrim/src/features/events/domain/team_event.dart';
+import 'package:skrim/src/features/firebase/data/firestore_skrim_repository.dart';
+import 'package:skrim/src/features/live_stats/application/live_stats_service.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_event.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/players/domain/player_role.dart';
+import 'package:skrim/src/features/settings/domain/app_settings.dart';
 
 void main() {
   test(
     'streams live match updates from the shared Firestore collections',
     () async {
       final firestore = FakeFirebaseFirestore();
-      final repository = FirestoreTrioRepository(
+      final repository = FirestoreSkrimRepository(
         firestore: firestore,
         organizationId: 'org-1',
       );
@@ -84,11 +84,11 @@ void main() {
 
   test('collaborates on live match updates through realtime streams', () async {
     final firestore = FakeFirebaseFirestore();
-    final clientA = FirestoreTrioRepository(
+    final clientA = FirestoreSkrimRepository(
       firestore: firestore,
       organizationId: 'org-1',
     );
-    final clientB = FirestoreTrioRepository(
+    final clientB = FirestoreSkrimRepository(
       firestore: firestore,
       organizationId: 'org-1',
     );
@@ -130,7 +130,7 @@ void main() {
 
   test('creates updates and deletes calendar events', () async {
     final firestore = FakeFirebaseFirestore();
-    final repository = FirestoreTrioRepository(
+    final repository = FirestoreSkrimRepository(
       firestore: firestore,
       organizationId: 'org-1',
     );
@@ -199,11 +199,11 @@ void main() {
 
   test('isolates data by organization', () async {
     final firestore = FakeFirebaseFirestore();
-    final orgA = FirestoreTrioRepository(
+    final orgA = FirestoreSkrimRepository(
       firestore: firestore,
       organizationId: 'org-a',
     );
-    final orgB = FirestoreTrioRepository(
+    final orgB = FirestoreSkrimRepository(
       firestore: firestore,
       organizationId: 'org-b',
     );

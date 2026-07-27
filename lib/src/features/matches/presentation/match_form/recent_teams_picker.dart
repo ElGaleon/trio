@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/features/matches/application/recent_match_team.dart';
+import 'package:skrim/src/features/matches/application/recent_match_team.dart';
 
 class RecentTeamsPicker extends StatelessWidget {
   const RecentTeamsPicker({

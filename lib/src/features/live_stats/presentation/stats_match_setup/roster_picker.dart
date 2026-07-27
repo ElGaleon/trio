@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
-import 'package:trio/src/shared/sport_player_avatar.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/src/shared/sport_player_avatar.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
 
 class RosterPicker extends StatefulWidget {
   const RosterPicker({

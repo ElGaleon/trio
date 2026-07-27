@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class MetricPill extends StatelessWidget {
   const MetricPill({super.key, required this.label, required this.value});

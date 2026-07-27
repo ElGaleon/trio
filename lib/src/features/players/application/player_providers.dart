@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/features/players/domain/player_role.dart';
-import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
-import 'package:trio/src/features/matches/application/matches_providers.dart';
-import 'package:trio/src/features/settings/application/theme_mode_provider.dart';
-import 'package:trio/src/features/settings/domain/app_settings.dart';
-import 'package:trio/src/shared/state_provider.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/features/players/domain/player_role.dart';
+import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:skrim/src/features/matches/application/matches_providers.dart';
+import 'package:skrim/src/features/settings/application/theme_mode_provider.dart';
+import 'package:skrim/src/features/settings/domain/app_settings.dart';
+import 'package:skrim/src/shared/state_provider.dart';
 
 final appSettingsProvider = Provider<AppSettings>((ref) {
   final settings = ref.watch(firebaseSettingsProvider).value ?? AppSettings();

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/players/application/player_providers.dart';
-import 'package:trio/src/features/settings/domain/custom_stat.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/application/player_providers.dart';
+import 'package:skrim/src/features/settings/domain/custom_stat.dart';
 import 'stat_button.dart';
 
 class PlayerStatRow extends ConsumerWidget {

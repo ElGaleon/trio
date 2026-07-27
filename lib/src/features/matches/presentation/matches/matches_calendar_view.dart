@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
-import 'package:trio/src/features/events/application/events_providers.dart';
-import 'package:trio/src/features/matches/application/matches_providers.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/events/application/events_providers.dart';
+import 'package:skrim/src/features/matches/application/matches_providers.dart';
 import 'calendar_header.dart';
 import 'calendar_grid.dart';
 import 'compact_week_calendar.dart';

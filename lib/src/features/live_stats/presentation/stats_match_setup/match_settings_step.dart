@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
 import 'setting_stepper.dart';
 import 'toggle_setting.dart';
 

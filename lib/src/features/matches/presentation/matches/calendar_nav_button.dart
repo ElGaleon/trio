@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class CalendarNavButton extends StatelessWidget {
   const CalendarNavButton({super.key, required this.icon, required this.onTap});

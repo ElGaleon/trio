@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/src/features/matches/presentation/match_form/form_nav_button.dart';
-import 'package:trio/src/features/players/domain/player.dart';
-import 'package:trio/src/features/players/domain/player_line_preference.dart';
-import 'package:trio/src/features/live_stats/application/stats_match_setup_provider.dart';
-import 'package:trio/src/features/live_stats/domain/stats_match_setup_state.dart';
-import 'package:trio/src/features/events/application/events_providers.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/routing/app_router.dart';
+import 'package:skrim/src/features/matches/presentation/match_form/form_nav_button.dart';
+import 'package:skrim/src/features/players/domain/player.dart';
+import 'package:skrim/src/features/players/domain/player_line_preference.dart';
+import 'package:skrim/src/features/live_stats/application/stats_match_setup_provider.dart';
+import 'package:skrim/src/features/live_stats/domain/stats_match_setup_state.dart';
+import 'package:skrim/src/features/events/application/events_providers.dart';
 import 'match_settings_step.dart';
 import 'point_start_selector.dart';
 import 'roster_picker.dart';
 import 'setup_step.dart';
 import 'stats_selection_step.dart';
 import 'stats_setup_step_header.dart';
-import 'package:trio/src/features/players/application/player_providers.dart';
+import 'package:skrim/src/features/players/application/player_providers.dart';
 
 class StatsMatchSetupScreen extends ConsumerStatefulWidget {
   const StatsMatchSetupScreen({super.key});

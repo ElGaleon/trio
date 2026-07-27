@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:trio/src/features/auth/application/rbac_provider.dart';
+import 'package:skrim/src/features/auth/application/rbac_provider.dart';
 
 void main() {
   test('reads roles from Firebase claims', () {

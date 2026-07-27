@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:trio/src/features/auth/application/rbac_provider.dart';
-import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/players/application/player_providers.dart';
-import 'package:trio/src/features/settings/domain/app_settings.dart';
-import 'package:trio/src/features/settings/domain/settings_form_state.dart';
+import 'package:skrim/src/features/auth/application/rbac_provider.dart';
+import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/players/application/player_providers.dart';
+import 'package:skrim/src/features/settings/domain/app_settings.dart';
+import 'package:skrim/src/features/settings/domain/settings_form_state.dart';
 
-import 'package:trio/src/features/settings/domain/custom_stat.dart';
+import 'package:skrim/src/features/settings/domain/custom_stat.dart';
 import 'theme_mode_provider.dart';
 
 class SettingsFormNotifier extends Notifier<SettingsFormState> {
@@ -106,7 +106,7 @@ class SettingsFormNotifier extends Notifier<SettingsFormState> {
       favoriteStatNames: state.favoriteStatNames,
     );
 
-    final repository = ref.read(firestoreTrioRepositoryProvider);
+    final repository = ref.read(firestoreSkrimRepositoryProvider);
     if (repository == null) return false;
     await repository.saveSettings(settings);
     ref.invalidate(appSettingsProvider);

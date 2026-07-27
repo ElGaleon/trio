@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:trio/src/shared/match_card.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/shared/match_card.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/routing/app_router.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 import 'compact_match_title.dart';
 
 class MatchScoreHeaderDelegate extends SliverPersistentHeaderDelegate {

@@ -3,33 +3,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:trio/src/shared/app_empty_state.dart';
-import 'package:trio/src/shared/decorated_panel.dart';
-import 'package:trio/src/shared/match_card.dart';
-import 'package:trio/src/shared/responsive_layout.dart';
-import 'package:trio/src/shared/sport_button.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/src/constants/app_constants.dart';
-import 'package:trio/src/features/auth/application/rbac_provider.dart';
-import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/firebase/application/firebase_repository_provider.dart';
-import 'package:trio/src/features/events/application/events_providers.dart';
-import 'package:trio/src/features/matches/application/matches_providers.dart';
-import 'package:trio/src/features/matches/application/matches_view_mode.dart';
+import 'package:skrim/src/shared/app_empty_state.dart';
+import 'package:skrim/src/shared/decorated_panel.dart';
+import 'package:skrim/src/shared/match_card.dart';
+import 'package:skrim/src/shared/responsive_layout.dart';
+import 'package:skrim/src/shared/sport_button.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/constants/app_constants.dart';
+import 'package:skrim/src/features/auth/application/rbac_provider.dart';
+import 'package:skrim/src/routing/app_router.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:skrim/src/features/events/application/events_providers.dart';
+import 'package:skrim/src/features/matches/application/matches_providers.dart';
+import 'package:skrim/src/features/matches/application/matches_view_mode.dart';
 import 'match_date_filters.dart';
 import 'match_toolbar.dart';
 import 'matches_calendar_view.dart';
 import 'matches_header_view_switch.dart';
 import 'popup_option.dart';
-import 'package:trio/src/features/players/application/player_providers.dart';
+import 'package:skrim/src/features/players/application/player_providers.dart';
 
 class MatchesScreen extends ConsumerWidget {
   const MatchesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final repository = ref.watch(firestoreTrioRepositoryProvider);
+    final repository = ref.watch(firestoreSkrimRepositoryProvider);
     final matches = ref.watch(matchesProvider);
     final filteredMatches = ref.watch(filteredMatchesProvider);
     final eventIds = {

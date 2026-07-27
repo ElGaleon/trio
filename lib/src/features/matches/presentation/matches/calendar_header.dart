@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/presentation/matches/calendar_utils.dart';
-import 'package:trio/src/features/matches/presentation/matches/calendar_nav_button.dart';
-import 'package:trio/src/features/matches/application/matches_providers.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/presentation/matches/calendar_utils.dart';
+import 'package:skrim/src/features/matches/presentation/matches/calendar_nav_button.dart';
+import 'package:skrim/src/features/matches/application/matches_providers.dart';
 
 class CalendarHeader extends ConsumerWidget {
   const CalendarHeader({

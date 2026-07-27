@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
-import 'package:trio/src/shared/sport_button.dart';
-import 'package:trio/src/shared/sport_glass_decoration_helper.dart';
-import 'package:trio/theme/app_colors.dart';
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
-import 'package:trio/src/features/settings/application/settings_provider.dart';
-import 'package:trio/src/features/live_stats/presentation/stats_match_setup/stat_toggle_chip.dart';
+import 'package:skrim/src/shared/sport_button.dart';
+import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
+import 'package:skrim/theme/app_colors.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/settings/application/settings_provider.dart';
+import 'package:skrim/src/features/live_stats/presentation/stats_match_setup/stat_toggle_chip.dart';
 import 'custom_stat_edit_dialog.dart';
 import 'settings_section_title.dart';
 

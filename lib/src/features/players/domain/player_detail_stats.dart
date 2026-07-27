@@ -1,4 +1,4 @@
-import 'package:trio/src/features/matches/domain/scrimmage_match.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 import 'player_stats_card_data.dart';
 
 class PlayerDetailStats {

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trio/src/extensions/theme_extension.dart';
+import 'package:skrim/src/extensions/theme_extension.dart';
 
-import 'package:trio/src/features/auth/application/auth_service.dart';
-import 'package:trio/src/features/organizations/application/organization_providers.dart';
-import 'package:trio/src/features/organizations/domain/organization.dart';
-import 'package:trio/src/routing/app_router.dart';
-import 'package:trio/theme/app_colors.dart';
+import 'package:skrim/src/features/auth/application/auth_service.dart';
+import 'package:skrim/src/features/organizations/application/organization_providers.dart';
+import 'package:skrim/src/features/organizations/domain/organization.dart';
+import 'package:skrim/src/routing/app_router.dart';
+import 'package:skrim/theme/app_colors.dart';
 
 class OrganizationSwitcher extends ConsumerWidget {
   const OrganizationSwitcher({super.key});
@@ -84,7 +84,8 @@ class OrganizationSwitcher extends ConsumerWidget {
               spacing: 0,
               children: [
                 Text(
-                  activeOrganization?.name.toUpperCase() ?? 'Seleziona workspace',
+                  activeOrganization?.name.toUpperCase() ??
+                      'Seleziona workspace',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textTheme.labelLarge,
@@ -93,7 +94,9 @@ class OrganizationSwitcher extends ConsumerWidget {
                   'Organization',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodySmall?.copyWith(color: AppColors.violetLight),
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: AppColors.violetLight,
+                  ),
                 ),
               ],
             ),
@@ -140,8 +143,7 @@ class _OrganizationLogo extends StatelessWidget {
         width: 24,
         height: 24,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) =>
-            Icon(FIcons.layers),
+        errorBuilder: (context, error, stackTrace) => Icon(FIcons.layers),
       ),
     );
   }

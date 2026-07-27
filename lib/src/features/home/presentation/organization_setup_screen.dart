@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:trio/src/features/auth/application/auth_service.dart';
-import 'package:trio/src/features/organizations/application/organization_invite_service.dart';
-import 'package:trio/src/features/organizations/application/organization_providers.dart';
-import 'package:trio/src/features/organizations/domain/organization.dart';
-import 'package:trio/src/features/organizations/presentation/organization_switcher.dart';
-import 'package:trio/src/shared/app_empty_state.dart';
-import 'package:trio/src/shared/sport_screen_shell.dart';
+import 'package:skrim/src/features/auth/application/auth_service.dart';
+import 'package:skrim/src/features/organizations/application/organization_invite_service.dart';
+import 'package:skrim/src/features/organizations/application/organization_providers.dart';
+import 'package:skrim/src/features/organizations/domain/organization.dart';
+import 'package:skrim/src/features/organizations/presentation/organization_switcher.dart';
+import 'package:skrim/src/shared/app_empty_state.dart';
+import 'package:skrim/src/shared/sport_screen_shell.dart';
 
 import '../../../shared/sport_style.dart' show SportActionButton;
 

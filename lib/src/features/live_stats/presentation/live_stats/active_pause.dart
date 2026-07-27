@@ -1,4 +1,4 @@
-import 'package:trio/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
 
 class ActivePause {
   const ActivePause({
