@@ -30,7 +30,7 @@ class Player {
   int matchesPlayed;
   int wins;
   int losses;
-  PlayerLinePreference? linePreference;
+  GameLine? linePreference;
   PlayerRole role;
   String? profileImagePath;
   String? accountUserId;
@@ -88,9 +88,9 @@ class Player {
       losses: (map['losses'] as num?)?.toInt() ?? 0,
       linePreference: map['linePreference'] == null
           ? null
-          : PlayerLinePreference.values.firstWhere(
+          : GameLine.values.firstWhere(
               (e) => e.name == map['linePreference'],
-              orElse: () => PlayerLinePreference.offense,
+              orElse: () => GameLine.offense,
             ),
       role: PlayerRole.values.firstWhere(
         (e) => e.name == map['role'],

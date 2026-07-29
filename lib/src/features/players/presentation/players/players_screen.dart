@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:skrim/src/components/ui/infinite_scroll_list.dart';
+import 'package:skrim/src/components/ui/paginated_table.dart';
 import 'package:skrim/src/features/auth/application/rbac_provider.dart';
 import 'package:skrim/src/routing/app_router.dart';
 import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
 import 'package:skrim/src/features/players/presentation/players/player_card.dart';
 import 'package:skrim/src/features/players/presentation/players/player_filters.dart';
-import 'package:skrim/src/features/players/presentation/players/player_toolbar.dart';
 import 'package:skrim/src/shared/app_empty_state.dart';
 import 'package:skrim/src/shared/responsive_layout.dart';
 import 'package:skrim/src/shared/sport_button.dart';
 import 'package:skrim/src/shared/sport_screen_shell.dart';
 import 'package:skrim/src/features/players/application/player_providers.dart';
 import 'package:skrim/src/features/players/domain/player.dart';
-import 'package:skrim/theme/app_colors.dart';
 
 class PlayersScreen extends ConsumerStatefulWidget {
   const PlayersScreen({super.key});
@@ -43,7 +43,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
   @override
   Widget build(BuildContext context) {
     final repository = ref.watch(firestoreSkrimRepositoryProvider);
-    final players = ref.watch(rankedPlayersProvider);
+    final players = ref.watch(playersProvider);
     final filteredPlayers = ref.watch(filteredPlayersProvider);
     final roleFilter = ref.watch(playersRoleFilterProvider);
     final lineFilter = ref.watch(playersLineFilterProvider);
@@ -51,11 +51,6 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
     final canCreate = can(role, AppPermission.createPlayer);
     final canEdit = can(role, AppPermission.editPlayer);
     final canDelete = can(role, AppPermission.deletePlayer);
-    final hasFilters =
-        _searchController.text.isNotEmpty ||
-        roleFilter != null ||
-        lineFilter != null;
-
     return SportScreenShell(
       title: 'Players',
       subtitle: 'Roster and roles',
@@ -74,13 +69,8 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
               ),
             )
           : Column(
-              spacing: 12,
+              spacing: 16,
               children: [
-                PlayerToolbar(
-                  totalCount: players.length,
-                  filteredCount: filteredPlayers.length,
-                  hasFilters: hasFilters,
-                ),
                 PlayerFilters(
                   searchController: _searchController,
                   roleFilter: roleFilter,
@@ -92,46 +82,41 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                   onLineChanged: (value) =>
                       ref.read(playersLineFilterProvider.notifier).set(value),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: 2,
-                  ), // Adjust gap to match original 14 (12 spacing + 2 padding)
-                  child: filteredPlayers.isEmpty
-                      ? const SportEmptyState(
-                          icon: Icons.manage_search_outlined,
-                          title: 'Nessun risultato',
-                          message: 'Prova a modificare i filtri.',
-                        )
-                      : ResponsiveLayout.isDesktop(context)
-                      ? _PlayersTable(
-                          players: filteredPlayers,
-                          onOpen: (player) =>
-                              context.go(AppRoutes.playerDetail(player.id)),
-                          onEdit: canEdit
-                              ? (player) => context.go(
-                                  AppRoutes.editPlayer(player.id),
-                                  extra: player,
-                                )
-                              : null,
-                          onDelete: canDelete
-                              ? (player) => repository?.deletePlayer(player.id)
-                              : null,
-                        )
-                      : _PlayersCardPager(
-                          players: filteredPlayers,
-                          onOpen: (player) =>
-                              context.go(AppRoutes.playerDetail(player.id)),
-                          onEdit: canEdit
-                              ? (player) => context.go(
-                                  AppRoutes.editPlayer(player.id),
-                                  extra: player,
-                                )
-                              : null,
-                          onDelete: canDelete
-                              ? (player) => repository?.deletePlayer(player.id)
-                              : null,
-                        ),
-                ),
+                filteredPlayers.isEmpty
+                    ? const SportEmptyState(
+                        icon: Icons.manage_search_outlined,
+                        title: 'Nessun risultato',
+                        message: 'Prova a modificare i filtri.',
+                      )
+                    : ResponsiveLayout.isMobile(context)
+                    ? _PlayersInfiniteList(
+                        players: filteredPlayers,
+                        onOpen: (player) =>
+                            context.go(AppRoutes.playerDetail(player.id)),
+                        onEdit: canEdit
+                            ? (player) => context.go(
+                                AppRoutes.editPlayer(player.id),
+                                extra: player,
+                              )
+                            : null,
+                        onDelete: canDelete
+                            ? (player) => repository?.deletePlayer(player.id)
+                            : null,
+                      )
+                    : _PlayersTable(
+                        players: filteredPlayers,
+                        onOpen: (player) =>
+                            context.go(AppRoutes.playerDetail(player.id)),
+                        onEdit: canEdit
+                            ? (player) => context.go(
+                                AppRoutes.editPlayer(player.id),
+                                extra: player,
+                              )
+                            : null,
+                        onDelete: canDelete
+                            ? (player) => repository?.deletePlayer(player.id)
+                            : null,
+                      ),
               ],
             ),
     );
@@ -175,56 +160,49 @@ class _PlayersTableState extends State<_PlayersTable> {
       return _sortAscending ? result : -result;
     });
 
-    return _TableShell(
-      child: DataTable(
-        sortColumnIndex: _sortColumnIndex,
-        sortAscending: _sortAscending,
-        headingRowHeight: 38,
-        dataRowMinHeight: 42,
-        dataRowMaxHeight: 48,
-        columns: [
-          _column('Nome', 0),
-          _column('Ruolo', 1),
-          _column('Linea', 2),
-          _column('#', 3),
-          _column('ELO', 4),
-          const DataColumn(label: Text('Azioni')),
-        ],
-        rows: [
-          for (final player in rows)
-            DataRow(
-              cells: [
-                DataCell(Text(player.name), onTap: () => widget.onOpen(player)),
-                DataCell(Text(player.role.label)),
-                DataCell(Text(player.linePreference?.label ?? '-')),
-                DataCell(Text(player.jerseyNumber?.toString() ?? '-')),
-                DataCell(Text(player.rating.round().toString())),
-                DataCell(
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        tooltip: 'Apri',
-                        icon: Icon(Icons.open_in_new, size: 18),
-                        onPressed: () => widget.onOpen(player),
-                      ),
-                      if (widget.onEdit != null)
-                        IconButton(
-                          tooltip: 'Modifica',
-                          icon: Icon(Icons.edit_outlined, size: 18),
-                          onPressed: () => widget.onEdit!(player),
-                        ),
-                      if (widget.onDelete != null)
-                        IconButton(
-                          tooltip: 'Elimina',
-                          icon: Icon(Icons.delete_outline, size: 18),
-                          onPressed: () => widget.onDelete!(player),
-                        ),
-                    ],
-                  ),
+    return PaginatedTable<Player>(
+      rows: rows,
+      sortColumnIndex: _sortColumnIndex,
+      sortAscending: _sortAscending,
+      columns: [
+        _column('#', 0),
+        _column('Nome', 1),
+        _column('Ruolo', 2),
+        _column('Linea', 3),
+        _column('ELO', 4),
+        const DataColumn(label: Text('Azioni')),
+      ],
+      rowBuilder: (player) => DataRow(
+        cells: [
+          DataCell(Text(player.jerseyNumber?.toString() ?? '-')),
+          DataCell(Text(player.name), onTap: () => widget.onOpen(player)),
+          DataCell(Text(player.role.label)),
+          DataCell(Text(player.linePreference?.label ?? '-')),
+          DataCell(Text(player.rating.round().toString())),
+          DataCell(
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  tooltip: 'Apri',
+                  icon: const Icon(Icons.open_in_new, size: 18),
+                  onPressed: () => widget.onOpen(player),
                 ),
+                if (widget.onEdit != null)
+                  IconButton(
+                    tooltip: 'Modifica',
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    onPressed: () => widget.onEdit!(player),
+                  ),
+                if (widget.onDelete != null)
+                  IconButton(
+                    tooltip: 'Elimina',
+                    icon: const Icon(Icons.delete_outline, size: 18),
+                    onPressed: () => widget.onDelete!(player),
+                  ),
               ],
             ),
+          ),
         ],
       ),
     );
@@ -243,8 +221,8 @@ class _PlayersTableState extends State<_PlayersTable> {
   }
 }
 
-class _PlayersCardPager extends StatefulWidget {
-  const _PlayersCardPager({
+class _PlayersInfiniteList extends StatelessWidget {
+  const _PlayersInfiniteList({
     required this.players,
     required this.onOpen,
     required this.onEdit,
@@ -257,102 +235,20 @@ class _PlayersCardPager extends StatefulWidget {
   final ValueChanged<Player>? onDelete;
 
   @override
-  State<_PlayersCardPager> createState() => _PlayersCardPagerState();
-}
-
-class _PlayersCardPagerState extends State<_PlayersCardPager> {
-  static const _pageSize = 8;
-  var _page = 0;
-
-  @override
   Widget build(BuildContext context) {
-    final maxPage = ((widget.players.length - 1) / _pageSize).floor().clamp(
-      0,
-      999,
-    );
-    if (_page > maxPage) _page = maxPage;
-    final visible = widget.players.skip(_page * _pageSize).take(_pageSize);
+    final viewportHeight = MediaQuery.sizeOf(context).height;
+    final listHeight = (viewportHeight * 0.72).clamp(360.0, 720.0);
 
-    return Column(
-      spacing: 10,
-      children: [
-        for (final player in visible)
-          PlayerCard(
-            player: player,
-            onTap: () => widget.onOpen(player),
-            onEdit: widget.onEdit == null ? null : () => widget.onEdit!(player),
-            onDelete: widget.onDelete == null
-                ? null
-                : () => widget.onDelete!(player),
-          ),
-        _PagerControls(
-          page: _page,
-          maxPage: maxPage,
-          onPrevious: _page == 0 ? null : () => setState(() => _page--),
-          onNext: _page == maxPage ? null : () => setState(() => _page++),
+    return SizedBox(
+      height: listHeight,
+      child: InfiniteScrollList<Player>(
+        items: players,
+        itemBuilder: (context, player, index) => PlayerCard(
+          player: player,
+          onTap: () => onOpen(player),
+          onEdit: onEdit == null ? null : () => onEdit!(player),
+          onDelete: onDelete == null ? null : () => onDelete!(player),
         ),
-      ],
-    );
-  }
-}
-
-class _TableShell extends StatelessWidget {
-  const _TableShell({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.sportForeground(context).withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppColors.sportForeground(context).withValues(alpha: 0.10),
-          ),
-        ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-class _PagerControls extends StatelessWidget {
-  const _PagerControls({
-    required this.page,
-    required this.maxPage,
-    required this.onPrevious,
-    required this.onNext,
-  });
-
-  final int page;
-  final int maxPage;
-  final VoidCallback? onPrevious;
-  final VoidCallback? onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 12,
-        children: [
-          IconButton(onPressed: onPrevious, icon: Icon(Icons.chevron_left)),
-          Text(
-            '${page + 1}/${maxPage + 1}',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.sportMutedForeground(context),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          IconButton(onPressed: onNext, icon: Icon(Icons.chevron_right)),
-        ],
       ),
     );
   }

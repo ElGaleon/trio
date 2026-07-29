@@ -232,7 +232,7 @@ class _StatsFilters extends ConsumerWidget {
                 onPressed: () =>
                     ref.read(statsLineFilterProvider.notifier).set(null),
               ),
-              for (final value in PlayerLinePreference.values)
+              for (final value in GameLine.values)
                 SportFilterPill(
                   label: value.label,
                   selected: line == value,

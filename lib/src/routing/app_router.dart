@@ -65,11 +65,8 @@ GoRouter _createAppRouter() {
       final loggingIn = state.matchedLocation == AppRoutes.login;
       if (!signedIn) return loggingIn ? null : AppRoutes.login;
       final size = MediaQuery.maybeSizeOf(context);
-      final wide = size == null || size.width >= ResponsiveLayout.tablet;
+      final wide = size == null || AppBreakpoints.isWideWidth(size.width);
       if (loggingIn) return wide ? AppRoutes.dashboard : AppRoutes.ranking;
-      if (!wide && state.matchedLocation == AppRoutes.dashboard) {
-        return AppRoutes.ranking;
-      }
       final permission = permissionForLocation(state.uri.toString());
       if (permission != null && !can(authNotifier.role, permission)) {
         return AppRoutes.ranking;

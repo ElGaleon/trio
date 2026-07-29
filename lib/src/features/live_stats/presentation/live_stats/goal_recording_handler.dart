@@ -30,6 +30,15 @@ class GoalRecordingHandler {
         match.scoreB + (type == MatchStatType.opponentGoal ? 1 : 0);
     final closesMatch =
         nextScoreA >= match.pointsLimit || nextScoreB >= match.pointsLimit;
+    final requiresSharedConfirmation = service.requiresSharedConfirmation(
+      match,
+    );
+    final scoreText = closesMatch
+        ? 'Il punteggio diventa $nextScoreA - $nextScoreB e la partita arriva al limite di ${match.pointsLimit}.'
+        : 'Il punteggio diventa $nextScoreA - $nextScoreB.';
+    final confirmationText = requiresSharedConfirmation
+        ? ' La meta dovra essere confermata anche da un altro utente.'
+        : '';
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: AppColors.transparent,
@@ -53,9 +62,7 @@ class GoalRecordingHandler {
                     ),
                   ),
                   Text(
-                    closesMatch
-                        ? 'Il punteggio diventa $nextScoreA - $nextScoreB e la partita arriva al limite di ${match.pointsLimit}. La meta dovra essere confermata anche dall altro utente.'
-                        : 'Il punteggio diventa $nextScoreA - $nextScoreB. La meta dovra essere confermata anche dall altro utente.',
+                    '$scoreText$confirmationText',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.sportMutedForeground(context),
                       fontWeight: FontWeight.w700,
@@ -95,6 +102,17 @@ class GoalRecordingHandler {
     if (confirmed != true) return;
     if (!context.mounted) return;
 
-    await service.proposeStatAction(match, type: type, repository: repository);
+    final result = await service.proposeStatAction(
+      match,
+      type: type,
+      repository: repository,
+      settings: settings,
+    );
+    if (result == null) return;
+    if (result.finished) {
+      await onFinish();
+    } else if (result.scoredPoint && context.mounted) {
+      await onShowLineSelection(result.oursOnOffense);
+    }
   }
 }

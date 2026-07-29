@@ -81,8 +81,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final notifier = ref.read(settingsFormProvider.notifier);
     final themeModeIndex = ref.watch(themeModeIndexProvider);
     final textTheme = Theme.of(context).textTheme;
-    final showMobileOrganizationSwitcher =
-        MediaQuery.sizeOf(context).width < ResponsiveLayout.tablet;
+    final showMobileOrganizationSwitcher = ResponsiveLayout.isMobile(context);
     final saveButton = SportFloatingActionButton(
       label: 'Salva',
       icon: FIcons.save,

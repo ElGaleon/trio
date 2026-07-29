@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:skrim/src/extensions/theme_extension.dart';
 
 import 'package:skrim/src/shared/decorated_panel.dart';
 import 'package:skrim/theme/app_colors.dart';
@@ -91,7 +92,7 @@ class _PullStopwatchSheetState extends State<PullStopwatchSheet> {
               children: [
                 Text(
                   'Cronometro pull',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  style: context.textTheme.titleLarge?.copyWith(
                     color: AppColors.sportForeground(context),
                     fontWeight: FontWeight.w900,
                   ),
@@ -100,7 +101,7 @@ class _PullStopwatchSheetState extends State<PullStopwatchSheet> {
                   _hasStarted
                       ? 'Ferma il cronometro scegliendo se il pull e rimasto dentro o e uscito.'
                       : 'Seleziona il tiratore e avvia il cronometro quando parte il pull.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: context.textTheme.bodySmall?.copyWith(
                     color: AppColors.sportMutedForeground(context),
                     fontWeight: FontWeight.w800,
                   ),

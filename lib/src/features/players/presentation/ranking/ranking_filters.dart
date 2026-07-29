@@ -13,9 +13,9 @@ class RankingFilters extends StatelessWidget {
   });
 
   final PlayerRole? roleFilter;
-  final PlayerLinePreference? lineFilter;
+  final GameLine? lineFilter;
   final ValueChanged<PlayerRole?> onRoleChanged;
-  final ValueChanged<PlayerLinePreference?> onLineChanged;
+  final ValueChanged<GameLine?> onLineChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -41,20 +41,20 @@ class RankingFilters extends StatelessWidget {
           ),
           SportFilterPill(
             label: 'Attacco',
-            selected: lineFilter == PlayerLinePreference.offense,
+            selected: lineFilter == GameLine.offense,
             onPressed: () => onLineChanged(
-              lineFilter == PlayerLinePreference.offense
+              lineFilter == GameLine.offense
                   ? null
-                  : PlayerLinePreference.offense,
+                  : GameLine.offense,
             ),
           ),
           SportFilterPill(
             label: 'Difesa',
-            selected: lineFilter == PlayerLinePreference.defense,
+            selected: lineFilter == GameLine.defense,
             onPressed: () => onLineChanged(
-              lineFilter == PlayerLinePreference.defense
+              lineFilter == GameLine.defense
                   ? null
-                  : PlayerLinePreference.defense,
+                  : GameLine.defense,
             ),
           ),
         ],

@@ -166,9 +166,9 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
                       keyboardType: TextInputType.number,
                       hint: 'Numero di maglia (opzionale)',
                     ),
-                    FSelect<PlayerLinePreference>(
+                    FSelect<GameLine>(
                       items: {
-                        for (final line in PlayerLinePreference.values)
+                        for (final line in GameLine.values)
                           line.label: line,
                       },
                       hint: 'Linea preferita',

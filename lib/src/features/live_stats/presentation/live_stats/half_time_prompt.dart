@@ -7,6 +7,7 @@ import 'package:skrim/src/features/firebase/data/firestore_skrim_repository.dart
 import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
 import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 import 'package:skrim/src/features/live_stats/application/live_stats_service.dart';
+import 'package:skrim/src/features/settings/domain/app_settings.dart';
 import 'general_action_button.dart';
 
 class HalfTimePrompt {
@@ -17,6 +18,7 @@ class HalfTimePrompt {
     LiveStatsService service,
     ScrimmageMatch match,
     FirestoreSkrimRepository repository,
+    AppSettings settings,
   ) async {
     if (service.hasHalfTimeEvent(match)) return;
     final start = await showModalBottomSheet<bool>(
@@ -85,6 +87,7 @@ class HalfTimePrompt {
       match,
       type: MatchStatType.halfTime,
       repository: repository,
+      settings: settings,
     );
   }
 }

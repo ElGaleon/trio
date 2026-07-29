@@ -23,6 +23,7 @@ class SportEmptyState extends StatelessWidget {
     final muted = AppColors.sportMutedForeground(context);
     return GlassDecoration(
       radius: 32,
+      border: Border(),
       child: Padding(
         padding: const EdgeInsets.all(28),
         child: Column(

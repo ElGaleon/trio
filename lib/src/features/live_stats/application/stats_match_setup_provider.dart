@@ -30,7 +30,7 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
       opponentName: 'Avversari',
       tournament: '',
       location: '',
-      division: 'Mixed',
+      division: Division.mixed,
       matchType: 'Classic',
       teamSize: 7,
       windKmh: 0,
@@ -75,7 +75,7 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
       opponentName: isTraining ? 'Scuri' : event?.title ?? 'Avversari',
       tournament: event?.title ?? '',
       location: event?.location ?? '',
-      division: 'Mixed',
+      division: Division.mixed,
       matchType: isTraining ? 'Allenamento' : 'Classic',
       teamSize: 7,
       windKmh: 0,
@@ -105,11 +105,11 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
     state = state.copyWith(isAttackVsDefense: nextVal);
     if (nextVal) {
       final a = allPlayers
-          .where((p) => p.linePreference == PlayerLinePreference.offense)
+          .where((p) => p.linePreference == GameLine.offense)
           .map((p) => p.id)
           .toSet();
       final b = allPlayers
-          .where((p) => p.linePreference == PlayerLinePreference.defense)
+          .where((p) => p.linePreference == GameLine.defense)
           .map((p) => p.id)
           .toSet();
       state = state.copyWith(
@@ -134,7 +134,7 @@ class StatsMatchSetupNotifier extends Notifier<StatsMatchSetupState> {
       state = state.copyWith(opponentName: name);
   void updateTournament(String val) => state = state.copyWith(tournament: val);
   void updateLocation(String val) => state = state.copyWith(location: val);
-  void updateDivision(String val) => state = state.copyWith(division: val);
+  void updateDivision(Division val) => state = state.copyWith(division: val);
   void updateMatchType(String val) => state = state.copyWith(matchType: val);
   void updateTeamSize(int val) => state = state.copyWith(teamSize: val);
   void updateWind(int val) => state = state.copyWith(windKmh: val);

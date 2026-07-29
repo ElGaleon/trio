@@ -39,7 +39,7 @@ class FirestoreSkrimRepository {
       ) {
         return Player.fromMap({'id': doc.id, ...doc.data()});
       }).toList();
-      return players..sort((a, b) => b.rating.compareTo(a.rating));
+      return players..sort((a, b) => b.name.compareTo(a.name));
     });
   }
 
@@ -94,7 +94,7 @@ class FirestoreSkrimRepository {
     String firstName = '',
     String lastName = '',
     String email = '',
-    required PlayerLinePreference? linePreference,
+    required GameLine? linePreference,
     required PlayerRole role,
     String? profileImagePath,
     bool isExternal = false,
@@ -126,7 +126,7 @@ class FirestoreSkrimRepository {
     String firstName = '',
     String lastName = '',
     String email = '',
-    required PlayerLinePreference? linePreference,
+    required GameLine? linePreference,
     required PlayerRole role,
     String? profileImagePath,
     required bool isExternal,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:skrim/src/extensions/theme_extension.dart';
 import 'package:skrim/theme/app_colors.dart';
 
 class PullTimerDisplay extends StatelessWidget {
@@ -28,19 +29,19 @@ class PullTimerDisplay extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        padding: const EdgeInsets.all(16),
         child: Row(
+          spacing: 16,
           children: [
             Icon(
               running ? FIcons.timer : FIcons.timerReset,
               color: running ? AppColors.violetLight : AppColors.sportMutedText,
               size: 22,
             ),
-            const SizedBox(width: 14),
             Expanded(
               child: Text(
                 '$minutes:$seconds.$tenths',
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                style: context.textTheme.displaySmall?.copyWith(
                   color: AppColors.sportForeground(context),
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0,
@@ -49,7 +50,7 @@ class PullTimerDisplay extends StatelessWidget {
             ),
             Text(
               running ? 'LIVE' : 'READY',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: context.textTheme.bodySmall?.copyWith(
                 color: running
                     ? AppColors.violetLight
                     : AppColors.sportMutedText,

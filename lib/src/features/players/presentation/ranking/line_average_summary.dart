@@ -14,12 +14,12 @@ class LineAverageSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final offenseAverage = _averageRating(
       players.where(
-        (player) => player.linePreference == PlayerLinePreference.offense,
+        (player) => player.linePreference == GameLine.offense,
       ),
     );
     final defenseAverage = _averageRating(
       players.where(
-        (player) => player.linePreference == PlayerLinePreference.defense,
+        (player) => player.linePreference == GameLine.defense,
       ),
     );
 

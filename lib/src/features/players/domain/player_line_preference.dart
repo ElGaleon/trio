@@ -1,8 +1,8 @@
-enum PlayerLinePreference {
+enum GameLine {
   offense('Attacco'),
   defense('Difesa');
 
-  const PlayerLinePreference(this.label);
+  const GameLine(this.label);
 
   final String label;
 }

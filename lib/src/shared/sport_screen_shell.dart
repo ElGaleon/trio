@@ -16,7 +16,7 @@ class SportScreenShell extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.child,
-    this.padding = const EdgeInsets.fromLTRB(16, 16, 16, 18),
+    this.padding = const EdgeInsets.all(16),
     this.floatingActionButton,
     this.showBackButton = false,
     this.headerActions,
@@ -80,11 +80,7 @@ class _SportScreenShellState extends State<SportScreenShell> {
       if (showFloatingInHeader) widget.floatingActionButton!,
     ];
     final floatingInset = floatingActionButton == null ? 0.0 : 76.0;
-    final horizontalPadding = size.width >= ResponsiveLayout.desktop
-        ? 32.0
-        : size.width >= ResponsiveLayout.tablet
-        ? 24.0
-        : 16.0;
+    final horizontalPadding = ResponsiveLayout.horizontalPaddingFor(size.width);
     final resolvedPadding = widget.padding.resolve(Directionality.of(context));
     final contentPadding = resolvedPadding.copyWith(
       left: horizontalPadding,

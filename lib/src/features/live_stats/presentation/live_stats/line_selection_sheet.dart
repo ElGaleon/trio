@@ -22,8 +22,8 @@ class LineSelectionSheet {
     required bool nextOnOffense,
   }) {
     final preferred = nextOnOffense
-        ? PlayerLinePreference.offense
-        : PlayerLinePreference.defense;
+        ? GameLine.offense
+        : GameLine.defense;
 
     final selectedA = match.teamAIds.toSet();
     final selectedB = match.teamBIds.toSet();
@@ -81,9 +81,9 @@ class LineSelectionSheet {
             final otherPlayers = visiblePlayers
                 .where((player) => player.linePreference != preferred)
                 .toList();
-            final otherLineLabel = preferred == PlayerLinePreference.offense
-                ? PlayerLinePreference.defense.label
-                : PlayerLinePreference.offense.label;
+            final otherLineLabel = preferred == GameLine.offense
+                ? GameLine.defense.label
+                : GameLine.offense.label;
 
             final canSubmit = isScrimmage
                 ? (selectedA.length == match.teamSize &&

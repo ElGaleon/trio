@@ -84,7 +84,7 @@ class PlayerFormNotifier extends Notifier<PlayerFormState> {
     state = state.copyWith(jerseyNumber: value);
   }
 
-  void updateLinePreference(PlayerLinePreference? line) {
+  void updateLinePreference(GameLine? line) {
     state = state.copyWith(linePreference: line);
   }
 

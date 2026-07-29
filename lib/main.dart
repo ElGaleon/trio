@@ -75,6 +75,7 @@ class StartupLoadingApp extends StatelessWidget {
     const palette = AppColorPalette.dark;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      initialRoute: '/',
       supportedLocales: FLocalizations.supportedLocales,
       localizationsDelegates: const [...FLocalizations.localizationsDelegates],
 
@@ -126,6 +127,7 @@ class FirebaseStartupErrorApp extends StatelessWidget {
     const palette = AppColorPalette.dark;
 
     return MaterialApp(
+      initialRoute: '/',
       home: Scaffold(
         backgroundColor: palette.bootstrapBackground,
         body: Center(

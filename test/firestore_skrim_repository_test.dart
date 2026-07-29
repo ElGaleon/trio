@@ -128,6 +128,79 @@ void main() {
     expect(received?.statEvents.single.playerId, playerId);
   });
 
+  test(
+    'applies shared live actions immediately when only one user is present',
+    () async {
+      final firestore = FakeFirebaseFirestore();
+      final repository = FirestoreSkrimRepository(
+        firestore: firestore,
+        organizationId: 'org-1',
+      );
+      await repository.upsertMatch(
+        ScrimmageMatch(
+          id: 'solo-live',
+          createdAt: DateTime(2026, 7, 22, 20),
+          teamAIds: const ['a'],
+          teamBIds: const [],
+          scoreA: 0,
+          scoreB: 0,
+          liveUserIds: const ['local-user'],
+        ),
+      );
+
+      final result = await LiveStatsService.instance.proposeStatAction(
+        (await repository.watchMatch('solo-live').first)!,
+        type: MatchStatType.timeout,
+        repository: repository,
+        settings: AppSettings(),
+      );
+
+      final updated = await repository
+          .watchMatch('solo-live')
+          .firstWhere((match) => match?.statEvents.isNotEmpty == true);
+      expect(result, isNotNull);
+      expect(updated?.pendingAction, isNull);
+      expect(updated?.statEvents.single.type, MatchStatType.timeout);
+    },
+  );
+
+  test(
+    'keeps shared live actions pending when multiple users are present',
+    () async {
+      final firestore = FakeFirebaseFirestore();
+      final repository = FirestoreSkrimRepository(
+        firestore: firestore,
+        organizationId: 'org-1',
+      );
+      await repository.upsertMatch(
+        ScrimmageMatch(
+          id: 'shared-live',
+          createdAt: DateTime(2026, 7, 22, 20),
+          teamAIds: const ['a'],
+          teamBIds: const [],
+          scoreA: 0,
+          scoreB: 0,
+          liveUserIds: const ['local-user', 'other-user'],
+        ),
+      );
+
+      final result = await LiveStatsService.instance.proposeStatAction(
+        (await repository.watchMatch('shared-live').first)!,
+        type: MatchStatType.timeout,
+        repository: repository,
+        settings: AppSettings(),
+      );
+
+      final updated = await repository
+          .watchMatch('shared-live')
+          .firstWhere((match) => match?.pendingAction != null);
+      expect(result, isNull);
+      expect(updated?.statEvents, isEmpty);
+      expect(updated?.pendingAction?.statType, MatchStatType.timeout);
+      expect(updated?.pendingAction?.confirmedByUserIds, ['local-user']);
+    },
+  );
+
   test('creates updates and deletes calendar events', () async {
     final firestore = FakeFirebaseFirestore();
     final repository = FirestoreSkrimRepository(

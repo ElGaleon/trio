@@ -22,7 +22,7 @@ class RosterPicker extends StatefulWidget {
   final List<Player> players;
   final Set<String> selectedIds;
   final int minimum;
-  final PlayerLinePreference preferredLine;
+  final GameLine preferredLine;
   final ValueChanged<String> onToggle;
   final int? maximum;
   final String title;
@@ -43,9 +43,9 @@ class _RosterPickerState extends State<RosterPicker> {
     final otherPlayers = widget.players
         .where((player) => player.linePreference != widget.preferredLine)
         .toList();
-    final otherLineLabel = widget.preferredLine == PlayerLinePreference.offense
-        ? PlayerLinePreference.defense.label
-        : PlayerLinePreference.offense.label;
+    final otherLineLabel = widget.preferredLine == GameLine.offense
+        ? GameLine.defense.label
+        : GameLine.offense.label;
 
     return GlassDecoration(
       child: Padding(

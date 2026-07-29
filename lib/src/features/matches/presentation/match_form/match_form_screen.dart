@@ -168,7 +168,7 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
         count: state.teamAIds.length,
         minimum: state.teamSize,
         suggestedLine: state.offenseVsDefense
-            ? PlayerLinePreference.offense
+            ? GameLine.offense
             : null,
         players: players,
         recentTeams: recentTeams,
@@ -184,7 +184,7 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
         count: state.teamBIds.length,
         minimum: state.teamSize,
         suggestedLine: state.offenseVsDefense
-            ? PlayerLinePreference.defense
+            ? GameLine.defense
             : null,
         players: players,
         recentTeams: recentTeams,

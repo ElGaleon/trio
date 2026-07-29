@@ -1,57 +1,65 @@
 import 'package:flutter/material.dart';
 
-class ResponsiveLayout {
-  const ResponsiveLayout._();
+enum AppScreenSize { mobile, tablet, desktop }
 
+class AppBreakpoints {
+  const AppBreakpoints._();
+
+  static const mobile = 0.0;
   static const tablet = 700.0;
   static const desktop = 1024.0;
   static const contentMaxWidth = 1120.0;
+  static const loginShowcase = 760.0;
 
-  static bool isWide(BuildContext context) =>
-      MediaQuery.sizeOf(context).width >= tablet;
-
-  static bool isDesktop(BuildContext context) =>
-      MediaQuery.sizeOf(context).width >= desktop;
-
-  static int columnsFor(double width, {double minTileWidth = 320}) {
-    return (width / minTileWidth).floor().clamp(1, 3);
+  static AppScreenSize fromWidth(double width) {
+    if (width >= desktop) return AppScreenSize.desktop;
+    if (width >= tablet) return AppScreenSize.tablet;
+    return AppScreenSize.mobile;
   }
+
+  static bool isMobileWidth(double width) =>
+      fromWidth(width) == AppScreenSize.mobile;
+
+  static bool isTabletWidth(double width) =>
+      fromWidth(width) == AppScreenSize.tablet;
+
+  static bool isDesktopWidth(double width) =>
+      fromWidth(width) == AppScreenSize.desktop;
+
+  static bool isWideWidth(double width) => width >= tablet;
 }
 
-class ResponsiveGrid extends StatelessWidget {
-  const ResponsiveGrid({
-    super.key,
-    required this.children,
-    this.minTileWidth = 320,
-    this.spacing = 12,
-    this.runSpacing = 12,
-  });
+class ResponsiveLayout {
+  const ResponsiveLayout._();
 
-  final List<Widget> children;
-  final double minTileWidth;
-  final double spacing;
-  final double runSpacing;
+  static const tablet = AppBreakpoints.tablet;
+  static const desktop = AppBreakpoints.desktop;
+  static const contentMaxWidth = AppBreakpoints.contentMaxWidth;
 
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = ResponsiveLayout.columnsFor(
-          constraints.maxWidth,
-          minTileWidth: minTileWidth,
-        );
-        final tileWidth =
-            (constraints.maxWidth - (spacing * (columns - 1))) / columns;
+  static AppScreenSize screenSizeOf(BuildContext context) =>
+      AppBreakpoints.fromWidth(MediaQuery.sizeOf(context).width);
 
-        return Wrap(
-          spacing: spacing,
-          runSpacing: runSpacing,
-          children: [
-            for (final child in children)
-              SizedBox(width: tileWidth, child: child),
-          ],
-        );
-      },
-    );
+  static bool isWide(BuildContext context) =>
+      AppBreakpoints.isWideWidth(MediaQuery.sizeOf(context).width);
+
+  static bool isMobile(BuildContext context) =>
+      AppBreakpoints.isMobileWidth(MediaQuery.sizeOf(context).width);
+
+  static bool isTablet(BuildContext context) =>
+      AppBreakpoints.isTabletWidth(MediaQuery.sizeOf(context).width);
+
+  static bool isDesktop(BuildContext context) =>
+      AppBreakpoints.isDesktopWidth(MediaQuery.sizeOf(context).width);
+
+  static int columnsFor(double width, {double minTileWidth = 320}) {
+    return (width / minTileWidth).floor().clamp(1, 4);
+  }
+
+  static double horizontalPaddingFor(double width) {
+    return switch (AppBreakpoints.fromWidth(width)) {
+      AppScreenSize.desktop => 32,
+      AppScreenSize.tablet => 24,
+      AppScreenSize.mobile => 16,
+    };
   }
 }

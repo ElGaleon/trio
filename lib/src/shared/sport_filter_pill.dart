@@ -27,12 +27,12 @@ class SportFilterPill extends StatelessWidget {
         duration: const Duration(milliseconds: 140),
         height: 32,
         alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 13),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.violet.withValues(alpha: 0.24)
+              ? AppColors.violet.withValues(alpha: 0.25)
               : AppColors.sportGlass(context),
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: selected ? AppColors.violet : AppColors.sportBorder(context),
           ),

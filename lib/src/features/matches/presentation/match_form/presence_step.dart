@@ -32,7 +32,7 @@ class PresenceStep extends StatelessWidget {
   final Set<String> disabledIds;
   final ValueChanged<String> onChanged;
   final ValueChanged<RecentMatchTeam> onApplyRecentTeam;
-  final PlayerLinePreference? suggestedLine;
+  final GameLine? suggestedLine;
 
   @override
   Widget build(BuildContext context) {
@@ -100,10 +100,10 @@ class PresenceStep extends StatelessWidget {
     );
   }
 
-  IconData _lineIcon(PlayerLinePreference? linePreference) {
+  IconData _lineIcon(GameLine? linePreference) {
     return switch (linePreference) {
-      PlayerLinePreference.offense => FIcons.arrowUpRight,
-      PlayerLinePreference.defense => FIcons.shield,
+      GameLine.offense => FIcons.arrowUpRight,
+      GameLine.defense => FIcons.shield,
       null => FIcons.user,
     };
   }

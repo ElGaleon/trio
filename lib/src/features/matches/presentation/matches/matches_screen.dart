@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:skrim/src/components/ui/responsive_grid.dart';
 
 import 'package:skrim/src/shared/app_empty_state.dart';
 import 'package:skrim/src/shared/decorated_panel.dart';
 import 'package:skrim/src/shared/match_card.dart';
-import 'package:skrim/src/shared/responsive_layout.dart';
 import 'package:skrim/src/shared/sport_button.dart';
 import 'package:skrim/src/shared/sport_screen_shell.dart';
 import 'package:skrim/src/constants/app_constants.dart';

@@ -5,12 +5,14 @@ class GlassDecoration extends StatelessWidget {
   final Gradient? gradient;
   final double radius;
   final Widget? child;
+  final Border? border;
 
   const GlassDecoration({
     super.key,
     this.gradient,
     this.radius = 28,
     this.child,
+    this.border
   });
 
   @override
@@ -22,7 +24,7 @@ class GlassDecoration extends StatelessWidget {
           color: AppColors.sportGlass(context),
           gradient: gradient,
           borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: AppColors.sportBorder(context)),
+          border: border ?? Border.all(color: AppColors.sportBorder(context)),
           boxShadow: [
             BoxShadow(
               color: AppColors.black.withValues(alpha: isDark ? 0.24 : 0.07),

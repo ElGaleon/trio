@@ -57,14 +57,58 @@ class LiveStatsService {
     );
   }
 
-  Future<void> proposeStatAction(
+  Future<void> enterLiveStats(
+    ScrimmageMatch match,
+    FirestoreSkrimRepository repository,
+  ) async {
+    final actor = _actor();
+    await repository.updateMatchTransaction(match.id, (current) {
+      if (!current.liveUserIds.contains(actor.$1)) {
+        current.liveUserIds = [...current.liveUserIds, actor.$1];
+      }
+      return current;
+    });
+  }
+
+  Future<void> leaveLiveStats(
+    String matchId,
+    FirestoreSkrimRepository repository,
+  ) async {
+    final actor = _actor();
+    await repository.updateMatchTransaction(matchId, (current) {
+      current.liveUserIds = current.liveUserIds
+          .where((id) => id != actor.$1)
+          .toList();
+      return current;
+    });
+  }
+
+  bool requiresSharedConfirmation(ScrimmageMatch match) {
+    return match.liveUserIds.toSet().length > 1;
+  }
+
+  Future<RecordEventResult?> proposeStatAction(
     ScrimmageMatch match, {
     required MatchStatType type,
     required FirestoreSkrimRepository repository,
+    required AppSettings settings,
   }) async {
     final actor = _actor();
+    RecordEventResult? result;
     await repository.updateMatchTransaction(match.id, (current) {
       if (current.pendingAction != null) return current;
+      if (!requiresSharedConfirmation(current)) {
+        result = _applyRecord(
+          current,
+          type: type,
+          player: null,
+          playersById: const {},
+          settings: settings,
+          actorUserId: actor.$1,
+          actorLabel: actor.$2,
+        );
+        return current;
+      }
       current.pendingAction = LivePendingAction(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         kind: 'stat',
@@ -76,15 +120,23 @@ class LiveStatsService {
       );
       return current;
     });
+    return result;
   }
 
-  Future<void> proposeFinishMatch(
+  Future<bool> proposeFinishMatch(
     ScrimmageMatch match,
     FirestoreSkrimRepository repository,
   ) async {
     final actor = _actor();
+    var applied = false;
     await repository.updateMatchTransaction(match.id, (current) {
       if (current.pendingAction != null) return current;
+      if (!requiresSharedConfirmation(current)) {
+        current.pendingAction = null;
+        _applyFinish(current, actor.$1, actor.$2);
+        applied = true;
+        return current;
+      }
       current.pendingAction = LivePendingAction(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         kind: 'finish',
@@ -95,6 +147,7 @@ class LiveStatsService {
       );
       return current;
     });
+    return applied;
   }
 
   Future<void> proposeLineup(
@@ -107,6 +160,17 @@ class LiveStatsService {
     final actor = _actor();
     await repository.updateMatchTransaction(match.id, (current) {
       if (current.pendingAction != null) return current;
+      if (!requiresSharedConfirmation(current)) {
+        _applyLineup(
+          current,
+          playerIdsA,
+          playerIdsB,
+          nextOnOffense,
+          actor.$1,
+          actor.$2,
+        );
+        return current;
+      }
       current.pendingAction = LivePendingAction(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         kind: 'lineup',
@@ -134,7 +198,8 @@ class LiveStatsService {
       final pending = current.pendingAction;
       if (pending == null) return current;
       final confirmed = pending.confirm(actor.$1);
-      if (confirmed.confirmedByUserIds.length < 2) {
+      final requiredConfirmations = requiresSharedConfirmation(current) ? 2 : 1;
+      if (confirmed.confirmedByUserIds.length < requiredConfirmations) {
         current.pendingAction = confirmed;
         return current;
       }
@@ -420,15 +485,21 @@ class LiveStatsService {
     MatchStatType endType,
     bool nextOnOffense,
     FirestoreSkrimRepository repository,
+    AppSettings settings,
   ) async {
-    await proposeStatAction(match, type: endType, repository: repository);
+    await proposeStatAction(
+      match,
+      type: endType,
+      repository: repository,
+      settings: settings,
+    );
   }
 
-  Future<void> finishMatch(
+  Future<bool> finishMatch(
     ScrimmageMatch match,
     FirestoreSkrimRepository repository,
   ) async {
-    await proposeFinishMatch(match, repository);
+    return proposeFinishMatch(match, repository);
   }
 
   Future<void> saveAndFinishMatch(

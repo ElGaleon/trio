@@ -16,7 +16,7 @@ final statsSearchQueryProvider = mutableProvider<String>(() => '');
 
 final statsRoleFilterProvider = mutableProvider<PlayerRole?>(() => null);
 
-final statsLineFilterProvider = mutableProvider<PlayerLinePreference?>(
+final statsLineFilterProvider = mutableProvider<GameLine?>(
   () => null,
 );
 

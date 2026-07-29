@@ -153,7 +153,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: LayoutBuilder(
             builder: (context, viewport) {
               final cardHeight = viewport.maxHeight - 48;
-
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: ConstrainedBox(
@@ -168,11 +167,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       height: cardHeight,
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          final isWide = constraints.maxWidth >= 760;
+                          final showShowcase =
+                              constraints.maxWidth >=
+                              AppBreakpoints.loginShowcase;
                           final authStep = Padding(
                             padding: EdgeInsets.symmetric(
-                              horizontal: isWide ? 70 : 24,
-                              vertical: isWide ? 36 : 24,
+                              horizontal: showShowcase ? 70 : 24,
+                              vertical: showShowcase ? 36 : 24,
                             ),
                             child: _AuthStep(
                               formKey: _formKey,
@@ -201,7 +202,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           );
 
-                          if (!isWide) return authStep;
+                          if (!showShowcase) return authStep;
 
                           return Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,

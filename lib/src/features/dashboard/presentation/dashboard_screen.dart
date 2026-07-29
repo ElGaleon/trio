@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:skrim/src/components/ui/responsive_grid.dart';
 
 import 'package:skrim/src/features/matches/application/matches_providers.dart';
 import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
@@ -94,8 +95,9 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final desktop =
-                        constraints.maxWidth >= ResponsiveLayout.desktop;
+                    final desktop = AppBreakpoints.isDesktopWidth(
+                      constraints.maxWidth,
+                    );
                     final left = Column(
                       spacing: 12,
                       children: [
@@ -173,6 +175,25 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final foreground = AppColors.sportForeground(context);
+    final muted = AppColors.sportMutedForeground(context);
+    final valueStyle = textTheme.headlineSmall?.copyWith(
+      color: foreground,
+      fontWeight: FontWeight.w900,
+      fontStyle: FontStyle.normal,
+      height: 1,
+    );
+    final labelStyle = textTheme.labelLarge?.copyWith(
+      color: foreground,
+      fontStyle: FontStyle.normal,
+      height: 1,
+    );
+    final detailStyle = textTheme.labelSmall?.copyWith(
+      color: muted,
+      fontStyle: FontStyle.normal,
+      height: 1,
+    );
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
@@ -191,26 +212,37 @@ class _MetricCard extends StatelessWidget {
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColors.sportForeground(context),
-                    fontWeight: FontWeight.w900,
-                  ),
+                  strutStyle: valueStyle == null
+                      ? null
+                      : StrutStyle.fromTextStyle(
+                          valueStyle,
+                          forceStrutHeight: true,
+                        ),
+                  style: valueStyle,
                 ),
                 Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppColors.sportForeground(context),
-                  ),
+                  strutStyle: labelStyle == null
+                      ? null
+                      : StrutStyle.fromTextStyle(
+                          labelStyle,
+                          forceStrutHeight: true,
+                        ),
+                  style: labelStyle,
                 ),
                 Text(
                   detail,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.sportMutedForeground(context),
-                  ),
+                  strutStyle: detailStyle == null
+                      ? null
+                      : StrutStyle.fromTextStyle(
+                          detailStyle,
+                          forceStrutHeight: true,
+                        ),
+                  style: detailStyle,
                 ),
               ],
             ),

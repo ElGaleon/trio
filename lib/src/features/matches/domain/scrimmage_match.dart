@@ -2,6 +2,16 @@ import 'match_stat_type.dart';
 import 'match_stat_event.dart';
 import 'live_pending_action.dart';
 
+enum Division{
+  mixed('Mixed'),
+  open('Open'),
+  women('Women');
+
+  final String label;
+
+  const Division(this.label);
+}
+
 class ScrimmageMatch {
   final String id;
   final DateTime createdAt;
@@ -16,7 +26,7 @@ class ScrimmageMatch {
   Map<String, double> initialRatings;
   Map<String, double> finalRatings;
   bool isExternalOpponent;
-  String division;
+  Division division;
   String tournament;
   String matchType;
   int windKmh;
@@ -36,6 +46,7 @@ class ScrimmageMatch {
   List<String> enabledCustomStatIds;
   String? eventId;
   String? trainingEventId;
+  List<String> liveUserIds;
   LivePendingAction? pendingAction;
 
   ScrimmageMatch({
@@ -52,7 +63,7 @@ class ScrimmageMatch {
     Map<String, double>? initialRatings,
     Map<String, double>? finalRatings,
     this.isExternalOpponent = false,
-    this.division = 'Mixed',
+    this.division = Division.mixed,
     this.tournament = '',
     this.matchType = 'Classic',
     this.windKmh = 0,
@@ -72,6 +83,7 @@ class ScrimmageMatch {
     List<String>? enabledCustomStatIds,
     this.eventId,
     this.trainingEventId,
+    List<String>? liveUserIds,
     this.pendingAction,
   }) : teamSize = teamSize ?? teamAIds.length,
        teamAName = teamAName ?? (offenseVsDefense ? 'Attacco' : 'A'),
@@ -84,7 +96,8 @@ class ScrimmageMatch {
        statEvents = statEvents ?? [],
        teamARosterIds = teamARosterIds ?? [],
        teamBRosterIds = teamBRosterIds ?? [],
-       enabledCustomStatIds = enabledCustomStatIds ?? [];
+       enabledCustomStatIds = enabledCustomStatIds ?? [],
+       liveUserIds = liveUserIds ?? [];
 
   bool get isDraw => scoreA == scoreB;
 
@@ -116,6 +129,22 @@ class ScrimmageMatch {
   bool tracks(MatchStatType type) {
     return enabledStatTypes.contains(type);
   }
+
+  bool containsPlayerById(String playerId) {
+    return isPlayerInAnyTeam(playerId) || isPlayerInAnyRoster(playerId) || isPlayerPresent(playerId) || hasPlayerAnyStats(playerId);
+  }
+
+  bool isPlayerInAnyRoster(String playerId) =>
+      teamARosterIds.contains(playerId) || teamBRosterIds.contains(playerId);
+
+  bool isPlayerInAnyTeam(String playerId) =>
+      teamAIds.contains(playerId) || teamBIds.contains(playerId);
+
+  bool isPlayerPresent(String playerId) => presentPlayerIds.contains(playerId);
+
+  bool hasPlayerAnyStats(String playerId) => statEvents.any(
+    (event) => event.playerId == playerId || event.lineupIds.contains(playerId),
+  );
 
   Map<String, dynamic> toMap() {
     return {
@@ -152,6 +181,7 @@ class ScrimmageMatch {
       'enabledCustomStatIds': enabledCustomStatIds,
       'eventId': eventId,
       'trainingEventId': trainingEventId,
+      'liveUserIds': liveUserIds,
       'pendingAction': pendingAction?.toMap(),
     };
   }
@@ -171,7 +201,7 @@ class ScrimmageMatch {
       initialRatings: _doubleMap(map['initialRatings']),
       finalRatings: _doubleMap(map['finalRatings']),
       isExternalOpponent: map['isExternalOpponent'] as bool? ?? false,
-      division: map['division'] as String? ?? 'Mixed',
+      division: map['division'] as Division? ?? Division.mixed,
       tournament: map['tournament'] as String? ?? '',
       matchType: map['matchType'] as String? ?? 'Classic',
       windKmh: (map['windKmh'] as num?)?.toInt() ?? 0,
@@ -206,6 +236,7 @@ class ScrimmageMatch {
       ),
       eventId: map['eventId'] as String?,
       trainingEventId: map['trainingEventId'] as String?,
+      liveUserIds: List<String>.from(map['liveUserIds'] as List? ?? []),
       pendingAction: LivePendingAction.fromMap(map['pendingAction']),
     );
   }

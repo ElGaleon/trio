@@ -82,13 +82,13 @@ void main() {
         id: '1',
         name: 'Alice',
         role: PlayerRole.handler,
-        linePreference: PlayerLinePreference.offense,
+        linePreference: GameLine.offense,
       ),
       Player(
         id: '2',
         name: 'Bob',
         role: PlayerRole.cutter,
-        linePreference: PlayerLinePreference.defense,
+        linePreference: GameLine.defense,
       ),
     ];
     final container = ProviderContainer(
@@ -100,7 +100,7 @@ void main() {
     container.read(playersRoleFilterProvider.notifier).set(PlayerRole.handler);
     container
         .read(playersLineFilterProvider.notifier)
-        .set(PlayerLinePreference.offense);
+        .set(GameLine.offense);
 
     final filtered = container.read(filteredPlayersProvider);
 
@@ -247,14 +247,14 @@ void main() {
         name: 'Alice',
         rating: 1100,
         role: PlayerRole.handler,
-        linePreference: PlayerLinePreference.offense,
+        linePreference: GameLine.offense,
       ),
       Player(
         id: 'p2',
         name: 'Bob',
         rating: 900,
         role: PlayerRole.cutter,
-        linePreference: PlayerLinePreference.defense,
+        linePreference: GameLine.defense,
       ),
     ];
     final matches = [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 
 import 'package:skrim/src/shared/sport_glass_decoration_helper.dart';
 import 'setting_stepper.dart';
@@ -50,7 +51,7 @@ class MatchSettingsStep extends StatelessWidget {
   final TextEditingController opponentController;
   final TextEditingController tournamentController;
   final TextEditingController locationController;
-  final String division;
+  final Division division;
   final String matchType;
   final int teamSize;
   final int windKmh;
@@ -61,7 +62,7 @@ class MatchSettingsStep extends StatelessWidget {
   final bool hasTimeouts;
   final int timeoutsPerTeamPerHalf;
   final int timeoutSeconds;
-  final ValueChanged<String> onDivisionChanged;
+  final ValueChanged<Division> onDivisionChanged;
   final ValueChanged<String> onMatchTypeChanged;
   final ValueChanged<int> onTeamSizeChanged;
   final ValueChanged<int> onWindChanged;
@@ -101,8 +102,8 @@ class MatchSettingsStep extends StatelessWidget {
                 hint: isTrainingMatch ? 'Nome Squadra B' : 'Squadra avversaria',
               ),
             ],
-            FSelect<String>(
-              items: const {'Mixed': 'Mixed', 'Open': 'Open', 'Women': 'Women'},
+            FSelect<Division>(
+              items: const {'Mixed': Division.mixed, 'Open': Division.open, 'Women': Division.women},
               hint: 'Division',
               control: FSelectControl.managed(
                 initial: division,

@@ -228,8 +228,8 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
                     : state.presentPlayerIds,
                 minimum: state.teamSize,
                 preferredLine: state.startOnOffense
-                    ? PlayerLinePreference.offense
-                    : PlayerLinePreference.defense,
+                    ? GameLine.offense
+                    : GameLine.defense,
                 onToggle: state.isTrainingMatch
                     ? notifier.toggleTeamARoster
                     : notifier.togglePresentPlayer,
@@ -247,8 +247,8 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
                 selectedIds: state.teamBRosterIds,
                 minimum: state.teamSize,
                 preferredLine: state.startOnOffense
-                    ? PlayerLinePreference.offense
-                    : PlayerLinePreference.defense,
+                    ? GameLine.offense
+                    : GameLine.defense,
                 onToggle: notifier.toggleTeamBRoster,
               )
             else if (activeStep == SetupStep.stats)
@@ -282,8 +282,8 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
                     maximum: state.teamSize,
                     title: 'Linea in campo',
                     preferredLine: state.startOnOffense
-                        ? PlayerLinePreference.offense
-                        : PlayerLinePreference.defense,
+                        ? GameLine.offense
+                        : GameLine.defense,
                     onToggle: notifier.togglePlayer,
                   ),
                 ],
@@ -380,8 +380,8 @@ class _StatsMatchSetupScreenState extends ConsumerState<StatsMatchSetupScreen> {
     Set<String> selectedIds,
   ) {
     final preferred = startOnOffense
-        ? PlayerLinePreference.offense
-        : PlayerLinePreference.defense;
+        ? GameLine.offense
+        : GameLine.defense;
     final sorted = [...players];
     sorted.sort((a, b) {
       final byLine = (a.linePreference == preferred ? 0 : 1).compareTo(

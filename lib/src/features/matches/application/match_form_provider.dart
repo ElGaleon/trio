@@ -101,11 +101,11 @@ class MatchFormNotifier extends Notifier<MatchFormState> {
     if (offenseVsDefense) {
       final players = ref.read(rankedPlayersProvider);
       final aIds = players
-          .where((p) => p.linePreference == PlayerLinePreference.offense)
+          .where((p) => p.linePreference == GameLine.offense)
           .map((p) => p.id)
           .toSet();
       final bIds = players
-          .where((p) => p.linePreference == PlayerLinePreference.defense)
+          .where((p) => p.linePreference == GameLine.defense)
           .map((p) => p.id)
           .toSet();
       state = state.copyWith(

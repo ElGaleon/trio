@@ -6,7 +6,7 @@ class PlayerFormState {
   final String firstName;
   final String lastName;
   final String email;
-  final PlayerLinePreference? linePreference;
+  final GameLine? linePreference;
   final PlayerRole role;
   final bool isExternal;
   final String jerseyNumber;
@@ -29,7 +29,7 @@ class PlayerFormState {
     String? firstName,
     String? lastName,
     String? email,
-    PlayerLinePreference? linePreference,
+    GameLine? linePreference,
     PlayerRole? role,
     bool? isExternal,
     String? jerseyNumber,

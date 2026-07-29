@@ -1,4 +1,5 @@
 import 'package:skrim/src/features/matches/domain/match_stat_type.dart';
+import 'package:skrim/src/features/matches/domain/scrimmage_match.dart';
 
 class StatsMatchSetupState {
   final int step;
@@ -6,7 +7,7 @@ class StatsMatchSetupState {
   final String opponentName;
   final String tournament;
   final String location;
-  final String division;
+  final Division division;
   final String matchType;
   final int teamSize;
   final int windKmh;
@@ -65,7 +66,7 @@ class StatsMatchSetupState {
     String? opponentName,
     String? tournament,
     String? location,
-    String? division,
+    Division? division,
     String? matchType,
     int? teamSize,
     int? windKmh,

@@ -14,17 +14,22 @@ final appSettingsProvider = Provider<AppSettings>((ref) {
   return settings.copyWith(themeModeIndex: ref.watch(themeModeIndexProvider));
 });
 
+final playersProvider = Provider<List<Player>>((ref) {
+  final players = ref.watch(firebasePlayersProvider).value ?? const [];
+  return players;
+});
+
 final rankedPlayersProvider = Provider<List<Player>>((ref) {
-  return ref.watch(firebasePlayersProvider).value ?? const [];
+  final players = [...ref.watch(playersProvider)];
+  players.sort((first, second) => first.rating.compareTo(second.rating));
+  return players;
 });
 
 final playersSearchQueryProvider = mutableProvider<String>(() => '');
 
 final playersRoleFilterProvider = mutableProvider<PlayerRole?>(() => null);
 
-final playersLineFilterProvider = mutableProvider<PlayerLinePreference?>(
-  () => null,
-);
+final playersLineFilterProvider = mutableProvider<GameLine?>(() => null);
 
 final filteredPlayersProvider = Provider<List<Player>>((ref) {
   return _filterPlayers(
@@ -37,42 +42,33 @@ final filteredPlayersProvider = Provider<List<Player>>((ref) {
 
 final rankingRoleFilterProvider = mutableProvider<PlayerRole?>(() => null);
 
-final rankingLineFilterProvider = mutableProvider<PlayerLinePreference?>(
-  () => null,
-);
+final rankingLineFilterProvider = mutableProvider<GameLine?>(() => null);
 
 final rankingStartDateFilterProvider = mutableProvider<DateTime?>(() => null);
 
 final rankingEndDateFilterProvider = mutableProvider<DateTime?>(() => null);
 
 final filteredRankingPlayersProvider = Provider<List<Player>>((ref) {
+  final matches = ref.watch(matchesProvider);
+  final rankedPlayers = ref.watch(rankedPlayersProvider);
   final startDate = ref.watch(rankingStartDateFilterProvider);
   final endDate = ref.watch(rankingEndDateFilterProvider);
+  final roleFilter = ref.watch(rankingRoleFilterProvider);
+  final lineFilter = ref.watch(rankingLineFilterProvider);
+  final querySearch = ref.watch(playersSearchQueryProvider);
   final hasDateFilter = startDate != null || endDate != null;
-  final matches = filterMatchesByDate(
-    ref.watch(matchesProvider),
-    startDate,
-    endDate,
-  );
+
+  final filteredMatches = filterMatchesByDate(matches, startDate, endDate);
 
   return _filterPlayers(
-    ref.watch(rankedPlayersProvider),
-    '',
-    ref.watch(rankingRoleFilterProvider),
-    ref.watch(rankingLineFilterProvider),
+    rankedPlayers,
+    querySearch,
+    roleFilter,
+    lineFilter,
     hasDateFilter
-        ? (player) => matches.any((match) {
-            return match.teamAIds.contains(player.id) ||
-                match.teamBIds.contains(player.id) ||
-                match.teamARosterIds.contains(player.id) ||
-                match.teamBRosterIds.contains(player.id) ||
-                match.presentPlayerIds.contains(player.id) ||
-                match.statEvents.any(
-                  (event) =>
-                      event.playerId == player.id ||
-                      event.lineupIds.contains(player.id),
-                );
-          })
+        ? (player) => filteredMatches.any(
+            (match) => match.containsPlayerById(player.id),
+          )
         : null,
   );
 });
@@ -81,7 +77,7 @@ List<Player> _filterPlayers(
   List<Player> players,
   String query,
   PlayerRole? role,
-  PlayerLinePreference? line, [
+  GameLine? line, [
   bool Function(Player player)? extraFilter,
 ]) {
   final normalizedQuery = query.trim().toLowerCase();

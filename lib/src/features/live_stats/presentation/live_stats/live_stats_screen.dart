@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skrim/src/features/firebase/application/firebase_repository_provider.dart';
+import 'package:skrim/src/features/firebase/data/firestore_skrim_repository.dart';
 import 'package:skrim/src/features/matches/application/match_provider.dart';
 
 import 'package:skrim/src/shared/app_empty_state.dart';
@@ -46,6 +49,10 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
   String _selectedTeamTab = 'teamA';
   String? _lastLineSelectionPromptKey;
   bool _lineSelectionOpen = false;
+  bool _livePresenceJoined = false;
+  String? _autoConfirmedPendingId;
+  String? _joinedMatchId;
+  FirestoreSkrimRepository? _joinedRepository;
   late final PageController _pageController;
 
   @override
@@ -58,6 +65,11 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
 
   @override
   void dispose() {
+    final matchId = _joinedMatchId;
+    final repository = _joinedRepository;
+    if (matchId != null && repository != null) {
+      unawaited(LiveStatsService.instance.leaveLiveStats(matchId, repository));
+    }
     _pageController.dispose();
     super.dispose();
   }
@@ -94,6 +106,14 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
           ),
         ),
       );
+    }
+    if (!_livePresenceJoined) {
+      _livePresenceJoined = true;
+      _joinedMatchId = match.id;
+      _joinedRepository = repository;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(LiveStatsService.instance.enterLiveStats(match, repository));
+      });
     }
     if (match.isFinished) {
       return Scaffold(
@@ -170,15 +190,39 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
             : null;
         final summary = LiveMatchStatsSummary.from(match, playersById);
 
-        Future<void> triggerFinishMatch() async {
-          await service.finishMatch(match, repository);
-        }
-
         Future<void> showFinalStatsAndExit() async {
           await FinalStatsSheet.show(context, match, playersById);
           if (context.mounted) {
             context.go(AppRoutes.matchDetail(match.id));
           }
+        }
+
+        Future<void> triggerFinishMatch() async {
+          final applied = await service.finishMatch(match, repository);
+          if (applied && context.mounted) {
+            await showFinalStatsAndExit();
+          }
+        }
+
+        final pending = match.pendingAction;
+        if (pending != null &&
+            !service.requiresSharedConfirmation(match) &&
+            _autoConfirmedPendingId != pending.id) {
+          _autoConfirmedPendingId = pending.id;
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            final res = await service.confirmPendingAction(
+              match,
+              playersById: playersById,
+              repository: repository,
+              settings: settings,
+            );
+            if (!context.mounted) return;
+            if (pending.kind == 'finish' && res?.finished == true) {
+              await showFinalStatsAndExit();
+            } else if (res?.finished == true) {
+              await triggerFinishMatch();
+            }
+          });
         }
 
         Future<void> confirmSaveAndClose() async {
@@ -431,10 +475,12 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                               service,
                               match,
                               repository,
+                              settings,
                             )
                           : null,
                     ),
-                    if (match.pendingAction != null)
+                    if (match.pendingAction != null &&
+                        service.requiresSharedConfirmation(match))
                       _PendingLiveActionPanel(
                         match: match,
                         playersById: playersById,
@@ -456,7 +502,13 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                           }
                           if (res == null) return;
                           if (res.finished) {
-                            await service.proposeFinishMatch(match, repository);
+                            final applied = await service.proposeFinishMatch(
+                              match,
+                              repository,
+                            );
+                            if (applied && context.mounted) {
+                              await showFinalStatsAndExit();
+                            }
                             return;
                           }
                           if (res.halfTimeDue && context.mounted) {
@@ -465,6 +517,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                               service,
                               match,
                               repository,
+                              settings,
                             );
                           }
                         },
@@ -523,6 +576,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                                 activePause.endType,
                                 activePause.nextOnOffense,
                                 repository,
+                                settings,
                               ),
                             )
                           : match.isExternalOpponent
@@ -626,6 +680,7 @@ class _LiveStatsScreenState extends ConsumerState<LiveStatsScreen> {
                                 match,
                                 type: MatchStatType.timeout,
                                 repository: repository,
+                                settings: settings,
                               )
                             : null,
                         onInjury: triggerInjurySubstitution,
@@ -665,16 +720,18 @@ class _PendingLiveActionPanel extends StatelessWidget {
     final userId = _currentUserId();
     final confirmed = pending.confirmedBy(userId);
     final isCreator = pending.createdByUserId == userId;
+    final requiredConfirmations =
+        LiveStatsService.instance.requiresSharedConfirmation(match) ? 2 : 1;
     final label = switch (pending.kind) {
       'lineup' => 'nuova linea',
       'finish' => 'fine partita',
       _ => pending.statType?.label ?? 'azione',
     };
     final lineupSummary = pending.kind == 'lineup'
-        ? '${_lineupSummary(pending.teamAIds, pending.teamBIds)} · ${pending.confirmedByUserIds.length}/2'
+        ? '${_lineupSummary(pending.teamAIds, pending.teamBIds)} · ${pending.confirmedByUserIds.length}/$requiredConfirmations'
         : null;
     final subtitle = confirmed
-        ? 'Hai gia confermato. In attesa dell altro utente.'
+        ? 'Hai gia confermato. In attesa degli altri utenti.'
         : 'Conferma per applicare l evento live.';
 
     return DecoratedBox(
@@ -709,7 +766,7 @@ class _PendingLiveActionPanel extends StatelessWidget {
                   ),
                   Text(
                     lineupSummary ??
-                        '$subtitle ${pending.confirmedByUserIds.length}/2',
+                        '$subtitle ${pending.confirmedByUserIds.length}/$requiredConfirmations',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(

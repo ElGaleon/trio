@@ -62,6 +62,8 @@ class SportPlayerAvatar extends StatelessWidget {
     final path = value?.trim();
     if (path == null || path.isEmpty) return null;
     if (path.startsWith('http://') || path.startsWith('https://')) {
+      final host = Uri.tryParse(path)?.host ?? '';
+      if (host.endsWith('fbcdn.net')) return null;
       return NetworkImage(path);
     }
     return FileImage(File(path));

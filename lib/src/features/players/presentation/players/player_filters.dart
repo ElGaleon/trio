@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
+import 'package:skrim/src/components/ui/searchbar.dart';
 
 import 'package:skrim/src/features/players/domain/player_line_preference.dart';
 import 'package:skrim/src/features/players/domain/player_role.dart';
@@ -18,26 +18,21 @@ class PlayerFilters extends StatelessWidget {
 
   final TextEditingController searchController;
   final PlayerRole? roleFilter;
-  final PlayerLinePreference? lineFilter;
+  final GameLine? lineFilter;
   final ValueChanged<String> onSearchChanged;
   final ValueChanged<PlayerRole?> onRoleChanged;
-  final ValueChanged<PlayerLinePreference?> onLineChanged;
+  final ValueChanged<GameLine?> onLineChanged;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       spacing: 8,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FTextFormField(
-          control: FTextFieldControl.managed(
-            controller: searchController,
-            onChange: (value) => onSearchChanged(value.text),
-          ),
-          prefixBuilder: (context, style, states) => const Padding(
-            padding: EdgeInsets.only(left: 12),
-            child: Icon(FIcons.search, size: 15),
-          ),
-          hint: 'Cerca giocatore',
+        Searchbar(
+          label: 'Player',
+          hint: 'Search player',
+          onChange: (value) => onSearchChanged(value),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -45,38 +40,21 @@ class PlayerFilters extends StatelessWidget {
           child: Row(
             spacing: 8,
             children: [
-              SportFilterPill(
-                label: 'Handler',
-                selected: roleFilter == PlayerRole.handler,
+              ...PlayerRole.values.map((role) => SportFilterPill(
+                label: role.label,
+                selected: roleFilter == role,
                 onPressed: () => onRoleChanged(
-                  roleFilter == PlayerRole.handler ? null : PlayerRole.handler,
+                  roleFilter == role ? null : role,
                 ),
-              ),
-              SportFilterPill(
-                label: 'Cutter',
-                selected: roleFilter == PlayerRole.cutter,
-                onPressed: () => onRoleChanged(
-                  roleFilter == PlayerRole.cutter ? null : PlayerRole.cutter,
-                ),
-              ),
-              SportFilterPill(
-                label: 'Attacco',
-                selected: lineFilter == PlayerLinePreference.offense,
+              ),),
+
+              ...GameLine.values.map((line) => SportFilterPill(
+                label: line.label,
+                selected: lineFilter == line,
                 onPressed: () => onLineChanged(
-                  lineFilter == PlayerLinePreference.offense
-                      ? null
-                      : PlayerLinePreference.offense,
+                  lineFilter == line ? null : line,
                 ),
-              ),
-              SportFilterPill(
-                label: 'Difesa',
-                selected: lineFilter == PlayerLinePreference.defense,
-                onPressed: () => onLineChanged(
-                  lineFilter == PlayerLinePreference.defense
-                      ? null
-                      : PlayerLinePreference.defense,
-                ),
-              ),
+              ),)
             ],
           ),
         ),
